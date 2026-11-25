@@ -1,0 +1,22 @@
+# Data, caches, patches, checkpoints and logs never go into git (BRIEF.md: Storage, Constraints).
+data/
+logs/
+*.pt
+*.pth
+*.npy
+*.npz
+*.tif
+*.tiff
+*.gpkg
+*.geojson
+*.parquet
+
+# Python
+.venv/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+
+# Demo build
+demo/node_modules/
+demo/dist/
