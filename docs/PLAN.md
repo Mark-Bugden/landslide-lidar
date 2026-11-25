@@ -35,7 +35,7 @@ If this plan and the brief disagree, the brief wins. On anything technical about
 | 1 | Agents | P1-01 … P1-18, then **■ STOP and report** |
 | 2 | Mark | Runs one command overnight (training → evaluation → stage 2 → verdict) |
 | 3 (when told) | Agent | P3-01: audit the run and write `REPLICATION.md`, then **■ STOP** |
-| 4 (when told, only if REPLICATED) | Agents | P4-01 … P4-03: the demo |
+| 4 (when told, only if REPLICATED) | Agents | The demo, planned at that point (§10) |
 
 **Phase-1 waves.** Tasks in the same wave can run in parallel. Use one git worktree per agent.
 
@@ -86,8 +86,8 @@ M0 ─► P1-01 ─┬─► P1-02 (config + pre-reg draft) ──────�
    - Title: **"Locating the Landslides"**.
    - Repo: `Mark-Bugden/landslide-lidar`.
    - Slug: `landslide-lidar` (follows the repo name). Mark updates the site's project list for the new title.
-2. **"Spot the landslide" in the first real release: open.** Nothing in phase 1 depends on it. Its pair seed (D26)
-   is fixed at the freeze either way, so the decision can wait until phase 4.
+2. **Demo details, "Spot the landslide" included: deferred.** The model must be verified first. Nothing in phases 1–3
+   depends on the demo.
 3. **Repo.**
    - Initialised locally at `C:\Users\Mark\Code\personal_website\landslide-lidar`.
    - `main` holds one root commit (`.gitignore`, README stub); the work happens on `phase-1`.
@@ -284,8 +284,7 @@ These are the interfaces between tasks. Change one only on a branch that also up
 | `src/landslide/stage2.py`, `scripts/stage2_baselines.py` | P1-12 |
 | `src/landslide/{evaluate,verdict,figures}.py`, `scripts/evaluate.py` | P1-13 |
 | `src/landslide/{runner,preflight,winawake}.py`, `scripts/run_overnight.py` | P1-14 |
-| `demo/`, `.github/workflows/demo.yml` | P1-15, P4-* |
-| `scripts/fetch_orthophoto.py`, `scripts/make_demo_data.py` | P4-01 |
+| `demo/`, `.github/workflows/demo.yml` | P1-15 (stub only); the demo itself later |
 
 ---
 
@@ -347,7 +346,7 @@ Every choice is final at the freeze.
 | D23 | Distance edges | NMS suppresses d ≤ 150 m. TP: the centre lies within target.buffer(50). Ignored: distance to any register polygon ≤ 150 m. The jitter seed is in the config. | P1-12 |
 | D24 | Smoke subset | 5 % of `pair_id`s plus 5 % of the background, seeded. The smoke test runs stage 2 on 1 sheet whatever (a) and (b) give. | P1-14 |
 | D25 | Verdict words | REPLICATED / NOT REPLICATED / INCOMPLETE, with Appendix A §1 precedence: a completed test below its threshold means NOT REPLICATED even when other runs are missing | P1-13 |
-| D26 | "Spot the landslide" pair seed | Fixed in the config at the freeze, before anyone looks at predictions | P1-16 |
+| D26 | (withdrawn) Demo pair seed | Deferred with the rest of the demo. If that view is built, its seed is fixed and committed before any pair is drawn. | — |
 
 ---
 
@@ -392,7 +391,7 @@ Sizes are rough agent effort: S < 1 h, M 1–3 h, L 3 h or more.
   1. **`configs/landslide.json`:**
      - Every Appendix B key and value verbatim, except `name`, `status` and `paths`.
      - Add a `replication` block for our own fixed choices: seed-stream ids, provenance sample seed and size,
-       negative jitter, NMS tie seed, random-baseline seed, smoke subset seed, the demo pair seed (D26), and the
+       negative jitter, NMS tie seed, random-baseline seed, smoke subset seed, and the
        verdict words.
   2. **`tests/test_config_appendix_b.py`:** embed Appendix B and assert equality on every key except paths, name and
      status.
@@ -719,7 +718,7 @@ Sizes are rough agent effort: S < 1 h, M 1–3 h, L 3 h or more.
 - **Do:**
   1. Fold every `docs/decisions/*.md` into `PREREGISTRATION.md`. "Decisions" and "Deviations" each list the
      reason, the owning task and the evidence, including the count comparison with §5.
-  2. Finalise the config `replication` block, including the demo pair seed (D26).
+  2. Finalise the config `replication` block.
   3. Set `status` to `"FROZEN <date> at the pre-registration commit (before any CNN training, including the smoke
      test)"`.
   4. Write `configs/landslide.sha256`.
@@ -802,67 +801,12 @@ our estimate. The run writes `results/run_summary.json`, `results/metrics.json` 
 
 ---
 
-## 10. Phase 4 task cards (only if REPLICATED, when told)
+## 10. Phase 4: the demo (planned later)
 
-### P4-01 · Demo data export · M
-- **Do:**
-  1. **Areas.** Agree the selection with Mark. Recommended: a fixed rule, such as one 3 × 3 km square per reserved
-     sheet, centred on the sheet and wholly inside it, or a seeded draw. This avoids the "chosen for illustration"
-     label. Squares are axis-aligned and wholly inside their sheet.
-  2. **`scripts/make_demo_data.py`** reads only this repo's outputs and writes per area:
-     - the hillshade at 4 m (about 41 KB) as base64 in JSON;
-     - the score lattice, quantised and limited to the square;
-     - register polygons clipped to the square and simplified (CC BY);
-     - detections (x, y, score, outcome under the pre-registered rule). The outcome doesn't depend on the threshold,
-       so the slider only filters.
-  3. **Orthophoto (row 7).** `scripts/fetch_orthophoto.py` fetches only the chosen squares. Include it only if the
-     budget allows.
-  4. **"Spot the landslide"** (only if Mark says yes; still open, see §2 item 2):
-     - pairs drawn with the frozen seed D26 from held-out same-sheet pairs;
-     - a hillshade of each patch;
-     - the model's answer and the truth;
-     - accuracy on the drawn pairs and on all pairs, from `metrics.json`.
-  5. **Budget check.** The script fails if `demo/public/data/` grows beyond about 1.5 MB, which leaves room for the
-     code and stills under the 2 MB limit. Only `.json`, `.csv` and `.js` files.
-  6. Commit the script **and** the derived files (CI builds without our caches).
-- **Never:** susceptibility, geology, sheet outlines, or a score map clipped at a sheet edge.
-
-### P4-02 · Demo UI · L
-- **Do:**
-  1. **Frame:** `mount()` into `[data-demo="landslide-lidar"]`, with a canvas stage.
-  2. **Map explorer:**
-     - an area picker;
-     - layer toggles: hillshade, orthophoto, heatmap, polygons, detections;
-     - a threshold slider;
-     - outcome colours: hit, false alarm, ignored, duplicate;
-     - a status line with the counts in view, labelled illustrative.
-  3. **Optional "Spot the landslide"** view.
-  4. **About panel:** only the allowed claims, with our numbers. Credit ČÚZK and ČGS.
-  5. **Site rules:**
-     - all CSS scoped under `[data-demo]`, using the kit's tokens;
-     - `var(--dk-fit-height, 100dvh)`;
-     - `loadJSON` with relative paths;
-     - workers only through `runInWorker`;
-     - no runtime fetching, analytics, cookies, external fonts or scripts.
-
-### P4-03 · Stills, manifest, model card and release · S
-- **Do:**
-  1. **Stills:** `static.webp`, `thumb.webp` (< 80 KB) and `og.jpg` (< 150 KB), rendered from our own outputs.
-  2. **Manifest:**
-     - `status` as Mark decides;
-     - the `modelCard` filled from `results/metrics.json` only, and true;
-     - `about` with the allowed claims.
-  3. **Release:**
-     - bump the version;
-     - build, validate and preview (no console errors);
-     - open the PR;
-     - after Mark merges, run `gh release view vX.Y.Z` and tell Mark.
-- **Claims:**
-  - Allowed: "agrees with ČGS's mapped landslides on map sheets and regions it never saw"; "beats slope, the official
-    susceptibility map and simple terrain statistics" (only if our paired differences show it); "reproduces an
-    earlier pre-registered result".
-  - Never: "detects landslides" without qualification, metrics from a hand-picked area, or "finds unmapped
-    landslides".
+Deliberately not planned yet. The demo is designed and split into tasks only after a REPLICATED verdict and Mark's go
+(G6), working from the brief's "Phase 4" section and the site contract. Until then, no agent spends effort on demo
+details. Phases 1–3 need nothing beyond what they already produce: `results/metrics.json` and the stage-2 outputs in
+`data/stage2/`.
 
 ---
 
@@ -885,4 +829,4 @@ our estimate. The run writes `results/run_summary.json`, `results/metrics.json` 
 | Stage-2 baselines can't reach 50 % recall | Report it; the rule stays fixed (it is already the spike's final rule) |
 | Parallel agents conflict in shared files | §4.4 ownership, per-task decision files, worktrees |
 | WebSearch budget overrun | Shared log, ask the orchestrator from 8 calls |
-| A licence leak (sheet outlines, susceptibility or geology in figures or the demo) | §3 rule 3. Review figures in each PR. P4-01 checks squares lie wholly inside their sheets. |
+| A licence leak (sheet outlines, susceptibility or geology in figures or the demo) | §3 rule 3. Review every figure before merging a task branch. |
