@@ -1,6 +1,9 @@
 # Implementation plan: landslide-lidar (independent replication, then demo)
 
-Written 2026-11-26 from `BRIEF.md` (this folder) and `..\site-contract-landslide-lidar.md`. Nothing has been run yet.
+Written 2026-11-26 from `docs/BRIEF.md` and `..\site-contract-landslide-lidar.md`. Nothing has been run yet.
+
+The brief and the raw data were moved into this repo on 2026-11-26. Where the brief says
+`…\landslide-demo-handoff\raw_data\` or `raw_data/`, read `data/raw_data/` (gitignored).
 If this plan and the brief disagree, the brief wins. On anything technical about the site, the site contract wins.
 
 ---
@@ -13,13 +16,13 @@ If this plan and the brief disagree, the brief wins. On anything technical about
   - the decision-register rows it owns (§6);
   - its task card.
 
-  Every agent also reads `BRIEF.md` in full first. Demo tasks also read the site contract.
+  Every agent also reads `docs/BRIEF.md` in full first. Demo tasks also read the site contract.
 - **Gates (■) are hard stops.** No task after a gate starts until the gate is cleared.
 - **Every task ends with its branch merged into the `phase-1` integration branch** (§2 item 4), or, for report tasks,
   in a message to Mark. Mark reviews phase 1 as one PR, `phase-1` → `main`.
 - **Agent launch prompt (template):**
   > You are doing task `<ID>` of `PLAN.md` for the repo at `C:\Users\Mark\Code\personal_website\landslide-lidar`.
-  > Read `BRIEF.md` in full, then PLAN.md §3, §4, the rows of §6 that list `<ID>` as owner, and the `<ID>` card. Do
+  > Read `docs/BRIEF.md` in full, then `docs/PLAN.md` §3, §4, the rows of §6 that list `<ID>` as owner, and the `<ID>` card. Do
   > only that card. Record every interpretation you make in `docs/decisions/<ID>.md`. Work on branch
   > `p1-<nn>-<name>` cut from `phase-1`, and finish with your commits on that branch plus a short summary: what you
   > built, the tests you ran, any number that differs from §5, and any open question. The orchestrator reviews the
@@ -114,7 +117,7 @@ M0 ─► P1-01 ─┬─► P1-02 (config + pre-reg draft) ──────�
    - Use the spike's numbers only as claims to verify and as sanity checks (§5), never as targets.
 2. **Data.**
    - Use only the 8 sources in the brief.
-   - Never modify `raw_data/`.
+   - Never modify `data/raw_data/`. It is read-only input.
    - Every input and derived file lives under the gitignored `data/`.
    - Never commit data, caches, patches, rasters, geometry or checkpoints.
 3. **Licences.**
@@ -176,7 +179,7 @@ landslide-lidar/
   tests/                          # pytest, synthetic data unless marked @needs_data
   results/                        # tracked, small, aggregate only (list in 4.3)
   figures/                        # tracked; no maps of rows 3–5, no sheet outlines
-  docs/decisions/<task>.md  docs/websearch_log.md  docs/PLAN.md (copy of this file)
+  docs/decisions/<task>.md  docs/websearch_log.md  docs/PLAN.md (this file)  docs/BRIEF.md (the task brief)
   data/                           # gitignored (4.2)
   logs/                           # gitignored
   demo/  .github/workflows/demo.yml
@@ -185,8 +188,9 @@ landslide-lidar/
 ### 4.2 Data layout (all gitignored)
 
 ```
-data/raw/          copies of the 3 vector files from raw_data/ (sha256 checked against MANIFEST.csv)
-                   DTMs are read in place from raw_data/dmr5g/ (read-only; path in landslide.paths, env LANDSLIDE_RAW_DIR)
+data/raw_data/     the hand-over data, moved here unchanged: MANIFEST.csv, the 3 vector files, dmr5g/ (860 rasters
+                   and fetch_log.jsonl). Read-only. Read in place, never copied or modified. The path lives in
+                   landslide.paths (env override LANDSLIDE_RAW_DIR).
 data/cache/        provenance/ (re-downloads) · susceptibility/<sheet>.tif · zabaged/<layer>.gpkg · torch/ (TORCH_HOME)
 data/derived/      sheets.parquet · polygons.parquet · flysch_outline.gpkg · splits.json
 data/dataset/      samples.parquet · patches.npy · meta.csv
@@ -321,7 +325,7 @@ Every choice is final at the freeze.
 
 | ID | Ambiguity | Recommended default | Owner |
 | --- | --- | --- | --- |
-| D01 | Copy or read raw data in place | Copy the 3 vector files to `data/raw/` and read the DTMs in place, read-only. Check the sha256 of every file against `MANIFEST.csv` once. | P1-01, P1-03 |
+| D01 | Copy or read raw data in place | Read everything in place from `data/raw_data/`, read-only (the brief allows this). Check the sha256 of every file against `MANIFEST.csv` once. | P1-01, P1-03 |
 | D02 | RNG | `numpy.random.default_rng` everywhere. Each step's stream is `SeedSequence([seed, stream_id])`; the stream ids are listed in the config. No `random` module. | P1-01 |
 | D03 | Sheet geometry in EPSG:5514 | pyproj `Transformer.from_crs(4326, 5514, always_xy=True)` with the default operation. Record the PROJ version and the operation. Verify against the fetch-log grids. | P1-03 |
 | D04 | `in_mapped` sheet union | All 860 sheets, partial ones included | P1-08 |
@@ -370,7 +374,7 @@ Sizes are rough agent effort: S < 1 h, M 1–3 h, L 3 h or more.
      `demo/dist`.
   4. **`landslide.config`:** load the config and compute `config_hash` (sha256 of the canonical JSON).
   5. **`landslide.paths`:** every path in §4.2. Smoke mode redirects to `data/smoke/`. `LANDSLIDE_RAW_DIR` defaults to
-     `..\landslide-demo-handoff\raw_data`.
+     `data/raw_data`.
   6. **`landslide.net`:** a requests session with User-Agent
      `landslide-lidar-replication (+https://github.com/Mark-Bugden/landslide-lidar)`, ≥ 0.3 s between requests,
      retries with backoff, and a hard error if any parameter is `outSR`.
@@ -382,7 +386,7 @@ Sizes are rough agent effort: S < 1 h, M 1–3 h, L 3 h or more.
 - **Done when:**
   - `uv run python scripts/check_env.py` reports `cuda: true` on the RTX 3060;
   - `uv run pytest` passes;
-  - `raw_data/` can be read;
+  - `data/raw_data/` can be read;
   - the branch is ready to merge into `phase-1`.
 
 ### P1-02 · Frozen config and pre-registration draft · S
@@ -401,7 +405,7 @@ Sizes are rough agent effort: S < 1 h, M 1–3 h, L 3 h or more.
      - the replication criteria, verbatim from the brief (REPLICATED needs (a) ≥ 0.75, (b) ≥ 0.65 and stage-2
        P@R50 ≥ 0.30; the point estimate decides; INCOMPLETE is never a pass; a point estimate outside the spike's CI
        is a discrepancy and doesn't change the verdict);
-     - the method, restated verbatim as an appendix (the brief itself isn't in the repo);
+     - the method: a pointer to Appendix A and B of `docs/BRIEF.md`, which is in the repo;
      - data sources and licences;
      - empty "Decisions" and "Deviations" sections, which P1-16 fills.
 - **Done when:** the test passes, the criteria match the brief word for word, and the branch is merged into
@@ -414,7 +418,7 @@ Sizes are rough agent effort: S < 1 h, M 1–3 h, L 3 h or more.
      - Load the surveyed sheets and reproject them locally (D03).
      - `dtm_grid(sheet)`: bounds + 250 m, snapped outwards to x ≡ 0.4 and y ≡ −0.12 (mod 2 m), giving (xmin, ymax,
        w, h).
-     - Compare with `raw_data/dmr5g/fetch_log.jsonl` and each raster's own transform for **all 860** sheets.
+     - Compare with `data/raw_data/dmr5g/fetch_log.jsonl` and each raster's own transform for **all 860** sheets.
   2. **Fetch scripts.** First read each layer's metadata (spatialReference, maxRecordCount, geometry type) and record
      it.
      - `fetch_dtm.py` (row 1): the exact recipe in the brief's note 1. Options `--sheets`, `--sample N --seed`. It
@@ -428,7 +432,7 @@ Sizes are rough agent effort: S < 1 h, M 1–3 h, L 3 h or more.
      - Compare each with the package file: georeferencing equal, values bitwise equal wherever the package isn't NaN,
        and every package NaN explained (NoData, or outside [−100, 2000] m in the download).
      - Run `returnCountOnly=true` on row 2 (expect 21,356) and row 3 (expect 860).
-     - Check the sha256 of every `raw_data/` file against `MANIFEST.csv`.
+     - Check the sha256 of every `data/raw_data/` file against `MANIFEST.csv`.
   4. Write `results/provenance.json` and a short `docs/provenance.md`.
 - **Gate:** on any disagreement, **stop**. Tell the orchestrator, who tells Mark. Wave 3 doesn't start.
 
@@ -814,7 +818,7 @@ details. Phases 1–3 need nothing beyond what they already produce: `results/me
 
 | Item | Estimate |
 | --- | --- |
-| New disk use in `data/` | About 6 GB: patches 3.5 GB, checkpoints 1 GB, susceptibility and ZABAGED under 1 GB, stage 2 under 1 GB. Copying the DTMs would add 11 GB. Free now: about 109 GB. |
+| New disk use in `data/` | About 6 GB: patches 3.5 GB, checkpoints 1 GB, susceptibility and ZABAGED under 1 GB, stage 2 under 1 GB. This is on top of the 11.4 GB of hand-over data already in `data/raw_data/`. Free now: about 109 GB. |
 | Network in phase 1 | About 12 provenance DTMs (~330 MB uncompressed F32), about 1,720 susceptibility renders (~1 h), ZABAGED queries (~0.5–1.5 h), 45 MB of weights |
 | Patch set | About 7,200 matched + 4,000 background ≈ 11,200 × 315 KB ≈ 3.5 GB float16. It fits on the GPU (12 GB) for the s2 run. |
 | Full run | About 1 h expected (the spike took 0.83 h). Stage-2 inference is about 20 sheets × ~11k windows × 8 views × 3 seeds ≈ 5M forward passes. The 6 h cap gives a wide margin. |
