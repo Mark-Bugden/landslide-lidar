@@ -1,0 +1,1493 @@
+{
+ "task": "P1-07",
+ "susceptibility": {
+  "row": 5,
+  "source": "ČGS landslide susceptibility map (no stated licence: rasters stay in data/, aggregates only here)",
+  "service": "https://mapy.geology.cz/arcgis/rest/services/Geohazardy/sesuvna_nachylnost/MapServer",
+  "request": {
+   "url": "https://mapy.geology.cz/arcgis/rest/services/Geohazardy/sesuvna_nachylnost/MapServer/export",
+   "per_sheet": "one request per class (mid, high) on the sheet's DTM grid",
+   "params": {
+    "bboxSR": 5514,
+    "imageSR": 5514,
+    "format": "png32",
+    "transparent": "true",
+    "layers": "show:0",
+    "dpi": 96,
+    "f": "image"
+   },
+   "bbox_size": "bbox and size of the sheet's package DTM raster (transform and size read from it)",
+   "layerDefs": {
+    "mid": "{\"0\": \"struktura LIKE 'Třída střední%'\"}",
+    "high": "{\"0\": \"struktura LIKE 'Třída vysoké%'\"}"
+   },
+   "class_rule": "alpha >= 128",
+   "codes": {
+    "0": "low or no data",
+    "1": "mid",
+    "2": "high"
+   },
+   "overlap_rule": "a pixel in both the mid and the high render gets code 2 (high)"
+  },
+  "metadata": {
+   "service": {
+    "currentVersion": 10.91,
+    "cimVersion": "2.9.0",
+    "serviceDescription": "Náchylnost svahů k sesouvání, vrstva se zobrazuje do měřítka 1 : 25 000",
+    "mapName": "Layers",
+    "copyrightText": "© ČGS",
+    "spatialReference": {
+     "wkid": 102067,
+     "latestWkid": 5514,
+     "xyTolerance": 0.001,
+     "zTolerance": 0.001,
+     "mTolerance": 0.001,
+     "falseX": -33699800,
+     "falseY": -33699800,
+     "xyUnits": 133638764.24698351,
+     "falseZ": -100000,
+     "zUnits": 10000,
+     "falseM": -100000,
+     "mUnits": 10000
+    },
+    "units": "esriMeters",
+    "supportedImageFormatTypes": "PNG32,PNG24,PNG,JPG,DIB,TIFF,EMF,PS,PDF,GIF,SVG,SVGZ,BMP",
+    "maxImageWidth": 4096,
+    "maxImageHeight": 4096,
+    "maxRecordCount": 2000,
+    "capabilities": "Map,Query,Data",
+    "supportsDynamicLayers": true,
+    "singleFusedMapCache": true,
+    "minScale": 7741440,
+    "maxScale": 7560,
+    "documentInfo": {
+     "Title": "sesuvy_mapa_all_v93",
+     "Author": "",
+     "Comments": "Náchylnost svahů k sesouvání, vrstva se zobrazuje do měřítka 1 : 25 000",
+     "Subject": "Náchylnost svahů k sesouvání",
+     "Category": "",
+     "AntialiasingMode": "None",
+     "TextAntialiasingMode": "Force",
+     "Version": "2.9.0",
+     "Keywords": "seduvy,svahobé deformace"
+    },
+    "serviceItemId": "44151e84a7814cf58d0996a091f49ea5"
+   },
+   "layer": {
+    "id": 0,
+    "name": "Náchylnost svahu k sesouvání",
+    "type": "Feature Layer",
+    "geometryType": "esriGeometryPolygon",
+    "sourceSpatialReference": {
+     "wkid": 102067,
+     "latestWkid": 5514,
+     "xyTolerance": 0.001,
+     "zTolerance": 0.001,
+     "mTolerance": 0.001,
+     "falseX": -33699800,
+     "falseY": -33699800,
+     "xyUnits": 10000,
+     "falseZ": -100000,
+     "zUnits": 10000,
+     "falseM": -100000,
+     "mUnits": 10000
+    },
+    "currentVersion": 10.91,
+    "maxRecordCount": 2000,
+    "minScale": 0,
+    "maxScale": 0,
+    "displayField": "struktura",
+    "capabilities": "Map,Query,Data",
+    "copyrightText": ""
+   },
+   "layer_fields": [
+    [
+     "objectid",
+     "esriFieldTypeOID"
+    ],
+    [
+     "struktura",
+     "esriFieldTypeString"
+    ],
+    [
+     "shape",
+     "esriFieldTypeGeometry"
+    ],
+    [
+     "st_area(shape)",
+     "esriFieldTypeDouble"
+    ],
+    [
+     "st_length(shape)",
+     "esriFieldTypeDouble"
+    ]
+   ],
+   "renderer": [
+    {
+     "value": "Třída nízké náchylnosti – jsou oblasti s nejméně vhodnými podmínkami pro vznik svahových deformací v dané oblasti",
+     "description": "1",
+     "color": [
+      56,
+      168,
+      0,
+      255
+     ]
+    },
+    {
+     "value": "Třída střední náchylnosti – v těchto územích nelze vznik svahových nestabilit vzhledem k podmínkám prostředí vyloučit",
+     "description": "2",
+     "color": [
+      255,
+      255,
+      0,
+      255
+     ]
+    },
+    {
+     "value": "Třída vysoké náchylnosti – definuje části oblastí, kde zohledněné podmínky jsou nejvíce vhodné pro vznik svahových nestabilit",
+     "description": "3",
+     "color": [
+      255,
+      0,
+      0,
+      255
+     ]
+    }
+   ],
+   "antialiasing": "None",
+   "class_statistics": [
+    {
+     "struktura": "Třída nízké náchylnosti – jsou oblasti s nejméně vhodnými podmínkami pro vznik svahových deformací v dané oblasti",
+     "n_features": 372528
+    },
+    {
+     "struktura": "Třída střední náchylnosti – v těchto územích nelze vznik svahových nestabilit vzhledem k podmínkám prostředí vyloučit",
+     "n_features": 212883
+    },
+    {
+     "struktura": "Třída vysoké náchylnosti – definuje části oblastí, kde zohledněné podmínky jsou nejvíce vhodné pro vznik svahových nestabilit",
+     "n_features": 603545
+    }
+   ],
+   "pattern_matches": {
+    "mid": [
+     "Třída střední náchylnosti – v těchto územích nelze vznik svahových nestabilit vzhledem k podmínkám prostředí vyloučit"
+    ],
+    "high": [
+     "Třída vysoké náchylnosti – definuje části oblastí, kde zohledněné podmínky jsou nejvíce vhodné pro vznik svahových nestabilit"
+    ],
+    "low": [
+     "Třída nízké náchylnosti – jsou oblasti s nejméně vhodnými podmínkami pro vznik svahových deformací v dané oblasti"
+    ]
+   },
+   "class_colours": {
+    "mid": [
+     255,
+     255,
+     0
+    ],
+    "high": [
+     255,
+     0,
+     0
+    ]
+   }
+  },
+  "metadata_retrieved_utc": "2026-11-26T20:59:55+00:00",
+  "retrieved_utc": {
+   "first": "2026-11-26T20:05:23+00:00",
+   "last": "2026-11-26T20:59:01+00:00"
+  },
+  "runs": [
+   {
+    "started_utc": "2026-11-26T20:05:19+00:00",
+    "finished_utc": "2026-11-26T20:06:39+00:00",
+    "status": "ok",
+    "n_requests": 81,
+    "n_rendered": 2,
+    "argv": [
+     "--sheets",
+     "25-14-17",
+     "04-33-10",
+     "--inspect"
+    ],
+    "git_commit": "cea4dc58fd2f3c30f14bab543d51120a430e8337"
+   },
+   {
+    "started_utc": "2026-11-26T20:07:22+00:00",
+    "finished_utc": "2026-11-26T20:59:02+00:00",
+    "status": "ok",
+    "n_requests": 1719,
+    "n_rendered": 858,
+    "argv": [
+     "--all"
+    ],
+    "git_commit": "cea4dc58fd2f3c30f14bab543d51120a430e8337"
+   },
+   {
+    "started_utc": "2026-11-26T20:59:52+00:00",
+    "finished_utc": "2026-11-26T21:07:14+00:00",
+    "status": "ok",
+    "n_requests": 482,
+    "n_rendered": 0,
+    "argv": [
+     "--inspect",
+     "--inspect-points",
+     "3",
+     "--sheets",
+     "02-23-04",
+     "03-31-03",
+     "03-34-10",
+     "03-42-20",
+     "03-43-11",
+     "04-31-13",
+     "04-31-21",
+     "04-33-04",
+     "14-13-09",
+     "14-14-17",
+     "14-32-02",
+     "14-34-06",
+     "14-34-14",
+     "25-22-02",
+     "34-41-10",
+     "02-32-22",
+     "02-41-16",
+     "03-32-23",
+     "11-12-19",
+     "12-14-04",
+     "14-23-14",
+     "15-43-21",
+     "24-32-01",
+     "24-34-11",
+     "24-43-12",
+     "25-12-12",
+     "25-14-25",
+     "25-23-03",
+     "25-31-19",
+     "25-33-12",
+     "25-41-05",
+     "26-13-01",
+     "34-23-15",
+     "35-12-03",
+     "25-24-12",
+     "25-22-24",
+     "25-24-07"
+    ],
+    "git_commit": "4d1221924a3cd766cc024fe63ae05a6b5dd50e06"
+   }
+  ],
+  "n_requests_total": 2282,
+  "n_export_requests_in_log": 1720,
+  "n_sheets_expected": 860,
+  "n_sheets_done": 860,
+  "missing_sheets": [],
+  "size_mismatches": 0,
+  "size_check": "every PNG's size equals its DTM raster's (asserted per request; a mismatch stops the run)",
+  "files": {
+   "class_rasters": {
+    "n": 860,
+    "bytes": 67018532,
+    "format": "uint8 deflate GeoTIFF"
+   },
+   "pngs": {
+    "n": 1720,
+    "bytes_in_log": 214480944
+   }
+  },
+  "class_fractions": {
+   "pixel_weighted": {
+    "low_or_no_data": 0.771546,
+    "mid": 0.103728,
+    "high": 0.124726
+   },
+   "note": "over all pixels of all sheet rasters (sheet + 250 m margin); overlapping margins count once per raster",
+   "n_px": 5819646142,
+   "n_code": {
+    "0": 4490121895,
+    "1": 603660609,
+    "2": 725863638
+   },
+   "per_sheet_quantiles": {
+    "mid": {
+     "min": 0.0,
+     "p10": 0.0,
+     "p25": 0.0,
+     "median": 0.009781,
+     "p75": 0.133463,
+     "p90": 0.342021,
+     "max": 0.942016
+    },
+    "high": {
+     "min": 0.0,
+     "p10": 0.0,
+     "p25": 0.0,
+     "median": 0.034784,
+     "p75": 0.205898,
+     "p90": 0.402752,
+     "max": 0.777829
+    },
+    "mid_or_high": {
+     "min": 0.0,
+     "p10": 0.0,
+     "p25": 0.028527,
+     "median": 0.16736,
+     "p75": 0.36126,
+     "p90": 0.545839,
+     "max": 0.962721
+    }
+   },
+   "n_sheets_all_low_or_no_data": 105
+  },
+  "overlap_mid_high": {
+   "n_px": 816949,
+   "fraction_of_px": 0.00014038,
+   "n_sheets_with_overlap": 277,
+   "alpha_pairs_mid_high": {
+    "128,128": 692681,
+    "255,255": 83547,
+    "128,255": 13239,
+    "255,128": 9834,
+    "191,255": 8440,
+    "255,191": 7870,
+    "128,191": 566,
+    "191,128": 391,
+    "191,191": 381
+   },
+   "resolution": "code 2 (high wins)"
+  },
+  "renders": {
+   "n_mid_px": 604477558,
+   "n_high_px": 725863638,
+   "alpha_histogram": {
+    "mid": {
+     "0": 5211064973,
+     "64": 4103611,
+     "128": 5472000,
+     "191": 4038665,
+     "255": 594966893
+    },
+    "high": {
+     "0": 5081630471,
+     "64": 12152033,
+     "128": 15814480,
+     "191": 11371875,
+     "255": 698677283
+    }
+   },
+   "class_pixels_with_unexpected_colour": 0
+  },
+  "inspection": {
+   "n_sheets": 39,
+   "export_json_ok": 78,
+   "export_json_n": 78,
+   "export_scale": [
+    7559.039999999999,
+    7559.04,
+    7559.040000000155
+   ],
+   "points": {
+    "mid_interior": {
+     "n": 64,
+     "agree": 64
+    },
+    "mid_edge": {
+     "n": 64,
+     "agree": 64
+    },
+    "high_interior": {
+     "n": 58,
+     "agree": 58
+    },
+    "high_edge": {
+     "n": 58,
+     "agree": 58
+    },
+    "none_interior": {
+     "n": 131,
+     "agree": 131
+    },
+    "none_edge": {
+     "n": 73,
+     "agree": 73
+    },
+    "both_full": {
+     "n": 27,
+     "agree": 27
+    }
+   },
+   "points_agree": 475,
+   "points_n": 475
+  }
+ },
+ "updated_utc": "2026-11-26T21:07:14+00:00",
+ "weights": {
+  "row": 8,
+  "source": "torchvision ResNet-18 ImageNet weights (torchvision's terms)",
+  "weights": "ResNet18_Weights.IMAGENET1K_V1",
+  "url": "https://download.pytorch.org/models/resnet18-f37072fd.pth",
+  "downloader": "torchvision WeightsEnum.get_state_dict(check_hash=True) -> torch.hub.load_state_dict_from_url",
+  "torch_home": "data/cache/torch (TORCH_HOME)",
+  "file": "cache/torch/hub/checkpoints/resnet18-f37072fd.pth",
+  "bytes": 46830571,
+  "sha256": "f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec",
+  "sha256_prefix_in_name_ok": true,
+  "retrieved_utc": "2026-11-26T20:11:17+00:00",
+  "torch": "2.14.1+cu130",
+  "torchvision": "0.29.1+cu130",
+  "meta": {
+   "min_size": [
+    1,
+    1
+   ],
+   "num_params": 11689512,
+   "recipe": "https://github.com/pytorch/vision/tree/main/references/classification#resnet",
+   "_metrics": {
+    "ImageNet-1K": {
+     "acc@1": 69.758,
+     "acc@5": 89.078
+    }
+   },
+   "_ops": 1.814,
+   "_file_size": 44.661,
+   "_docs": "These weights reproduce closely the results of the paper using a simple training recipe.",
+   "n_categories": 1000
+  },
+  "offline_check": {
+   "network_blocked": true,
+   "loaded": true,
+   "n_tensors_in_file": 102,
+   "backbone_tensors_equal_file": true,
+   "conv1_shape": [
+    64,
+    7,
+    7,
+    7
+   ],
+   "conv1_from_rgb": true,
+   "output_shape": [
+    2,
+    1
+   ],
+   "output_finite": true
+  },
+  "n_requests": 1
+ },
+ "zabaged": {
+  "row": 6,
+  "source": "ČÚZK ZABAGED polohopis, CC BY 4.0 (© ČÚZK); data stay in data/, never committed",
+  "service": "https://ags.cuzk.gov.cz/arcgis/rest/services/ZABAGED_POLOHOPIS/MapServer",
+  "service_metadata": {
+   "currentVersion": 11.5,
+   "mapName": "ZABAGED",
+   "serviceDescription": "Prohlížecí služba AGS - ZABAGED je poskytována jako veřejná prohlížecí služba nad daty ZABAGED®. Službu lze využít prostřednictvím rozhraní REST, SOAP, WMS a WFS. Služba je určena pro prohlížení od měřítka cca 1:10 000.",
+   "copyrightText": " © ČÚZK",
+   "spatialReference": {
+    "wkid": 102067,
+    "latestWkid": 5514,
+    "xyTolerance": 0.001,
+    "zTolerance": 0.001,
+    "mTolerance": 0.001,
+    "falseX": -33699800,
+    "falseY": -33699800,
+    "xyUnits": 133638764.24698351,
+    "falseZ": -100000,
+    "zUnits": 10000,
+    "falseM": -100000,
+    "mUnits": 10000
+   },
+   "maxRecordCount": 2000,
+   "capabilities": "Map,Query,Data",
+   "supportedQueryFormats": "JSON, geoJSON, PBF"
+  },
+  "metadata_retrieved_utc": "2026-11-26T20:10:13+00:00",
+  "request": {
+   "per_sheet_and_layer": "returnIdsOnly with the envelope, then pages of <= maxRecordCount ids (OBJECTID range + the same envelope), Esri JSON (f=json) in the native SR",
+   "envelope": "bbox of the sheet's package DTM raster (sheet + 250 m on the native lattice)",
+   "params": {
+    "geometryType": "esriGeometryEnvelope",
+    "inSR": 5514,
+    "spatialRel": "esriSpatialRelIntersects"
+   },
+   "outFields": "*",
+   "no_outSR": true
+  },
+  "retrieved_utc": {
+   "first": "2026-11-26T20:09:09+00:00",
+   "last": "2026-11-26T20:53:52+00:00"
+  },
+  "runs": [
+   {
+    "started_utc": "2026-11-26T20:09:02+00:00",
+    "finished_utc": "2026-11-26T20:09:14+00:00",
+    "status": "ok",
+    "n_requests": 35,
+    "n_pairs": 12,
+    "argv": [
+     "--sheets",
+     "25-14-17",
+     "04-33-10"
+    ],
+    "git_commit": "cea4dc58fd2f3c30f14bab543d51120a430e8337"
+   },
+   {
+    "started_utc": "2026-11-26T20:10:09+00:00",
+    "finished_utc": "2026-11-26T20:53:52+00:00",
+    "status": "ok",
+    "n_requests": 7225,
+    "n_pairs": 5148,
+    "argv": [
+     "--all"
+    ],
+    "git_commit": "cea4dc58fd2f3c30f14bab543d51120a430e8337"
+   }
+  ],
+  "n_requests_total": 7260,
+  "n_sheets": 860,
+  "layers": {
+   "118": {
+    "name_brief": "quarry",
+    "metadata": {
+     "name": "Povrchová těžba, lom",
+     "type": "Feature Layer",
+     "geometryType": "esriGeometryPolygon",
+     "maxRecordCount": 2000,
+     "sourceSpatialReference": {
+      "wkid": 102067,
+      "latestWkid": 5514,
+      "xyTolerance": 0.001,
+      "zTolerance": 0.001,
+      "mTolerance": 0.001,
+      "falseX": -33699800,
+      "falseY": -33699800,
+      "xyUnits": 10000,
+      "falseZ": -100000,
+      "zUnits": 10000,
+      "falseM": -100000,
+      "mUnits": 10000
+     },
+     "spatialReference": {
+      "wkid": 102067,
+      "latestWkid": 5514,
+      "xyTolerance": 0.001,
+      "zTolerance": 0.001,
+      "mTolerance": 0.001,
+      "falseX": -33699800,
+      "falseY": -33699800,
+      "xyUnits": 133638764.24698351,
+      "falseZ": -100000,
+      "zUnits": 10000,
+      "falseM": -100000,
+      "mUnits": 10000
+     },
+     "extent": {
+      "xmin": -897869.9050000012,
+      "ymin": -1213781.6180000007,
+      "xmax": -450127.37999999896,
+      "ymax": -938990.193,
+      "spatialReference": {
+       "wkid": 102067,
+       "latestWkid": 5514,
+       "xyTolerance": 0.001,
+       "zTolerance": 0.001,
+       "mTolerance": 0.001,
+       "falseX": -33699800,
+       "falseY": -33699800,
+       "xyUnits": 133638764.24698351,
+       "falseZ": -100000,
+       "zUnits": 10000,
+       "falseM": -100000,
+       "mUnits": 10000
+      }
+     },
+     "currentVersion": 11.5,
+     "supportedQueryFormats": "JSON, geoJSON, PBF",
+     "capabilities": "Map,Query,Data",
+     "displayField": "FID_ZBG",
+     "copyrightText": "",
+     "advancedQueryCapabilities": {
+      "useStandardizedQueries": true,
+      "supportsStatistics": true,
+      "supportsPercentileStatistics": true,
+      "supportsHavingClause": true,
+      "supportsOrderBy": true,
+      "supportsDistinct": true,
+      "supportsCountDistinct": true,
+      "supportsAdvancedQueryRelated": true,
+      "supportsQueryRelatedPagination": true,
+      "supportsPagination": true,
+      "supportsLod": false,
+      "supportsQueryWithLodSR": false,
+      "supportsTrueCurve": true,
+      "supportsQueryWithDatumTransformation": true,
+      "supportsReturningQueryExtent": true,
+      "supportsQueryWithDistance": true,
+      "supportsSqlExpression": true,
+      "supportsTimeRelation": true,
+      "supportsSqlFormat": false,
+      "supportsQueryAnalytic": false,
+      "supportsCurrentUserQueries": true
+     },
+     "fields": [
+      [
+       "OBJECTID",
+       "esriFieldTypeOID"
+      ],
+      [
+       "Shape",
+       "esriFieldTypeGeometry"
+      ],
+      [
+       "fid_zbg",
+       "esriFieldTypeString"
+      ],
+      [
+       "jmeno",
+       "esriFieldTypeString"
+      ],
+      [
+       "druhtez_k",
+       "esriFieldTypeString"
+      ],
+      [
+       "druhtez_p",
+       "esriFieldTypeString"
+      ],
+      [
+       "Shape_Length",
+       "esriFieldTypeDouble"
+      ],
+      [
+       "Shape_Area",
+       "esriFieldTypeDouble"
+      ]
+     ],
+     "count_national": 641
+    },
+    "file": "118.gpkg",
+    "bytes": 745472,
+    "gpkg_layer": "zabaged_118",
+    "n_sheets_queried": 860,
+    "n_sheets_nonempty": 171,
+    "max_features_per_sheet": 5,
+    "n_pages": 171,
+    "page_bytes": 2400382,
+    "declared_geometry_types": {
+     "esriGeometryPolygon": 171
+    },
+    "n_raw": 243,
+    "n_unique": 149,
+    "n_duplicate_rows": 94,
+    "n_conflicting_ids": 0,
+    "conflicting_ids_examples": [],
+    "geometry": {
+     "types": {
+      "Polygon": 149
+     },
+     "n_null": 0,
+     "n_empty": 0,
+     "n_invalid": 0
+    },
+    "roundtrip_equal": true,
+    "n_unique_fid_zbg": 149
+   },
+   "119": {
+    "name_brief": "spoil heap",
+    "metadata": {
+     "name": "Úložné místo",
+     "type": "Feature Layer",
+     "geometryType": "esriGeometryPolygon",
+     "maxRecordCount": 2000,
+     "sourceSpatialReference": {
+      "wkid": 102067,
+      "latestWkid": 5514,
+      "xyTolerance": 0.001,
+      "zTolerance": 0.001,
+      "mTolerance": 0.001,
+      "falseX": -33699800,
+      "falseY": -33699800,
+      "xyUnits": 10000,
+      "falseZ": -100000,
+      "zUnits": 10000,
+      "falseM": -100000,
+      "mUnits": 10000
+     },
+     "spatialReference": {
+      "wkid": 102067,
+      "latestWkid": 5514,
+      "xyTolerance": 0.001,
+      "zTolerance": 0.001,
+      "mTolerance": 0.001,
+      "falseX": -33699800,
+      "falseY": -33699800,
+      "xyUnits": 133638764.24698351,
+      "falseZ": -100000,
+      "zUnits": 10000,
+      "falseM": -100000,
+      "mUnits": 10000
+     },
+     "extent": {
+      "xmin": -873307.4140000008,
+      "ymin": -1213936.9910000004,
+      "xmax": -444830.7870000005,
+      "ymax": -956394.4100000001,
+      "spatialReference": {
+       "wkid": 102067,
+       "latestWkid": 5514,
+       "xyTolerance": 0.001,
+       "zTolerance": 0.001,
+       "mTolerance": 0.001,
+       "falseX": -33699800,
+       "falseY": -33699800,
+       "xyUnits": 133638764.24698351,
+       "falseZ": -100000,
+       "zUnits": 10000,
+       "falseM": -100000,
+       "mUnits": 10000
+      }
+     },
+     "currentVersion": 11.5,
+     "supportedQueryFormats": "JSON, geoJSON, PBF",
+     "capabilities": "Map,Query,Data",
+     "displayField": "fid_zbg",
+     "copyrightText": "",
+     "advancedQueryCapabilities": {
+      "useStandardizedQueries": true,
+      "supportsStatistics": true,
+      "supportsPercentileStatistics": true,
+      "supportsHavingClause": true,
+      "supportsOrderBy": true,
+      "supportsDistinct": true,
+      "supportsCountDistinct": true,
+      "supportsAdvancedQueryRelated": true,
+      "supportsQueryRelatedPagination": true,
+      "supportsPagination": true,
+      "supportsLod": false,
+      "supportsQueryWithLodSR": false,
+      "supportsTrueCurve": true,
+      "supportsQueryWithDatumTransformation": true,
+      "supportsReturningQueryExtent": true,
+      "supportsQueryWithDistance": true,
+      "supportsSqlExpression": true,
+      "supportsTimeRelation": true,
+      "supportsSqlFormat": false,
+      "supportsQueryAnalytic": false,
+      "supportsCurrentUserQueries": true
+     },
+     "fields": [
+      [
+       "OBJECTID",
+       "esriFieldTypeOID"
+      ],
+      [
+       "Shape",
+       "esriFieldTypeGeometry"
+      ],
+      [
+       "fid_zbg",
+       "esriFieldTypeString"
+      ],
+      [
+       "podtypob_k",
+       "esriFieldTypeString"
+      ],
+      [
+       "podtypob_p",
+       "esriFieldTypeString"
+      ],
+      [
+       "jmeno",
+       "esriFieldTypeString"
+      ],
+      [
+       "Shape_Length",
+       "esriFieldTypeDouble"
+      ],
+      [
+       "Shape_Area",
+       "esriFieldTypeDouble"
+      ]
+     ],
+     "count_national": 186
+    },
+    "file": "119.gpkg",
+    "bytes": 208896,
+    "gpkg_layer": "zabaged_119",
+    "n_sheets_queried": 860,
+    "n_sheets_nonempty": 50,
+    "max_features_per_sheet": 4,
+    "n_pages": 50,
+    "page_bytes": 403260,
+    "declared_geometry_types": {
+     "esriGeometryPolygon": 50
+    },
+    "n_raw": 68,
+    "n_unique": 46,
+    "n_duplicate_rows": 22,
+    "n_conflicting_ids": 0,
+    "conflicting_ids_examples": [],
+    "geometry": {
+     "types": {
+      "Polygon": 46
+     },
+     "n_null": 0,
+     "n_empty": 0,
+     "n_invalid": 0
+    },
+    "roundtrip_equal": true,
+    "n_unique_fid_zbg": 46
+   },
+   "130": {
+    "name_brief": "rock formation",
+    "metadata": {
+     "name": "Skalní útvary",
+     "type": "Feature Layer",
+     "geometryType": "esriGeometryPolygon",
+     "maxRecordCount": 2000,
+     "sourceSpatialReference": {
+      "wkid": 102067,
+      "latestWkid": 5514,
+      "xyTolerance": 0.001,
+      "zTolerance": 0.001,
+      "mTolerance": 0.001,
+      "falseX": -33699800,
+      "falseY": -33699800,
+      "xyUnits": 10000,
+      "falseZ": -100000,
+      "zUnits": 10000,
+      "falseM": -100000,
+      "mUnits": 10000
+     },
+     "spatialReference": {
+      "wkid": 102067,
+      "latestWkid": 5514,
+      "xyTolerance": 0.001,
+      "zTolerance": 0.001,
+      "mTolerance": 0.001,
+      "falseX": -33699800,
+      "falseY": -33699800,
+      "xyUnits": 133638764.24698351,
+      "falseZ": -100000,
+      "zUnits": 10000,
+      "falseM": -100000,
+      "mUnits": 10000
+     },
+     "extent": {
+      "xmin": -899465.3359999992,
+      "ymin": -1211146.0899999999,
+      "xmax": -441089.4210000001,
+      "ymax": -938580.1900000013,
+      "spatialReference": {
+       "wkid": 102067,
+       "latestWkid": 5514,
+       "xyTolerance": 0.001,
+       "zTolerance": 0.001,
+       "mTolerance": 0.001,
+       "falseX": -33699800,
+       "falseY": -33699800,
+       "xyUnits": 133638764.24698351,
+       "falseZ": -100000,
+       "zUnits": 10000,
+       "falseM": -100000,
+       "mUnits": 10000
+      }
+     },
+     "currentVersion": 11.5,
+     "supportedQueryFormats": "JSON, geoJSON, PBF",
+     "capabilities": "Map,Query,Data",
+     "displayField": "FID_ZBG",
+     "copyrightText": "",
+     "advancedQueryCapabilities": {
+      "useStandardizedQueries": true,
+      "supportsStatistics": true,
+      "supportsPercentileStatistics": true,
+      "supportsHavingClause": true,
+      "supportsOrderBy": true,
+      "supportsDistinct": true,
+      "supportsCountDistinct": true,
+      "supportsAdvancedQueryRelated": true,
+      "supportsQueryRelatedPagination": true,
+      "supportsPagination": true,
+      "supportsLod": false,
+      "supportsQueryWithLodSR": false,
+      "supportsTrueCurve": true,
+      "supportsQueryWithDatumTransformation": true,
+      "supportsReturningQueryExtent": true,
+      "supportsQueryWithDistance": true,
+      "supportsSqlExpression": true,
+      "supportsTimeRelation": true,
+      "supportsSqlFormat": false,
+      "supportsQueryAnalytic": false,
+      "supportsCurrentUserQueries": true
+     },
+     "fields": [
+      [
+       "OBJECTID",
+       "esriFieldTypeOID"
+      ],
+      [
+       "Shape",
+       "esriFieldTypeGeometry"
+      ],
+      [
+       "fid_zbg",
+       "esriFieldTypeString"
+      ],
+      [
+       "Shape_Length",
+       "esriFieldTypeDouble"
+      ],
+      [
+       "Shape_Area",
+       "esriFieldTypeDouble"
+      ],
+      [
+       "jmeno",
+       "esriFieldTypeString"
+      ]
+     ],
+     "count_national": 39444
+    },
+    "file": "130.gpkg",
+    "bytes": 5894144,
+    "gpkg_layer": "zabaged_130",
+    "n_sheets_queried": 860,
+    "n_sheets_nonempty": 457,
+    "max_features_per_sheet": 1666,
+    "n_pages": 457,
+    "page_bytes": 17312101,
+    "declared_geometry_types": {
+     "esriGeometryPolygon": 457
+    },
+    "n_raw": 15111,
+    "n_unique": 10500,
+    "n_duplicate_rows": 4611,
+    "n_conflicting_ids": 0,
+    "conflicting_ids_examples": [],
+    "geometry": {
+     "types": {
+      "Polygon": 10500
+     },
+     "n_null": 0,
+     "n_empty": 0,
+     "n_invalid": 0
+    },
+    "roundtrip_equal": true,
+    "n_unique_fid_zbg": 10500
+   },
+   "129": {
+    "name_brief": "landslide/scree",
+    "metadata": {
+     "name": "Sesuv půdy, suť",
+     "type": "Feature Layer",
+     "geometryType": "esriGeometryPolygon",
+     "maxRecordCount": 2000,
+     "sourceSpatialReference": {
+      "wkid": 102067,
+      "latestWkid": 5514,
+      "xyTolerance": 0.001,
+      "zTolerance": 0.001,
+      "mTolerance": 0.001,
+      "falseX": -33699800,
+      "falseY": -33699800,
+      "xyUnits": 10000,
+      "falseZ": -100000,
+      "zUnits": 10000,
+      "falseM": -100000,
+      "mUnits": 10000
+     },
+     "spatialReference": {
+      "wkid": 102067,
+      "latestWkid": 5514,
+      "xyTolerance": 0.001,
+      "zTolerance": 0.001,
+      "mTolerance": 0.001,
+      "falseX": -33699800,
+      "falseY": -33699800,
+      "xyUnits": 133638764.24698351,
+      "falseZ": -100000,
+      "zUnits": 10000,
+      "falseM": -100000,
+      "mUnits": 10000
+     },
+     "extent": {
+      "xmin": -898918.8509999998,
+      "ymin": -1198913.4070000015,
+      "xmax": -436461.06799999997,
+      "ymax": -959291.0309999995,
+      "spatialReference": {
+       "wkid": 102067,
+       "latestWkid": 5514,
+       "xyTolerance": 0.001,
+       "zTolerance": 0.001,
+       "mTolerance": 0.001,
+       "falseX": -33699800,
+       "falseY": -33699800,
+       "xyUnits": 133638764.24698351,
+       "falseZ": -100000,
+       "zUnits": 10000,
+       "falseM": -100000,
+       "mUnits": 10000
+      }
+     },
+     "currentVersion": 11.5,
+     "supportedQueryFormats": "JSON, geoJSON, PBF",
+     "capabilities": "Map,Query,Data",
+     "displayField": "FID_ZBG",
+     "copyrightText": "",
+     "advancedQueryCapabilities": {
+      "useStandardizedQueries": true,
+      "supportsStatistics": true,
+      "supportsPercentileStatistics": true,
+      "supportsHavingClause": true,
+      "supportsOrderBy": true,
+      "supportsDistinct": true,
+      "supportsCountDistinct": true,
+      "supportsAdvancedQueryRelated": true,
+      "supportsQueryRelatedPagination": true,
+      "supportsPagination": true,
+      "supportsLod": false,
+      "supportsQueryWithLodSR": false,
+      "supportsTrueCurve": true,
+      "supportsQueryWithDatumTransformation": true,
+      "supportsReturningQueryExtent": true,
+      "supportsQueryWithDistance": true,
+      "supportsSqlExpression": true,
+      "supportsTimeRelation": true,
+      "supportsSqlFormat": false,
+      "supportsQueryAnalytic": false,
+      "supportsCurrentUserQueries": true
+     },
+     "fields": [
+      [
+       "OBJECTID",
+       "esriFieldTypeOID"
+      ],
+      [
+       "Shape",
+       "esriFieldTypeGeometry"
+      ],
+      [
+       "fid_zbg",
+       "esriFieldTypeString"
+      ],
+      [
+       "Shape_Length",
+       "esriFieldTypeDouble"
+      ],
+      [
+       "Shape_Area",
+       "esriFieldTypeDouble"
+      ]
+     ],
+     "count_national": 478
+    },
+    "file": "129.gpkg",
+    "bytes": 204800,
+    "gpkg_layer": "zabaged_129",
+    "n_sheets_queried": 860,
+    "n_sheets_nonempty": 73,
+    "max_features_per_sheet": 25,
+    "n_pages": 73,
+    "page_bytes": 375048,
+    "declared_geometry_types": {
+     "esriGeometryPolygon": 73
+    },
+    "n_raw": 282,
+    "n_unique": 184,
+    "n_duplicate_rows": 98,
+    "n_conflicting_ids": 0,
+    "conflicting_ids_examples": [],
+    "geometry": {
+     "types": {
+      "Polygon": 184
+     },
+     "n_null": 0,
+     "n_empty": 0,
+     "n_invalid": 0
+    },
+    "roundtrip_equal": true,
+    "n_unique_fid_zbg": 184
+   },
+   "79": {
+    "name_brief": "road",
+    "metadata": {
+     "name": "Silnice, dálnice",
+     "type": "Feature Layer",
+     "geometryType": "esriGeometryPolyline",
+     "maxRecordCount": 2000,
+     "sourceSpatialReference": {
+      "wkid": 102067,
+      "latestWkid": 5514,
+      "xyTolerance": 0.001,
+      "zTolerance": 0.001,
+      "mTolerance": 0.001,
+      "falseX": -33699800,
+      "falseY": -33699800,
+      "xyUnits": 10000,
+      "falseZ": -100000,
+      "zUnits": 10000,
+      "falseM": -100000,
+      "mUnits": 10000
+     },
+     "spatialReference": {
+      "wkid": 102067,
+      "latestWkid": 5514,
+      "xyTolerance": 0.001,
+      "zTolerance": 0.001,
+      "mTolerance": 0.001,
+      "falseX": -33699800,
+      "falseY": -33699800,
+      "xyUnits": 133638764.24698351,
+      "falseZ": -100000,
+      "zUnits": 10000,
+      "falseM": -100000,
+      "mUnits": 10000
+     },
+     "extent": {
+      "xmin": -902126.9050000012,
+      "ymin": -1219950.7769999988,
+      "xmax": -432225.26000000164,
+      "ymax": -936465.0100000016,
+      "spatialReference": {
+       "wkid": 102067,
+       "latestWkid": 5514,
+       "xyTolerance": 0.001,
+       "zTolerance": 0.001,
+       "mTolerance": 0.001,
+       "falseX": -33699800,
+       "falseY": -33699800,
+       "xyUnits": 133638764.24698351,
+       "falseZ": -100000,
+       "zUnits": 10000,
+       "falseM": -100000,
+       "mUnits": 10000
+      }
+     },
+     "currentVersion": 11.5,
+     "supportedQueryFormats": "JSON, geoJSON, PBF",
+     "capabilities": "Map,Query,Data",
+     "displayField": "fid_zbg",
+     "copyrightText": "",
+     "advancedQueryCapabilities": {
+      "useStandardizedQueries": true,
+      "supportsStatistics": true,
+      "supportsPercentileStatistics": true,
+      "supportsHavingClause": true,
+      "supportsOrderBy": true,
+      "supportsDistinct": true,
+      "supportsCountDistinct": true,
+      "supportsAdvancedQueryRelated": true,
+      "supportsQueryRelatedPagination": true,
+      "supportsPagination": true,
+      "supportsLod": false,
+      "supportsQueryWithLodSR": false,
+      "supportsTrueCurve": true,
+      "supportsQueryWithDatumTransformation": true,
+      "supportsReturningQueryExtent": true,
+      "supportsQueryWithDistance": true,
+      "supportsSqlExpression": true,
+      "supportsTimeRelation": true,
+      "supportsSqlFormat": false,
+      "supportsQueryAnalytic": false,
+      "supportsCurrentUserQueries": true
+     },
+     "fields": [
+      [
+       "OBJECTID",
+       "esriFieldTypeOID"
+      ],
+      [
+       "Shape",
+       "esriFieldTypeGeometry"
+      ],
+      [
+       "fid_zbg",
+       "esriFieldTypeString"
+      ],
+      [
+       "jmeno",
+       "esriFieldTypeString"
+      ],
+      [
+       "silnice",
+       "esriFieldTypeString"
+      ],
+      [
+       "typsil_k",
+       "esriFieldTypeString"
+      ],
+      [
+       "typsil_p",
+       "esriFieldTypeString"
+      ],
+      [
+       "cislouseku",
+       "esriFieldTypeString"
+      ],
+      [
+       "peazkom1",
+       "esriFieldTypeString"
+      ],
+      [
+       "peazkom2",
+       "esriFieldTypeString"
+      ],
+      [
+       "peazkom3",
+       "esriFieldTypeString"
+      ],
+      [
+       "peazkom4",
+       "esriFieldTypeString"
+      ],
+      [
+       "etah1",
+       "esriFieldTypeString"
+      ],
+      [
+       "etah2",
+       "esriFieldTypeString"
+      ],
+      [
+       "etah3",
+       "esriFieldTypeString"
+      ],
+      [
+       "etah4",
+       "esriFieldTypeString"
+      ],
+      [
+       "vym_tahy_k",
+       "esriFieldTypeString"
+      ],
+      [
+       "vym_tahy_p",
+       "esriFieldTypeString"
+      ],
+      [
+       "r_indsil7",
+       "esriFieldTypeString"
+      ],
+      [
+       "kruh_obj_k",
+       "esriFieldTypeString"
+      ],
+      [
+       "kruh_obj_p",
+       "esriFieldTypeString"
+      ],
+      [
+       "dpr_smer_k",
+       "esriFieldTypeSmallInteger"
+      ],
+      [
+       "dpr_smer_p",
+       "esriFieldTypeString"
+      ],
+      [
+       "Shape_Length",
+       "esriFieldTypeDouble"
+      ]
+     ],
+     "count_national": 41363
+    },
+    "file": "79.gpkg",
+    "bytes": 17592320,
+    "gpkg_layer": "zabaged_79",
+    "n_sheets_queried": 860,
+    "n_sheets_nonempty": 833,
+    "max_features_per_sheet": 164,
+    "n_pages": 833,
+    "page_bytes": 74973664,
+    "declared_geometry_types": {
+     "esriGeometryPolyline": 833
+    },
+    "n_raw": 15842,
+    "n_unique": 9323,
+    "n_duplicate_rows": 6519,
+    "n_conflicting_ids": 0,
+    "conflicting_ids_examples": [],
+    "geometry": {
+     "types": {
+      "LineString": 9323
+     },
+     "n_null": 0,
+     "n_empty": 0,
+     "n_invalid": 0
+    },
+    "roundtrip_equal": true,
+    "n_unique_fid_zbg": 9323
+   },
+   "75": {
+    "name_brief": "railway",
+    "metadata": {
+     "name": "Železniční trať",
+     "type": "Feature Layer",
+     "geometryType": "esriGeometryPolyline",
+     "maxRecordCount": 2000,
+     "sourceSpatialReference": {
+      "wkid": 102067,
+      "latestWkid": 5514,
+      "xyTolerance": 0.001,
+      "zTolerance": 0.001,
+      "mTolerance": 0.001,
+      "falseX": -33699800,
+      "falseY": -33699800,
+      "xyUnits": 10000,
+      "falseZ": -100000,
+      "zUnits": 10000,
+      "falseM": -100000,
+      "mUnits": 10000
+     },
+     "spatialReference": {
+      "wkid": 102067,
+      "latestWkid": 5514,
+      "xyTolerance": 0.001,
+      "zTolerance": 0.001,
+      "mTolerance": 0.001,
+      "falseX": -33699800,
+      "falseY": -33699800,
+      "xyUnits": 133638764.24698351,
+      "falseZ": -100000,
+      "zUnits": 10000,
+      "falseM": -100000,
+      "mUnits": 10000
+     },
+     "extent": {
+      "xmin": -900463.2140000015,
+      "ymin": -1217278.6889999993,
+      "xmax": -438572.1499999985,
+      "ymax": -938682.8779999986,
+      "spatialReference": {
+       "wkid": 102067,
+       "latestWkid": 5514,
+       "xyTolerance": 0.001,
+       "zTolerance": 0.001,
+       "mTolerance": 0.001,
+       "falseX": -33699800,
+       "falseY": -33699800,
+       "xyUnits": 133638764.24698351,
+       "falseZ": -100000,
+       "zUnits": 10000,
+       "falseM": -100000,
+       "mUnits": 10000
+      }
+     },
+     "currentVersion": 11.5,
+     "supportedQueryFormats": "JSON, geoJSON, PBF",
+     "capabilities": "Map,Query,Data",
+     "displayField": "fid_zbg",
+     "copyrightText": "",
+     "advancedQueryCapabilities": {
+      "useStandardizedQueries": true,
+      "supportsStatistics": true,
+      "supportsPercentileStatistics": true,
+      "supportsHavingClause": true,
+      "supportsOrderBy": true,
+      "supportsDistinct": true,
+      "supportsCountDistinct": true,
+      "supportsAdvancedQueryRelated": true,
+      "supportsQueryRelatedPagination": true,
+      "supportsPagination": true,
+      "supportsLod": false,
+      "supportsQueryWithLodSR": false,
+      "supportsTrueCurve": true,
+      "supportsQueryWithDatumTransformation": true,
+      "supportsReturningQueryExtent": true,
+      "supportsQueryWithDistance": true,
+      "supportsSqlExpression": true,
+      "supportsTimeRelation": true,
+      "supportsSqlFormat": false,
+      "supportsQueryAnalytic": false,
+      "supportsCurrentUserQueries": true
+     },
+     "fields": [
+      [
+       "OBJECTID",
+       "esriFieldTypeOID"
+      ],
+      [
+       "Shape",
+       "esriFieldTypeGeometry"
+      ],
+      [
+       "fid_zbg",
+       "esriFieldTypeString"
+      ],
+      [
+       "jmeno",
+       "esriFieldTypeString"
+      ],
+      [
+       "kod_zelez",
+       "esriFieldTypeString"
+      ],
+      [
+       "typrozch_k",
+       "esriFieldTypeString"
+      ],
+      [
+       "typrozch_p",
+       "esriFieldTypeString"
+      ],
+      [
+       "typtrati_k",
+       "esriFieldTypeString"
+      ],
+      [
+       "typtrati_p",
+       "esriFieldTypeString"
+      ],
+      [
+       "vlastnik_k",
+       "esriFieldTypeString"
+      ],
+      [
+       "vlastnik_p",
+       "esriFieldTypeString"
+      ],
+      [
+       "pocetkolej",
+       "esriFieldTypeSmallInteger"
+      ],
+      [
+       "Shape_Length",
+       "esriFieldTypeDouble"
+      ]
+     ],
+     "count_national": 5245
+    },
+    "file": "75.gpkg",
+    "bytes": 2240512,
+    "gpkg_layer": "zabaged_75",
+    "n_sheets_queried": 860,
+    "n_sheets_nonempty": 484,
+    "max_features_per_sheet": 49,
+    "n_pages": 484,
+    "page_bytes": 11910295,
+    "declared_geometry_types": {
+     "esriGeometryPolyline": 484
+    },
+    "n_raw": 2347,
+    "n_unique": 1303,
+    "n_duplicate_rows": 1044,
+    "n_conflicting_ids": 0,
+    "conflicting_ids_examples": [],
+    "geometry": {
+     "types": {
+      "LineString": 1303
+     },
+     "n_null": 0,
+     "n_empty": 0,
+     "n_invalid": 0
+    },
+    "roundtrip_equal": true,
+    "n_unique_fid_zbg": 1303
+   }
+  },
+  "total_bytes": {
+   "gpkg": 26886144,
+   "pages": 107374750
+  }
+ }
+}
