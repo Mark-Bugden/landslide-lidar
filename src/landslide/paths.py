@@ -40,15 +40,22 @@ class Paths:
     smoke: bool = False
     root: Path = REPO_ROOT
 
+    def _env(self, name: str) -> str | None:
+        """An env override, honoured only for the checkout's own root. A `Paths` built on another root (a test's
+        tmp dir) ignores the overrides, so it can never read or write the real data tree."""
+        if Path(self.root).resolve() != REPO_ROOT:
+            return None
+        return os.environ.get(name) or None
+
     # ---- inputs (never redirected) ----
     @property
     def data(self) -> Path:
-        env = os.environ.get("LANDSLIDE_DATA_DIR")
+        env = self._env("LANDSLIDE_DATA_DIR")
         return Path(env) if env else self.root / "data"
 
     @property
     def raw(self) -> Path:
-        env = os.environ.get("LANDSLIDE_RAW_DIR")
+        env = self._env("LANDSLIDE_RAW_DIR")
         return Path(env) if env else self.data / "raw_data"
 
     @property

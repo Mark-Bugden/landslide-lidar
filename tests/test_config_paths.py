@@ -73,6 +73,16 @@ def test_raw_dir_env_override(monkeypatch, tmp_path):
     assert Paths().raw == Paths().root / "data" / "raw_data"
 
 
+def test_env_overrides_never_reach_another_root(monkeypatch, tmp_path):
+    # A test building Paths on its own tmp root must stay there even when the overrides are set.
+    monkeypatch.setenv("LANDSLIDE_DATA_DIR", str(tmp_path / "real_data"))
+    monkeypatch.setenv("LANDSLIDE_RAW_DIR", str(tmp_path / "real_raw"))
+    p = Paths(root=tmp_path / "test_root")
+    assert p.data == tmp_path / "test_root" / "data"
+    assert p.raw == tmp_path / "test_root" / "data" / "raw_data"
+    assert Paths(smoke=True, root=tmp_path / "test_root").runs == tmp_path / "test_root" / "data" / "smoke" / "runs"
+
+
 def test_data_dir_env_override(monkeypatch, tmp_path):
     monkeypatch.delenv("LANDSLIDE_RAW_DIR", raising=False)
     monkeypatch.setenv("LANDSLIDE_DATA_DIR", str(tmp_path))
