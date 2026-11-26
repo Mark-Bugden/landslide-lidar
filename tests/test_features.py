@@ -40,7 +40,7 @@ def _tri_brute(z):
     per = []
     for i in range(1, H - 1):
         for j in range(1, W - 1):
-            per.append(sum(abs(z[i, j] - z[i + di, j + dj]) for di, dj in NEIGHBOURS) / 8.0)
+            per.append(math.sqrt(math.fsum((z[i + di, j + dj] - z[i, j]) ** 2 for di, dj in NEIGHBOURS)))
     return _mean(per)
 
 
@@ -87,11 +87,13 @@ def test_tri_brute_force_and_plane():
     rng = np.random.default_rng(3)
     z = rng.normal(size=(20, 17)) * 3 + 500
     assert tri(z) == pytest.approx(_tri_brute(z), rel=1e-13)
-    # a plane z = a*col + b*row: every pixel's 8 differences are |a|, |a|, |b|, |b|, |a+b| x 2, |a-b| x 2
-    a, b = 0.7, -1.9
+    # a plane with gradient (p, q) at cell size g: the 8 differences are +-pg, +-qg, +-(p+q)g, +-(p-q)g, so the
+    # squares sum to 2p^2 + 2q^2 + 2(p+q)^2 + 2(p-q)^2 = 6(p^2 + q^2) times g^2: TRI = g * sqrt(6 (p^2 + q^2))
+    g = 2.0
     ii, jj = np.mgrid[0:30, 0:25].astype(np.float64)
-    plane = 300 + a * jj + b * ii
-    assert tri(plane) == pytest.approx((abs(a) + abs(b) + abs(a + b) + abs(a - b)) / 4, rel=1e-12)
+    for p, q in ((0.35, -0.95), (0.0, 0.4), (1.2, 1.2)):
+        plane = 300 + p * g * jj + q * g * ii
+        assert tri(plane) == pytest.approx(g * math.sqrt(6 * (p * p + q * q)), rel=1e-12)
     assert tri(np.full((5, 5), 412.5)) == 0.0
     zn = z.copy()
     zn[0, 0] = np.nan                        # a ring corner is a neighbour of interior pixel (1, 1)
@@ -104,7 +106,7 @@ def test_tri_uses_the_ring():
     """The patch-edge pixels' neighbours come from the 1 px ring: changing only a ring cell changes the TRI."""
     z = np.full((8, 8), 100.0)
     z[0, 3] = 101.0                          # ring cell, neighbour of patch pixels (1, 2), (1, 3), (1, 4)
-    assert tri(z) == pytest.approx(3 * (1 / 8) / 36)
+    assert tri(z) == pytest.approx(3 * 1.0 / 36)   # each of the 3 pixels: sqrt(1^2) = 1; the other 33: 0
 
 
 def test_susceptibility_stats():

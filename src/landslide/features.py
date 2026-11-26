@@ -17,15 +17,18 @@ CNN sees, at full precision.
 | svf_std           | std of svf                                                                             |
 | detr_std          | std of detr (m)                                                                        |
 | detr_range_2_98   | 98th minus 2nd percentile of detr (m)                                                  |
-| tri               | mean over the patch pixels of the mean |z - z_n| over the 8 neighbours n of each pixel (m) |
+| tri               | mean over the patch pixels of Riley's TRI, sqrt(sum over the 8 neighbours n of (z_n - z)^2) (m) |
 | susc_mean         | mean of the susceptibility class code (0 low/no data, 1 mid, 2 high)                   |
 | susc_high_frac    | fraction of patch pixels with code 2                                                   |
 
 The first twelve are Appendix A §10's "12 simple statistics"; the last two are the slope_susc_lr inputs.
 
-**TRI.** D19 defines it as the mean over the patch of each pixel's mean absolute elevation difference to its eight
-neighbours, on the DTM z (not smoothed). A patch-edge pixel's neighbours lie one pixel into the channel context,
-exactly as for slope (central differences), so the caller passes z for the patch plus a 1 px ring.
+**TRI** is the Terrain Ruggedness Index of Riley et al. (1999), gdaldem's default: per pixel,
+sqrt(sum over the 8 neighbours n of (z_n - z)^2) on the DTM z (not smoothed); the statistic is its mean over the
+patch. (PLAN.md D19's formula text described the mean-absolute-difference "Wilson" variant; the orchestrator chose
+Riley's definition before any data was built, `docs/decisions/P1-10.md` D19a-new.) A patch-edge pixel's neighbours lie
+one pixel into the channel context, exactly as for slope (central differences), so the caller passes z for the patch
+plus a 1 px ring.
 
 **Susceptibility** is the uint8 class raster of P1-07 on the sheet's DTM grid; its statistics use the same px x px
 pixels as the patch. Licence (BRIEF.md "Constraints"): row 5 appears only as these per-patch numbers inside `data/`.
@@ -57,7 +60,7 @@ NEIGHBOURS: tuple[tuple[int, int], ...] = tuple((di, dj) for di in (-1, 0, 1) fo
 
 
 def tri(z_ring: np.ndarray) -> float:
-    """Mean over the interior pixels of the mean |z - z_n| over the 8 neighbours (D19).
+    """Mean over the interior pixels of Riley's TRI, sqrt(sum over the 8 neighbours n of (z_n - z)^2) (D19a-new).
 
     `z_ring` is the DTM over the patch plus a 1 px ring, shape (px + 2, px + 2); the result averages over the px x px
     interior. NaN anywhere in the ring gives NaN.
@@ -69,8 +72,9 @@ def tri(z_ring: np.ndarray) -> float:
     c = z[1:H - 1, 1:W - 1]
     acc = np.zeros(c.shape)
     for di, dj in NEIGHBOURS:
-        acc += np.abs(c - z[1 + di:H - 1 + di, 1 + dj:W - 1 + dj])
-    acc /= len(NEIGHBOURS)
+        d = z[1 + di:H - 1 + di, 1 + dj:W - 1 + dj] - c
+        acc += d * d
+    np.sqrt(acc, out=acc)
     return float(acc.mean())
 
 
