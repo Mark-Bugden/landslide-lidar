@@ -20,3 +20,6 @@ __pycache__/
 # Demo build
 demo/node_modules/
 demo/dist/
+
+# Agent worktrees (each shares data/ through LANDSLIDE_DATA_DIR)
+.worktrees/
