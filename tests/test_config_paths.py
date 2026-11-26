@@ -17,6 +17,14 @@ def test_hash_ignores_formatting_and_key_order(tmp_path):
 
 def test_hash_changes_with_any_value():
     assert config.config_hash({"lr": 0.0003}) != config.config_hash({"lr": 0.0004})
+    assert config.config_hash({"name": "a", "x": 1}) != config.config_hash({"name": "b", "x": 1})
+
+
+def test_hash_ignores_status():
+    draft = {"status": "DRAFT", "train": {"lr": 0.0003}}
+    frozen = {"status": "FROZEN 2026-11-27", "train": {"lr": 0.0003}}
+    assert config.config_hash(draft) == config.config_hash(frozen)
+    assert config.config_hash(draft) == config.config_hash({"train": {"lr": 0.0003}})
 
 
 def test_frozen_hash(tmp_path):

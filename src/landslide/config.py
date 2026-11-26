@@ -2,7 +2,7 @@
 
 Every value used by the pipeline comes from `configs/landslide.json`. The config hash is the sha256 of the
 canonical JSON (sorted keys, no whitespace, UTF-8), so formatting changes to the file do not change it but any
-value change does.
+value change does. The `status` key is left out, so freezing the config doesn't change its hash.
 
 Random numbers (decision D02): always `numpy.random.default_rng`. A step that needs its own stream uses
 `SeedSequence([seed, stream_id])`, with the stream ids listed in the config's `replication.streams` block.
@@ -32,9 +32,14 @@ def canonical_json(cfg: dict[str, Any]) -> bytes:
     return json.dumps(cfg, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
 
 
+#: Top-level keys left out of the hash. `status` only says whether the config is frozen; setting it at the freeze
+#: must not change the hash recorded by files built before the freeze.
+HASH_EXCLUDED_KEYS = frozenset({"status"})
+
+
 def config_hash(cfg: dict[str, Any]) -> str:
-    """sha256 hex digest of the canonical JSON of `cfg`."""
-    return hashlib.sha256(canonical_json(cfg)).hexdigest()
+    """sha256 hex digest of the canonical JSON of `cfg`, without the keys in HASH_EXCLUDED_KEYS."""
+    return hashlib.sha256(canonical_json({k: v for k, v in cfg.items() if k not in HASH_EXCLUDED_KEYS})).hexdigest()
 
 
 def frozen_hash(path: Path | str | None = None) -> str | None:
