@@ -343,8 +343,8 @@ def build(cfg: dict, paths: Paths) -> dict[str, Any]:
                     for g in (SP.GROUP_TRAIN, SP.GROUP_TEST)},
         "inner_val": {"frac": frac, "rule": "random training blocks until >= frac of the run's training eligible "
                                             "polygons (D10)", "runs": inner_summ},
-        "seconds": round(time.time() - t0, 1),
     }
+    log.info("build finished in %.1f s", time.time() - t0)  # not in the summary, so re-runs are byte-identical
     return {"sheets": sheets, "poly": poly, "reg": reg, "flysch": fl, "splits": splits, "summary": summary,
             "s2_fail": s2_fail}
 
