@@ -240,6 +240,12 @@ class CornerGrid:
             raise ValueError(f"raster origin ({self.x0}, {self.y0}) is not on the DMR 5G lattice")
         return int(gi), int(gj)
 
+    def same_lattice(self, other: CornerGrid) -> bool:
+        """The same grid on the national lattice (origin indices, size, cell), whatever the float rounding of the
+        corner coordinates (P1-08 stores them rounded to 1e-6 m; a raster's transform may differ in the last bits)."""
+        return (self.cell == other.cell and self.n_rows == other.n_rows and self.n_cols == other.n_cols
+                and self.lattice_offset() == other.lattice_offset())
+
     def global_ij(self, r, c) -> tuple[np.ndarray, np.ndarray]:
         """National lattice indices of corners (r, c): gi grows east, gj grows north."""
         gi0, gj0 = self.lattice_offset()
@@ -1188,7 +1194,7 @@ def build_samples(cfg: Mapping[str, Any], inputs: Inputs, show_progress: bool = 
     for row in bar(list(stage1.itertuples(index=False)), desc="pass 2 (DTM)", unit="sheet"):
         sg = geoms[row.sheet]
         dtm = inputs.read_dtm(row.sheet)
-        if CornerGrid.from_transform(dtm.transform, *dtm.shape) != sg.grid:
+        if not CornerGrid.from_transform(dtm.transform, *dtm.shape).same_lattice(sg.grid):
             raise AssertionError(f"{row.sheet}: the raster grid differs from sheets.parquet")
         sr = sheet_raster(dtm.z, cfg)
         del dtm

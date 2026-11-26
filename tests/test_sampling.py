@@ -93,6 +93,12 @@ def test_corner_grid_lattice_and_snap():
     off = S.CornerGrid.from_transform(Affine(2.0, 0.0, X0 + 1.0, 0.0, -2.0, Y0), 10, 10)
     with pytest.raises(ValueError):
         off.lattice_offset()
+    # a raster transform that differs from the stored (rounded) corner in the last bits is the same grid
+    a = S.CornerGrid.from_transform(Affine(2.0, 0.0, X0, 0.0, -2.0, Y0), 300, 350)
+    b = S.CornerGrid.from_transform(Affine(2.0, 0.0, X0 + 3e-10, 0.0, -2.0, Y0 - 2e-10), 300, 350)
+    c = S.CornerGrid.from_transform(Affine(2.0, 0.0, X0 + 2.0, 0.0, -2.0, Y0), 300, 350)
+    assert a != b and a.same_lattice(b) and not a.same_lattice(c)
+    assert not a.same_lattice(S.CornerGrid.from_transform(Affine(2.0, 0.0, X0, 0.0, -2.0, Y0), 300, 351))
 
 
 # ======================================================================================================================

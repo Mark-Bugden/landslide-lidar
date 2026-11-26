@@ -27,6 +27,7 @@ from landslide.sampling import Inputs
 from landslide.sheets import dtm_grid
 from terrain_synth import synthetic_dtm
 
+# DTM transforms differ from the stored grid by 3e-10 m, as a raster's may differ from P1-08's rounded corner.
 ORIGIN = (-600_000.0, -1_150_000.0)
 W_M, H_M, THETA = 2000.0, 1600.0, math.radians(5.0)
 STAGE2 = (1, 1)
@@ -86,7 +87,7 @@ def make_world(seed: int = 7, cfg: dict | None = None) -> tuple[Inputs, dict]:
                      "block": block, "fold_a": fold, "is_stage2": (i, j) == STAGE2, "ij": (i, j)})
         z = synthetic_dtm((g.h, g.w), seed=100 + 10 * i + j, border=(i, j) == (2, 1), holes=(i, j) == (0, 1),
                           lake=(i, j) == (0, 0))
-        dtms[sheet] = Dtm(z=z, transform=Affine(2.0, 0.0, g.xmin, 0.0, -2.0, g.ymax), crs=None,
+        dtms[sheet] = Dtm(z=z, transform=Affine(2.0, 0.0, g.xmin + 3e-10, 0.0, -2.0, g.ymax - 3e-10), crs=None,
                           path=Path(f"synthetic/{sheet}.tif"))
     sheets = pd.DataFrame(rows)
 
