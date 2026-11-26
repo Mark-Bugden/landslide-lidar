@@ -7,7 +7,8 @@ Steps (PLAN.md P1-08; Appendix A §3-§4; decisions D04-D10 in docs/decisions/P1
    of "2 km closing" (buffer 1 km) is computed alongside and reported, never used.
 3. DTM validity: the 860 package rasters, one at a time (grid from the raster, 0 m cells, invalid cells).
 4. Eligible polygon -> sheet (largest share of area); `n_eligible` per sheet.
-5. Sheet kraj (D06), transfer group, stratum.
+5. Sheet kraj (D06, ties by `replication.splits.kraj_tie_rule`), transfer group, stratum. The other tie rule is
+   computed alongside and its strata reported, never used.
 6. Stage-2 sheets: the 20 of Appendix A §4, checked (full, >= 5 eligible, valid DTM, flysch flag). Never swapped.
 7. Stage-1 sheets, 15 km blocks (D08), (a) folds (D09), (b) groups and inner-val blocks (D10).
 
@@ -41,6 +42,7 @@ from landslide import geo as G
 from landslide import sheets as S
 from landslide import splits as SP
 from landslide.config import config_hash, load_config
+from landslide.dtm import invalid_bounds
 from landslide.logs import get_logger, progress, setup_logging
 from landslide.paths import RUN_NAMES, Paths
 
@@ -154,7 +156,7 @@ def dtm_step(cfg: dict, paths: Paths, sheets: gpd.GeoDataFrame) -> tuple[pd.Data
             "n_with_le_min": int((df["n_le_min"] > 0).sum()), "n_with_gt_max": int((df["n_gt_max"] > 0).sum()),
             "n_with_negative": int((df["zmin"] < 0).sum()),
             "n_grid_matches_recipe": int(df["grid_matches_recipe"].sum()),
-            "invalid_rule": cfg["dtm"]["invalid_rule"], "invalid_bounds": list(G.invalid_bounds(cfg)),
+            "invalid_rule": cfg["dtm"]["invalid_rule"], "invalid_bounds": list(invalid_bounds(cfg)),
             "zmax_all_sheets": float(df["zmax"].max()),
             "n_zero_cells_total": int(df["n_zero"].sum())}
     return df, summ
@@ -211,7 +213,13 @@ def build(cfg: dict, paths: Paths) -> dict[str, Any]:
                 "n_sheets_with_eligible": int((sheets["n_eligible"] > 0).sum())}
 
     # 5. kraj, transfer group, stratum
-    kr = G.sheet_kraj(sg, reg.geometry.values, reg["gen_kraj"].values)
+    tie_rule = SP.kraj_tie_rule(cfg)
+    alt_rule = next(r for r in G.KRAJ_TIE_RULES if r != tie_rule) if tie_rule in G.KRAJ_TIE_RULES else None
+    if alt_rule is None:
+        raise ValueError(f"unknown replication.splits.kraj_tie_rule {tie_rule!r}; expected one of {G.KRAJ_TIE_RULES}")
+    votes = G.kraj_votes(sg, reg.geometry.values, reg["gen_kraj"].values, reg["objectid"].values)
+    kr = G.sheet_kraj_from_votes(votes, len(sheets), tie_rule)
+    kr_alt = G.sheet_kraj_from_votes(votes, len(sheets), alt_rule)
     for c in kr.columns:
         sheets[c] = pd.Series(kr[c].tolist(), index=sheets.index, dtype=object)
     sheets["kraj"] = pd.Series([None if SP._missing(k) else k for k in kr["kraj"]], index=sheets.index, dtype=object)
@@ -220,9 +228,10 @@ def build(cfg: dict, paths: Paths) -> dict[str, Any]:
                                   dtype=object)
     sheets["stratum"] = pd.Series([SP.stratum(f, g) for f, g in zip(sheets["flysch"], sheets["group_b"])],
                                   index=sheets.index, dtype=object)
+    sheets["kraj_alt_rule"] = pd.Series(kr_alt["kraj"].tolist(), index=sheets.index, dtype=object)
 
     # 6. stage-2 sheets
-    expected = SP.STAGE2_SHEETS
+    expected = SP.stage2_sheets(cfg)
     s2_all = set(expected["flysch"]) | set(expected["nonflysch"])
     sheets["is_stage2"] = sheets["sheet"].isin(s2_all)
     s2_checks = SP.check_stage2(sheets, expected, cfg)
@@ -256,7 +265,7 @@ def build(cfg: dict, paths: Paths) -> dict[str, Any]:
     # (a) folds over the flysch blocks (D09)
     n_folds = int(cfg["splits"]["n_folds_a"])
     fly = bt[bt["stratum"].isin(["F_ZLMS", "F_other"])]
-    folds = SP.assign_folds(dict(zip(fly["block"], fly["n_eligible"])), n_folds, SP.FOLD_SEED)
+    folds = SP.assign_folds(dict(zip(fly["block"], fly["n_eligible"])), n_folds, SP.fold_seed(cfg))
     bt["fold_a"] = bt["block"].map(folds).astype("Int64")
     sheets["fold_a"] = sheets["block"].map(folds).astype("Int64")
 
@@ -267,11 +276,11 @@ def build(cfg: dict, paths: Paths) -> dict[str, Any]:
     inner_summ: dict[str, Any] = {}
     for run in RUN_NAMES:
         tb = SP.training_blocks(run, bt)
-        iv = SP.inner_val_blocks({b: bn[b] for b in tb}, frac, SP.inner_val_seed(run))
+        iv = SP.inner_val_blocks({b: bn[b] for b in tb}, frac, SP.inner_val_seed(run, cfg))
         inner[run] = iv
         n_train = int(sum(bn[b] for b in tb))
         n_iv = int(sum(bn[b] for b in iv))
-        inner_summ[run] = {"seed": SP.inner_val_seed(run), "n_training_blocks": len(tb),
+        inner_summ[run] = {"seed": SP.inner_val_seed(run, cfg), "n_training_blocks": len(tb),
                            "n_training_eligible": n_train, "n_inner_val_blocks": len(iv),
                            "n_inner_val_eligible": n_iv, "inner_val_frac_eligible": n_iv / n_train if n_train else None,
                            "n_inner_val_sheets": int(sum(len(bt.set_index("block").at[b, "sheets"]) for b in iv))}
@@ -294,7 +303,7 @@ def build(cfg: dict, paths: Paths) -> dict[str, Any]:
         "blocks": {r.block: {"stratum": r.stratum, "group_b": r.group_b,
                              "fold_a": None if pd.isna(r.fold_a) else int(r.fold_a),
                              "n_eligible": int(r.n_eligible), "sheets": list(r.sheets)} for r in bt.itertuples()},
-        "seeds": {"folds_a": SP.FOLD_SEED, "inner_val": {run: SP.inner_val_seed(run) for run in RUN_NAMES}},
+        "seeds": {"folds_a": SP.fold_seed(cfg), "inner_val": {run: SP.inner_val_seed(run, cfg) for run in RUN_NAMES}},
     }
 
     # ---- summary (tracked; aggregate only) ----
@@ -302,6 +311,19 @@ def build(cfg: dict, paths: Paths) -> dict[str, Any]:
         return {s: {"n_sheets": int((df["stratum"] == s).sum()), "n_blocks": int((blocks["stratum"] == s).sum()),
                     "n_eligible": int(df.loc[df["stratum"] == s, "n_eligible"].sum())} for s in SP.STRATA}
 
+    def alt_strata(df: pd.DataFrame) -> dict[str, Any]:
+        """Stage-1 strata if the sheet kraj used the other tie rule (blocks = distinct stratum and cell)."""
+        g = [SP.transfer_group(k, train_kraje) for k in df["kraj_alt_rule"]]
+        st = pd.Series([SP.stratum(f, x) for f, x in zip(df["flysch"], g)], index=df.index, dtype=object)
+        out = {}
+        for s_ in SP.STRATA:
+            m = st == s_
+            out[s_] = {"n_sheets": int(m.sum()),
+                       "n_blocks": int(df.loc[m, ["block_cx", "block_cy"]].drop_duplicates().shape[0]),
+                       "n_eligible": int(df.loc[m, "n_eligible"].sum())}
+        return out
+
+    kraj_diff = sheets["kraj"].fillna("") != sheets["kraj_alt_rule"].fillna("")
     s2df = sheets[sheets["is_stage2"]]
     full = sheets["full"].values
     pool = full & (sheets["n_eligible"].values >= int(cfg["splits"]["stage2"]["min_eligible_polygons"])) \
@@ -315,7 +337,15 @@ def build(cfg: dict, paths: Paths) -> dict[str, Any]:
         "assignment": asg_summ,
         "sheets": {"n": int(len(sheets)), "n_full": int(full.sum()), "n_partial": int((~full).sum()),
                    "n_with_kraj": int(sheets["kraj"].notna().sum()), "kraj": _counts(sheets["kraj"]),
-                   "kraj_rule": _counts(sheets["kraj_rule"]),
+                   "kraj_rule": _counts(sheets["kraj_rule"]), "kraj_tie_rule": tie_rule,
+                   "kraj_other_tie_rule": {
+                       "rule": alt_rule, "used": False,
+                       "sheets_kraj_differs": sorted(sheets.loc[kraj_diff, "sheet"]),
+                       "stage1_sheets_stratum_differs": sorted(
+                           s for s, k, f, st in zip(sheets["sheet"], sheets["kraj_alt_rule"], sheets["flysch"],
+                                                    sheets["stratum"])
+                           if s in set(s1["sheet"]) and SP.stratum(f, SP.transfer_group(k, train_kraje)) != st),
+                       "stage1_strata": alt_strata(s1)},
                    "n_flysch": int(sheets["flysch"].sum()), "n_with_eligible": asg_summ["n_sheets_with_eligible"]},
         "dtm": dtm_summ,
         "flysch": fl_summ,
@@ -333,7 +363,7 @@ def build(cfg: dict, paths: Paths) -> dict[str, Any]:
                    "n_sheets_with_zero_cells": int(s1["has_zero_cells"].sum()),
                    "block_km": cfg["splits"]["block_km"],
                    "n_sheets_per_block": {"min": int(bt["n_sheets"].min()), "max": int(bt["n_sheets"].max())}},
-        "folds_a": {"seed": SP.FOLD_SEED, "n_folds": n_folds, "per_fold": {
+        "folds_a": {"seed": SP.fold_seed(cfg), "n_folds": n_folds, "per_fold": {
             k: {"n_blocks": len(v["blocks"]), "n_sheets": len(v["sheets"]), "n_eligible": v["n_eligible"],
                 "n_blocks_F_ZLMS": int(bt.loc[bt["block"].isin(v["blocks"]), "stratum"].eq("F_ZLMS").sum()),
                 "n_blocks_F_other": int(bt.loc[bt["block"].isin(v["blocks"]), "stratum"].eq("F_other").sum())}
@@ -359,7 +389,7 @@ SHEET_COLS = ["sheet", "objectid", "poznamka", "full", "area_m2", "centroid_x", 
               "has_zero_cells", "dtm_all_valid", "n_cells", "n_zero", "n_nonfinite", "n_le_min", "n_gt_max",
               "n_nodata", "n_invalid", "zmin", "zmax",
               "flysch_frac", "flysch", "flysch_frac_alt",
-              "kraj", "kraj_rule", "kraj_n_polygons", "kraj_n_votes", "kraj_votes",
+              "kraj", "kraj_rule", "kraj_n_polygons", "kraj_n_votes", "kraj_votes", "kraj_alt_rule",
               "group_b", "stratum", "block_cx", "block_cy", "block", "fold_a", "is_stage1", "is_stage2", "n_eligible",
               "geometry"]
 POLY_COLS = ["objectid", "skupina", "area_m2", "in_mapped", "eligible", "kraj1", "sheet", "sheet_share",

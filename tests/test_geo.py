@@ -1,5 +1,6 @@
 """Synthetic tests for `landslide.geo`: kraj1, in_mapped, eligibility, polygon -> sheet assignment, the sheet-kraj
-rule (D06) with its tie rules, the flysch closing (D07), area fractions and the DTM validity scan."""
+rule (D06) with both tie rules, the flysch closing (D07) with the `replication.flysch` values, area fractions and the
+DTM validity scan."""
 
 import json
 
@@ -12,7 +13,9 @@ from landslide import geo as G
 
 CFG = {"labels": {"skupina": 1, "in_mapped": True, "min_area_m2": 3000},
        "dtm": {"cell_m": 2.0, "invalid_rule": "z <= 0 (ImageServer returns 0.0 outside the border) or z > 2000 -> NaN"},
-       "flysch": {"closing_m": 2000, "subregions": ["A", "B"], "min_sheet_frac": 0.5}}
+       "flysch": {"closing_m": 2000, "subregions": ["A", "B"], "min_sheet_frac": 0.5},
+       "replication": {"flysch": {"fill_holes": True, "min_part_km2": 1.0, "buffer_quad_segs": 8}}}
+FP = G.flysch_params(CFG)
 
 
 def arr(*geoms):
@@ -95,13 +98,33 @@ def test_assign_invalid_polygon_does_not_fail():
 
 # ---- sheet kraj (D06) ----
 
-def test_majority_kraj_rules():
-    assert G.majority_kraj({"Zlínský": 3, "Jihomoravský": 2}, {"Jihomoravský": 1e9}) == ("Zlínský", "majority")
-    assert G.majority_kraj({"Zlínský": 2, "Jihomoravský": 2}, {"Zlínský": 5.0, "Jihomoravský": 7.0}) == \
-        ("Jihomoravský", "area")
-    assert G.majority_kraj({"Zlínský": 2, "Jihomoravský": 2, "Olomoucký": 1},
-                           {"Zlínský": 5.0, "Jihomoravský": 5.0, "Olomoucký": 99.0}) == ("Jihomoravský", "alphabetical")
-    assert G.majority_kraj({}, {}) == (None, "none")
+def test_majority_kraj_majority_ignores_tie_rule():
+    for rule in G.KRAJ_TIE_RULES:
+        assert G.majority_kraj({"Zlínský": 3, "Jihomoravský": 2}, rule, areas={"Jihomoravský": 1e9},
+                               min_objectid={"Zlínský": 50, "Jihomoravský": 1}) == ("Zlínský", "majority")
+        assert G.majority_kraj({}, rule) == (None, "none")
+
+
+def test_majority_kraj_lowest_objectid():
+    votes = {"Zlínský": 2, "Olomoucký": 2, "Jihomoravský": 1}
+    oid = {"Zlínský": 8705, "Olomoucký": 10659, "Jihomoravský": 3}  # Jihomoravský isn't tied, so its id doesn't count
+    areas = {"Zlínský": 1.0, "Olomoucký": 9.0, "Jihomoravský": 99.0}
+    assert G.majority_kraj(votes, "lowest_objectid", areas=areas, min_objectid=oid) == ("Zlínský", "lowest_objectid")
+
+
+def test_majority_kraj_area_then_alphabetical():
+    assert G.majority_kraj({"Zlínský": 2, "Jihomoravský": 2}, "area", areas={"Zlínský": 5.0, "Jihomoravský": 7.0}) \
+        == ("Jihomoravský", "area")
+    assert G.majority_kraj({"Zlínský": 2, "Jihomoravský": 2, "Olomoucký": 1}, "area",
+                           areas={"Zlínský": 5.0, "Jihomoravský": 5.0, "Olomoucký": 99.0}) \
+        == ("Jihomoravský", "alphabetical")
+
+
+def test_unknown_kraj_tie_rule_raises():
+    with pytest.raises(ValueError, match="tie rule"):
+        G.majority_kraj({"Zlínský": 1}, "first_seen")
+    with pytest.raises(ValueError, match="tie rule"):
+        G.sheet_kraj(arr(box(0, 0, 1, 1)), arr(box(0, 0, 1, 1)), ["Zlínský"], [1], "first_seen")
 
 
 def test_sheet_kraj_majority_tie_and_first_listed():
@@ -109,22 +132,29 @@ def test_sheet_kraj_majority_tie_and_first_listed():
     polys = arr(
         # sheet 0: two small Zlínský against one big Jihomoravský -> count wins
         box(1, 1, 2, 2), box(3, 3, 4, 4), box(5, 0, 9.5, 9),
-        # sheet 1: one each, the Olomoucký polygon covers more of the sheet -> area decides the tie
+        # sheet 1: one vote each; the Moravskoslezský polygon has the lower objectid, the Olomoucký one more area
         box(11, 1, 12, 2), box(13, 1, 19, 9),
     )
     kraj = ["Zlínský", "Zlínský, Jihomoravský", "Jihomoravský", "Moravskoslezský", "Olomoucký, Zlínský"]
-    out = G.sheet_kraj(sheets, polys, kraj)
-    assert out["kraj"].tolist() == ["Zlínský", "Olomoucký", None]
-    assert out["kraj_rule"].tolist() == ["majority", "area", "none"]
+    oid = [5, 4, 3, 10743, 12103]
+    out = G.sheet_kraj(sheets, polys, kraj, oid, "lowest_objectid")
+    assert out["kraj"].tolist() == ["Zlínský", "Moravskoslezský", None]
+    assert out["kraj_rule"].tolist() == ["majority", "lowest_objectid", "none"]
     assert out["kraj_n_polygons"].tolist() == [3, 2, 0]
     assert json.loads(out.loc[0, "kraj_votes"]) == {"Jihomoravský": 1, "Zlínský": 2}
+    alt = G.sheet_kraj(sheets, polys, kraj, oid, "area")
+    assert alt["kraj"].tolist() == ["Zlínský", "Olomoucký", None]
+    assert alt["kraj_rule"].tolist() == ["majority", "area", "none"]
+    # The input order of the polygons doesn't matter, only their objectids.
+    rev = G.sheet_kraj(sheets, polys[::-1], kraj[::-1], oid[::-1], "lowest_objectid")
+    assert rev["kraj"].tolist() == out["kraj"].tolist()
 
 
 def test_sheet_kraj_counts_polygons_that_only_touch():
     # "all register polygons that intersect the sheet": a polygon sharing an edge intersects.
     sheets = arr(box(0, 0, 10, 10))
     polys = arr(box(10, 0, 12, 2), box(10, 4, 12, 6), box(1, 1, 2, 2))
-    out = G.sheet_kraj(sheets, polys, ["Zlínský", "Zlínský", "Jihomoravský"])
+    out = G.sheet_kraj(sheets, polys, ["Zlínský", "Zlínský", "Jihomoravský"], [1, 2, 3], "lowest_objectid")
     assert out.loc[0, "kraj"] == "Zlínský" and out.loc[0, "kraj_n_polygons"] == 3
 
 
@@ -133,9 +163,9 @@ def test_sheet_kraj_counts_polygons_that_only_touch():
 def test_closing_bridges_gaps_narrower_than_twice_the_buffer():
     a, b = box(0, 0, 5000, 5000), box(6000, 0, 11000, 5000)  # 1 km gap
     u = shapely.union_all([a, b])
-    out, st = G.close_fill_drop(u, 2000)
+    out, st = G.close_fill_drop(u, 2000, **FP)
     assert st["final"]["n_parts"] == 1 and out.area > u.area
-    out, st = G.close_fill_drop(u, 400)  # 0.8 km structuring element: the 1 km gap stays open
+    out, st = G.close_fill_drop(u, 400, **FP)  # 0.8 km structuring element: the 1 km gap stays open
     assert st["final"]["n_parts"] == 2 and out.area == pytest.approx(u.area, rel=1e-4)  # corners: chords
 
 
@@ -144,18 +174,26 @@ def test_closing_fills_holes_and_drops_small_parts():
     small = box(100000, 0, 100800, 1000)  # 0.8 km² -> dropped
     keep = box(200000, 0, 201200, 1000)   # 1.2 km² -> kept
     u = shapely.union_all([ring, small, keep])
-    out, st = G.close_fill_drop(u, 2000)
+    out, st = G.close_fill_drop(u, 2000, **FP)
     assert st["closed"]["n_holes"] == 1 and st["filled"]["n_holes"] == 0
     assert st["final"]["n_parts"] == 2 and st["filled"]["n_parts"] == 3
     assert out.area == pytest.approx(20000 ** 2 + 1.2e6, rel=1e-4)
-    out, st = G.close_fill_drop(u, 2000, fill_holes=False)
+    out, st = G.close_fill_drop(u, 2000, **{**FP, "fill_holes": False})
     assert st["final"]["n_holes"] == 1
 
 
 def test_small_part_threshold_is_inclusive():
     u = shapely.union_all([box(0, 0, 1000, 1000), box(5000, 0, 5999, 1000)])  # 1 km² and 0.999 km²
-    out, st = G.close_fill_drop(u, 0.0)
+    out, st = G.close_fill_drop(u, 0.0, **FP)
     assert st["final"]["n_parts"] == 1 and out.area == pytest.approx(1e6)
+
+
+def test_flysch_params_from_config():
+    assert FP == {"fill_holes": True, "min_part_m2": 1e6, "quad_segs": 8}
+    from landslide.config import load_config
+
+    real = G.flysch_params(load_config())
+    assert set(real) == set(FP) and real["min_part_m2"] > 0
 
 
 def test_flysch_outline_selects_subregions_and_uses_config_buffer():
@@ -175,12 +213,6 @@ def test_area_fraction_inside():
 
 
 # ---- DTM validity ----
-
-def test_invalid_bounds_parse_and_reject():
-    assert G.invalid_bounds(CFG) == (0.0, 2000.0)
-    with pytest.raises(ValueError):
-        G.invalid_bounds({"dtm": {"invalid_rule": "z below zero is invalid"}})
-
 
 def test_dtm_validity_flags():
     z = np.full((4, 5), 300.0, dtype=np.float32)

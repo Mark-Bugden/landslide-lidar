@@ -12,7 +12,10 @@ from landslide import splits as SP
 from landslide.config import load_config
 from landslide.paths import RUN_NAMES, Paths
 
-CFG = {"splits": {"stage2": {"n_flysch": 2, "n_nonflysch": 2, "min_eligible_polygons": 5,
+CFG = {"replication": {"splits": {"stage2_sheets": {"flysch": ["a", "b"], "nonflysch": ["c", "d"]}, "fold_seed": 11,
+                                  "inner_val_seeds": {"a_base": 1000, "b": 2000, "s2": 3000},
+                                  "kraj_tie_rule": "lowest_objectid"}},
+       "splits": {"stage2": {"n_flysch": 2, "n_nonflysch": 2, "min_eligible_polygons": 5,
                              "full_sheets_only": True}}}
 TRAIN = ["Zlínský", "Moravskoslezský"]
 
@@ -109,9 +112,17 @@ def test_inner_val_exact_boundary():
 
 
 def test_inner_val_seeds():
-    assert [SP.inner_val_seed(r) for r in RUN_NAMES] == [1000, 1001, 1002, 1003, 1004, 2000, 3000]
+    assert [SP.inner_val_seed(r, CFG) for r in RUN_NAMES] == [1000, 1001, 1002, 1003, 1004, 2000, 3000]
+    other = {"replication": {"splits": {"inner_val_seeds": {"a_base": 7, "b": 8, "s2": 9}}}}
+    assert [SP.inner_val_seed(r, other) for r in RUN_NAMES] == [7, 8, 9, 10, 11, 8, 9]
     with pytest.raises(ValueError):
-        SP.inner_val_seed("c")
+        SP.inner_val_seed("c", CFG)
+
+
+def test_config_readers():
+    assert SP.stage2_sheets(CFG) == {"flysch": ("a", "b"), "nonflysch": ("c", "d")}
+    assert SP.fold_seed(CFG) == 11 and SP.kraj_tie_rule(CFG) == "lowest_objectid"
+    assert SP.stage2_list_sizes_ok(SP.stage2_sheets(CFG), CFG)["sizes_match_config"]
 
 
 def test_training_blocks_per_run():
@@ -127,10 +138,13 @@ def test_training_blocks_per_run():
 
 # ---- stage 2 ----
 
-def test_stage2_constants_match_config():
+def test_real_config_split_values():
+    from landslide import geo as G
+
     cfg = load_config()
-    s = SP.stage2_list_sizes_ok(SP.STAGE2_SHEETS, cfg)
+    s = SP.stage2_list_sizes_ok(SP.stage2_sheets(cfg), cfg)
     assert s == {"n_flysch": 10, "n_nonflysch": 10, "sizes_match_config": True, "distinct": True}
+    assert SP.kraj_tie_rule(cfg) in G.KRAJ_TIE_RULES
 
 
 def test_check_stage2_reports_every_failure_and_never_swaps():

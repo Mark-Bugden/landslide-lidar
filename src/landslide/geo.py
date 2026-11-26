@@ -13,13 +13,12 @@ area (D05) and representative point (D04) use the geometry as delivered, the sam
 Overlays (intersection areas, the `intersects` test of the sheet kraj) use a repaired copy,
 `shapely.make_valid(method="structure", keep_collapsed=False)`, because GEOS overlays can fail on invalid input.
 
-Two method values of Appendix A §3 have no config key: interior holes are filled and parts under 1 km² are dropped.
-They are the module constants below (`FLYSCH_FILL_HOLES`, `FLYSCH_MIN_PART_M2`).
+The closing's hole filling, minimum part size and buffer resolution come from `replication.flysch`; the kraj tie
+rule comes from `replication.splits.kraj_tie_rule`. The DTM invalid rule is `landslide.dtm.invalid_bounds` (P1-04).
 """
 
 from __future__ import annotations
 
-import re
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
@@ -30,15 +29,12 @@ import shapely
 from shapely.geometry import MultiPolygon, Polygon
 
 from landslide import sheets as S
+from landslide.dtm import invalid_bounds
 
-# ---- method values that are not config keys (Appendix A §3) ----
-
-#: Appendix A §3: "interior holes (Quaternary valley fills) are filled".
-FLYSCH_FILL_HOLES = True
-#: Appendix A §3: "parts under 1 km² are dropped".
-FLYSCH_MIN_PART_M2 = 1_000_000.0
-#: Buffer resolution of the closing: segments per quarter circle (shapely's default). Round joins and caps.
-BUFFER_QUAD_SEGS = 8
+#: Kraj tie rules (D06). "lowest_objectid": the tied kraj whose polygons include the lowest objectid (what a plain
+#: first-occurrence count over the register in source order gives). "area": the larger summed intersection area, then
+#: Python string order (the first P1-08 default, kept as the documented alternative).
+KRAJ_TIE_RULES = ("lowest_objectid", "area")
 
 #: `gen_kraj` lists several kraje separated by commas ("Jihomoravský, Zlínský"); the first one counts (D06).
 KRAJ_SEP = ","
@@ -126,10 +122,17 @@ def eligible_mask(skupina: np.ndarray, in_mapped_: np.ndarray, area_m2: np.ndarr
 # ======================================================================================================================
 
 
-def close_fill_drop(geom: Any, buffer_m: float, fill_holes: bool = FLYSCH_FILL_HOLES,
-                    min_part_m2: float = FLYSCH_MIN_PART_M2,
-                    quad_segs: int = BUFFER_QUAD_SEGS) -> tuple[Any, dict[str, Any]]:
-    """Morphological closing `buffer(+d).buffer(-d)`, then fill interior holes, then drop parts under `min_part_m2`.
+def flysch_params(cfg: Mapping[str, Any]) -> dict[str, Any]:
+    """`replication.flysch` (Appendix A §3 and our buffer resolution) as keyword arguments of `close_fill_drop`."""
+    f = cfg["replication"]["flysch"]
+    return {"fill_holes": bool(f["fill_holes"]), "min_part_m2": float(f["min_part_km2"]) * 1e6,
+            "quad_segs": int(f["buffer_quad_segs"])}
+
+
+def close_fill_drop(geom: Any, buffer_m: float, *, fill_holes: bool, min_part_m2: float,
+                    quad_segs: int) -> tuple[Any, dict[str, Any]]:
+    """Morphological closing `buffer(+d).buffer(-d)` (round joins, `quad_segs` segments per quarter circle), then
+    fill interior holes (if `fill_holes`), then drop parts under `min_part_m2`.
 
     Returns the outline (a MultiPolygon) and the area (km²) and part count after each step.
     """
@@ -160,7 +163,7 @@ def flysch_outline(geoms: np.ndarray, subregion: Sequence[Any], cfg: Mapping[str
     """D07: the closed flysch outline. `buffer_m` defaults to the config's `flysch.closing_m` (the buffer distance)."""
     u, n = flysch_union(geoms, subregion, cfg["flysch"]["subregions"])
     d = float(cfg["flysch"]["closing_m"]) if buffer_m is None else float(buffer_m)
-    out, stages = close_fill_drop(u, d)
+    out, stages = close_fill_drop(u, d, **flysch_params(cfg))
     stages["n_geology_polygons"] = n
     return out, stages
 
@@ -213,80 +216,94 @@ def assign_to_sheets(poly_geoms: np.ndarray, sheet_geoms: np.ndarray,
     return out, share
 
 
-def majority_kraj(votes: Mapping[str, int], areas: Mapping[str, float]) -> tuple[str | None, str]:
-    """D06 for one sheet: the most frequent kraj; ties to the larger summed intersection area, then alphabetical.
+def majority_kraj(votes: Mapping[str, int], tie_rule: str, areas: Mapping[str, float] | None = None,
+                  min_objectid: Mapping[str, int] | None = None) -> tuple[str | None, str]:
+    """D06 for one sheet: the most frequent kraj, ties broken by `tie_rule` (one of `KRAJ_TIE_RULES`).
 
-    Returns (kraj, how it was decided: "majority", "area" or "alphabetical"; "none" without votes).
-    "Alphabetical" is Python string order (Unicode code points).
+    - "lowest_objectid": the tied kraj whose polygons include the lowest objectid (`min_objectid[kraj]`).
+    - "area": the larger summed intersection area (`areas[kraj]`), then Python string order.
+
+    Returns (kraj, how it was decided: "majority", "lowest_objectid", "area" or "alphabetical"; "none" without votes).
     """
+    if tie_rule not in KRAJ_TIE_RULES:
+        raise ValueError(f"unknown kraj tie rule {tie_rule!r}; expected one of {KRAJ_TIE_RULES}")
     if not votes:
         return None, "none"
     top = max(votes.values())
     tied = sorted(k for k, v in votes.items() if v == top)
     if len(tied) == 1:
         return tied[0], "majority"
+    if tie_rule == "lowest_objectid":
+        if min_objectid is None:
+            raise ValueError("the lowest_objectid tie rule needs min_objectid")
+        return min(tied, key=lambda k: int(min_objectid[k])), "lowest_objectid"
+    if areas is None:
+        raise ValueError("the area tie rule needs areas")
     best_area = max(areas.get(k, 0.0) for k in tied)
     tied_area = sorted(k for k in tied if areas.get(k, 0.0) == best_area)
     return tied_area[0], ("area" if len(tied_area) == 1 else "alphabetical")
 
 
-def sheet_kraj(sheet_geoms: np.ndarray, poly_geoms: np.ndarray, poly_kraj: Sequence[Any]) -> pd.DataFrame:
-    """D06: each sheet's kraj from all register polygons that intersect it (one row per sheet, in input order).
+def kraj_votes(sheet_geoms: np.ndarray, poly_geoms: np.ndarray, poly_kraj: Sequence[Any],
+               poly_objectid: Sequence[int]) -> pd.DataFrame:
+    """Per (sheet index, kraj1): the number of register polygons intersecting the sheet, their summed intersection
+    area and their lowest objectid. Columns `s`, `kraj`, `n`, `area`, `min_objectid`."""
+    pk = np.asarray([first_kraj(k) for k in poly_kraj], dtype=object)
+    oid = np.asarray(poly_objectid, dtype=np.int64)
+    si, pi, area = overlap_pairs(np.asarray(sheet_geoms, dtype=object), np.asarray(poly_geoms, dtype=object))
+    df = pd.DataFrame({"s": si, "kraj": pk[pi], "area": area, "oid": oid[pi]}).dropna(subset=["kraj"])
+    return (df.groupby(["s", "kraj"], sort=True)
+            .agg(n=("area", "size"), area=("area", "sum"), min_objectid=("oid", "min")).reset_index())
 
-    Columns: `kraj`, `kraj_rule` (majority | area | alphabetical | none), `kraj_n_polygons`, `kraj_n_votes` (votes
-    of the winner), `kraj_votes` (JSON object, kraj -> count).
+
+def sheet_kraj_from_votes(votes: pd.DataFrame, n_sheets: int, tie_rule: str) -> pd.DataFrame:
+    """D06 for every sheet (rows 0..n_sheets-1) from `kraj_votes`.
+
+    Columns: `kraj`, `kraj_rule` (majority | lowest_objectid | area | alphabetical | none), `kraj_n_polygons`,
+    `kraj_n_votes` (votes of the winner), `kraj_votes` (JSON object, kraj -> count).
     """
     import json
 
-    pk = np.asarray([first_kraj(k) for k in poly_kraj], dtype=object)
-    si, pi, area = overlap_pairs(np.asarray(sheet_geoms, dtype=object), np.asarray(poly_geoms, dtype=object))
-    df = pd.DataFrame({"s": si, "kraj": pk[pi], "area": area}).dropna(subset=["kraj"])
-    grp = df.groupby(["s", "kraj"], sort=True).agg(n=("area", "size"), area=("area", "sum")).reset_index()
+    if tie_rule not in KRAJ_TIE_RULES:
+        raise ValueError(f"unknown kraj tie rule {tie_rule!r}; expected one of {KRAJ_TIE_RULES}")
+    by_sheet = {s: g for s, g in votes.groupby("s", sort=True)}
     rows = []
-    by_sheet = {s: g for s, g in grp.groupby("s", sort=True)}
-    for s in range(len(sheet_geoms)):
+    for s in range(n_sheets):
         g = by_sheet.get(s)
-        votes = {} if g is None else dict(zip(g["kraj"], g["n"].astype(int)))
-        areas = {} if g is None else dict(zip(g["kraj"], g["area"].astype(float)))
-        k, rule = majority_kraj(votes, areas)
-        rows.append({"kraj": k, "kraj_rule": rule, "kraj_n_polygons": int(sum(votes.values())),
-                     "kraj_n_votes": int(votes.get(k, 0)) if k else 0,
-                     "kraj_votes": json.dumps(dict(sorted(votes.items())), ensure_ascii=False)})
+        v = {} if g is None else dict(zip(g["kraj"], g["n"].astype(int)))
+        a = {} if g is None else dict(zip(g["kraj"], g["area"].astype(float)))
+        m = {} if g is None else dict(zip(g["kraj"], g["min_objectid"].astype(int)))
+        k, rule = majority_kraj(v, tie_rule, areas=a, min_objectid=m)
+        rows.append({"kraj": k, "kraj_rule": rule, "kraj_n_polygons": int(sum(v.values())),
+                     "kraj_n_votes": int(v.get(k, 0)) if k else 0,
+                     "kraj_votes": json.dumps(dict(sorted(v.items())), ensure_ascii=False)})
     out = pd.DataFrame(rows)
     out["kraj"] = pd.Series([r["kraj"] for r in rows], index=out.index, dtype=object)  # keep None, not NaN
     return out
+
+
+def sheet_kraj(sheet_geoms: np.ndarray, poly_geoms: np.ndarray, poly_kraj: Sequence[Any],
+               poly_objectid: Sequence[int], tie_rule: str) -> pd.DataFrame:
+    """D06: each sheet's kraj from all register polygons that intersect it (one row per sheet, in input order).
+
+    Every intersecting polygon votes with its `kraj1`; the most votes win; ties follow `tie_rule`. A sheet without
+    intersecting polygons gets None. See `sheet_kraj_from_votes` for the columns.
+    """
+    votes = kraj_votes(sheet_geoms, poly_geoms, poly_kraj, poly_objectid)
+    return sheet_kraj_from_votes(votes, len(sheet_geoms), tie_rule)
 
 
 # ======================================================================================================================
 # DTM validity (row 1)
 # ======================================================================================================================
 
-_RULE_LE = re.compile(r"\bz\s*<=\s*(-?\d+(?:\.\d+)?)")
-_RULE_GT = re.compile(r"\bz\s*>\s*(-?\d+(?:\.\d+)?)")
-
-
-def invalid_bounds(cfg: Mapping[str, Any]) -> tuple[float, float]:
-    """(le, gt) from the config's `dtm.invalid_rule`: z <= le or z > gt is invalid (as are NaN and nodata).
-
-    The same parse as `landslide.dtm.invalid_bounds` (P1-04); the rule must contain exactly one `z <= a` and one
-    `z > b`, so a reworded rule can't be silently misread.
-    """
-    rule = cfg["dtm"]["invalid_rule"]
-    le, gt = _RULE_LE.findall(rule), _RULE_GT.findall(rule)
-    if len(le) != 1 or len(gt) != 1:
-        raise ValueError(f"cannot parse dtm.invalid_rule {rule!r}: need one 'z <= a' and one 'z > b'")
-    lo, hi = float(le[0]), float(gt[0])
-    if not lo < hi:
-        raise ValueError(f"dtm.invalid_rule bounds out of order: {lo} >= {hi}")
-    return lo, hi
-
-
 def dtm_validity(z: np.ndarray, cfg: Mapping[str, Any], nodata: float | None = None) -> dict[str, Any]:
     """Cell counts of one raster against the invalid rule, and the two flags of PLAN.md §4.3.
 
     - `has_zero_cells`: some cell is exactly 0 m (the ImageServer's value outside the border).
     - `dtm_all_valid`: config `splits.stage2.require_valid_dtm` ("no 0-m cells or NaN"), read with the full
-      `dtm.invalid_rule`: no NaN or non-finite cell, no nodata cell, no z <= le, no z > gt.
+      `dtm.invalid_rule` (`landslide.dtm.invalid_bounds`): no NaN or non-finite cell, no nodata cell, no z <= le,
+      no z > gt.
     """
     lo, hi = invalid_bounds(cfg)
     z = np.asarray(z)

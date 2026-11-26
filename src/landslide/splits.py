@@ -10,8 +10,9 @@ Random numbers follow D02: where the method names a seed ("shuffled (seed 11)", 
 is `numpy.random.default_rng(seed)`. Every shuffle starts from the blocks sorted by id, so the result depends only on
 the block ids, their counts and the seed.
 
-Three Appendix A §4 values have no key in `configs/landslide.json`: the 20 stage-2 sheet numbers, the fold seed (11)
-and the inner-validation seeds (1000 + fold, 2000, 3000). They are the module constants below.
+The Appendix A §4 values that Appendix B has no key for come from `replication.splits`: the 20 stage-2 sheet numbers
+(`stage2_sheets`), the fold seed (`fold_seed`, 11) and the inner-validation seeds (`inner_val_seeds`: a_base 1000,
+b 2000, s2 3000).
 """
 
 from __future__ import annotations
@@ -24,24 +25,29 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-# ---- Appendix A §4 values that are not config keys ----
-
-#: Appendix A §4: the 20 reserved stage-2 sheets ("chosen before anything else, seed 2026").
-STAGE2_SHEETS: dict[str, tuple[str, ...]] = {
-    "flysch": ("24-43-19", "24-44-17", "25-14-17", "25-23-01", "25-23-04", "25-24-01", "25-32-22", "25-33-01",
-               "25-41-05", "35-12-16"),
-    "nonflysch": ("02-41-01", "02-41-18", "03-34-01", "03-34-04", "14-13-14", "14-14-22", "24-12-21", "24-14-16",
-                  "24-42-23", "25-12-22"),
-}
-#: Appendix A §4: "Flysch blocks are shuffled (seed 11)".
-FOLD_SEED = 11
-#: Appendix A §4: inner validation "seed 1000 + fold for (a), 2000 for (b), 3000 for the stage-2 model".
-INNER_VAL_SEED_A_BASE = 1000
-INNER_VAL_SEED_B = 2000
-INNER_VAL_SEED_S2 = 3000
-
 STRATA = ("F_ZLMS", "F_other", "N_ZLMS", "N_other")
 GROUP_TRAIN, GROUP_TEST = "train", "test"
+
+
+# ======================================================================================================================
+# Config values (replication.splits)
+# ======================================================================================================================
+
+
+def stage2_sheets(cfg: Mapping[str, Any]) -> dict[str, tuple[str, ...]]:
+    """Appendix A §4's 20 reserved sheets: `replication.splits.stage2_sheets` ({flysch, nonflysch})."""
+    s2 = cfg["replication"]["splits"]["stage2_sheets"]
+    return {"flysch": tuple(str(v) for v in s2["flysch"]), "nonflysch": tuple(str(v) for v in s2["nonflysch"])}
+
+
+def fold_seed(cfg: Mapping[str, Any]) -> int:
+    """Appendix A §4 "Flysch blocks are shuffled (seed 11)": `replication.splits.fold_seed`."""
+    return int(cfg["replication"]["splits"]["fold_seed"])
+
+
+def kraj_tie_rule(cfg: Mapping[str, Any]) -> str:
+    """D06 tie rule: `replication.splits.kraj_tie_rule` (checked by `landslide.geo`)."""
+    return str(cfg["replication"]["splits"]["kraj_tie_rule"])
 
 
 # ======================================================================================================================
@@ -140,14 +146,15 @@ def inner_val_blocks(block_n: Mapping[str, int], frac: float, seed: int) -> list
     return chosen
 
 
-def inner_val_seed(run: str) -> int:
-    """Appendix A §4: 1000 + fold for a_f<k>, 2000 for b, 3000 for s2."""
+def inner_val_seed(run: str, cfg: Mapping[str, Any]) -> int:
+    """Appendix A §4 (`replication.splits.inner_val_seeds`): a_base + fold for a_f<k>, b for b, s2 for s2."""
+    seeds = cfg["replication"]["splits"]["inner_val_seeds"]
     if run.startswith("a_f"):
-        return INNER_VAL_SEED_A_BASE + int(run[3:])
+        return int(seeds["a_base"]) + int(run[3:])
     if run == "b":
-        return INNER_VAL_SEED_B
+        return int(seeds["b"])
     if run == "s2":
-        return INNER_VAL_SEED_S2
+        return int(seeds["s2"])
     raise ValueError(f"unknown run {run!r}")
 
 

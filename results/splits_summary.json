@@ -1,7 +1,7 @@
 {
  "task": "P1-08",
- "config_hash": "e9969c41baecb16bbe95760eb168f341822ec50eaf9844af15fca1d0424dff5a",
- "code_commit": "6b4ee8dda3d348622edc327b4946ccadc8fabd06",
+ "config_hash": "4a66e6a87e42ffddb4ce157be21f3057b7f8c0a1aeace0479b90dd1c309c8899",
+ "code_commit": "25f5abcf6b6d0f0a61c14adbafcde1e81047564b",
  "environment": {
   "pyproj": "3.8.0",
   "proj": "9.8.1",
@@ -72,21 +72,58 @@
   "kraj": {
    "Hlavní město Praha": 1,
    "Jihomoravský": 171,
-   "Karlovarský": 11,
+   "Karlovarský": 10,
    "Královéhradecký": 62,
    "Liberecký": 37,
-   "Moravskoslezský": 100,
-   "Olomoucký": 31,
+   "Moravskoslezský": 101,
+   "Olomoucký": 29,
    "Pardubický": 40,
+   "Plzeňský": 1,
    "Středočeský": 31,
    "Vysočina": 11,
-   "Zlínský": 194,
+   "Zlínský": 195,
    "Ústecký": 108
   },
   "kraj_rule": {
-   "area": 4,
+   "lowest_objectid": 4,
    "majority": 793,
    "none": 63
+  },
+  "kraj_tie_rule": "lowest_objectid",
+  "kraj_other_tie_rule": {
+   "rule": "area",
+   "used": false,
+   "sheets_kraj_differs": [
+    "11-42-04",
+    "25-12-13",
+    "25-13-15"
+   ],
+   "stage1_sheets_stratum_differs": [
+    "25-12-13",
+    "25-13-15"
+   ],
+   "stage1_strata": {
+    "F_ZLMS": {
+     "n_sheets": 241,
+     "n_blocks": 33,
+     "n_eligible": 7998
+    },
+    "F_other": {
+     "n_sheets": 43,
+     "n_blocks": 18,
+     "n_eligible": 577
+    },
+    "N_ZLMS": {
+     "n_sheets": 38,
+     "n_blocks": 18,
+     "n_eligible": 370
+    },
+    "N_other": {
+     "n_sheets": 429,
+     "n_blocks": 96,
+     "n_eligible": 5672
+    }
+   }
   },
   "n_flysch": 300,
   "n_with_eligible": 771
@@ -544,27 +581,27 @@
  "stage1": {
   "n_sheets": 751,
   "n_eligible": 14617,
-  "n_blocks": 165,
+  "n_blocks": 166,
   "strata": {
    "F_ZLMS": {
-    "n_sheets": 241,
-    "n_blocks": 33,
-    "n_eligible": 7998
+    "n_sheets": 242,
+    "n_blocks": 34,
+    "n_eligible": 8000
    },
    "F_other": {
-    "n_sheets": 43,
+    "n_sheets": 42,
     "n_blocks": 18,
-    "n_eligible": 577
+    "n_eligible": 575
    },
    "N_ZLMS": {
-    "n_sheets": 38,
+    "n_sheets": 39,
     "n_blocks": 18,
-    "n_eligible": 370
+    "n_eligible": 372
    },
    "N_other": {
-    "n_sheets": 429,
+    "n_sheets": 428,
     "n_blocks": 96,
-    "n_eligible": 5672
+    "n_eligible": 5670
    }
   },
   "n_sheets_with_zero_cells": 77,
@@ -586,11 +623,11 @@
     "n_blocks_F_other": 4
    },
    "1": {
-    "n_blocks": 10,
+    "n_blocks": 11,
     "n_sheets": 59,
-    "n_eligible": 1715,
+    "n_eligible": 1716,
     "n_blocks_F_ZLMS": 6,
-    "n_blocks_F_other": 4
+    "n_blocks_F_other": 5
    },
    "2": {
     "n_blocks": 10,
@@ -602,9 +639,9 @@
    "3": {
     "n_blocks": 11,
     "n_sheets": 63,
-    "n_eligible": 1716,
-    "n_blocks_F_ZLMS": 6,
-    "n_blocks_F_other": 5
+    "n_eligible": 1715,
+    "n_blocks_F_ZLMS": 7,
+    "n_blocks_F_other": 4
    },
    "4": {
     "n_blocks": 10,
@@ -617,14 +654,14 @@
  },
  "group_b": {
   "train": {
-   "n_blocks": 51,
-   "n_sheets": 279,
-   "n_eligible": 8368
+   "n_blocks": 52,
+   "n_sheets": 281,
+   "n_eligible": 8372
   },
   "test": {
    "n_blocks": 114,
-   "n_sheets": 472,
-   "n_eligible": 6249
+   "n_sheets": 470,
+   "n_eligible": 6245
   }
  },
  "inner_val": {
@@ -633,66 +670,66 @@
   "runs": {
    "a_f0": {
     "seed": 1000,
-    "n_training_blocks": 41,
+    "n_training_blocks": 42,
     "n_training_eligible": 6860,
-    "n_inner_val_blocks": 7,
-    "n_inner_val_eligible": 1121,
-    "inner_val_frac_eligible": 0.16341107871720117,
-    "n_inner_val_sheets": 50
+    "n_inner_val_blocks": 9,
+    "n_inner_val_eligible": 1309,
+    "inner_val_frac_eligible": 0.19081632653061226,
+    "n_inner_val_sheets": 51
    },
    "a_f1": {
     "seed": 1001,
     "n_training_blocks": 41,
-    "n_training_eligible": 6860,
+    "n_training_eligible": 6859,
     "n_inner_val_blocks": 9,
-    "n_inner_val_eligible": 1127,
-    "inner_val_frac_eligible": 0.16428571428571428,
-    "n_inner_val_sheets": 43
+    "n_inner_val_eligible": 1477,
+    "inner_val_frac_eligible": 0.21533751275696167,
+    "n_inner_val_sheets": 51
    },
    "a_f2": {
     "seed": 1002,
-    "n_training_blocks": 41,
+    "n_training_blocks": 42,
     "n_training_eligible": 6860,
-    "n_inner_val_blocks": 12,
-    "n_inner_val_eligible": 1445,
-    "inner_val_frac_eligible": 0.21064139941690962,
-    "n_inner_val_sheets": 56
+    "n_inner_val_blocks": 3,
+    "n_inner_val_eligible": 1122,
+    "inner_val_frac_eligible": 0.16355685131195336,
+    "n_inner_val_sheets": 29
    },
    "a_f3": {
     "seed": 1003,
-    "n_training_blocks": 40,
-    "n_training_eligible": 6859,
+    "n_training_blocks": 41,
+    "n_training_eligible": 6860,
     "n_inner_val_blocks": 5,
     "n_inner_val_eligible": 1086,
-    "inner_val_frac_eligible": 0.15833211838460418,
-    "n_inner_val_sheets": 34
+    "inner_val_frac_eligible": 0.15830903790087464,
+    "n_inner_val_sheets": 35
    },
    "a_f4": {
     "seed": 1004,
-    "n_training_blocks": 41,
+    "n_training_blocks": 42,
     "n_training_eligible": 6861,
-    "n_inner_val_blocks": 7,
-    "n_inner_val_eligible": 1269,
-    "inner_val_frac_eligible": 0.184958460865763,
-    "n_inner_val_sheets": 41
+    "n_inner_val_blocks": 8,
+    "n_inner_val_eligible": 1107,
+    "inner_val_frac_eligible": 0.16134674245736774,
+    "n_inner_val_sheets": 40
    },
    "b": {
     "seed": 2000,
-    "n_training_blocks": 51,
-    "n_training_eligible": 8368,
-    "n_inner_val_blocks": 7,
-    "n_inner_val_eligible": 1500,
-    "inner_val_frac_eligible": 0.17925430210325047,
-    "n_inner_val_sheets": 40
+    "n_training_blocks": 52,
+    "n_training_eligible": 8372,
+    "n_inner_val_blocks": 10,
+    "n_inner_val_eligible": 1533,
+    "inner_val_frac_eligible": 0.18311036789297658,
+    "n_inner_val_sheets": 42
    },
    "s2": {
     "seed": 3000,
-    "n_training_blocks": 165,
+    "n_training_blocks": 166,
     "n_training_eligible": 14617,
-    "n_inner_val_blocks": 17,
-    "n_inner_val_eligible": 2211,
-    "inner_val_frac_eligible": 0.15126222891154137,
-    "n_inner_val_sheets": 117
+    "n_inner_val_blocks": 18,
+    "n_inner_val_eligible": 2251,
+    "inner_val_frac_eligible": 0.15399876855715947,
+    "n_inner_val_sheets": 119
    }
   }
  }
