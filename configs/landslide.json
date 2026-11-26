@@ -209,6 +209,47 @@
       "curv_truncate": 4.0,
       "curv_flat_eps": 1e-12,
       "svf_r_min_px": 1
+    },
+    "splits": {
+      "note": "Appendix A §3-§4 values that Appendix B has no key for, plus our tie rules (P1-08)",
+      "stage2_sheets": {
+        "flysch": [
+          "24-43-19",
+          "24-44-17",
+          "25-14-17",
+          "25-23-01",
+          "25-23-04",
+          "25-24-01",
+          "25-32-22",
+          "25-33-01",
+          "25-41-05",
+          "35-12-16"
+        ],
+        "nonflysch": [
+          "02-41-01",
+          "02-41-18",
+          "03-34-01",
+          "03-34-04",
+          "14-13-14",
+          "14-14-22",
+          "24-12-21",
+          "24-14-16",
+          "24-42-23",
+          "25-12-22"
+        ]
+      },
+      "fold_seed": 11,
+      "inner_val_seeds": {
+        "a_base": 1000,
+        "b": 2000,
+        "s2": 3000
+      },
+      "kraj_tie_rule": "lowest_objectid"
+    },
+    "flysch": {
+      "fill_holes": true,
+      "min_part_km2": 1.0,
+      "buffer_quad_segs": 8
     }
   }
 }
