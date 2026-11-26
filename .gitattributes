@@ -1,0 +1,2 @@
+# Tracked results are compared byte for byte on re-runs; keep them LF on every platform.
+results/** text eol=lf
