@@ -47,7 +47,6 @@ __all__ = [
     "KIND_CLASSICAL_ML",
     "SLOPE_SUSC_FEATURES",
     "TERRAIN_FEATURES",
-    "DEFAULT_SPECS",
     "STAT_COLUMNS",
     "SPIKE_BEST_NON_CNN",
     "BaselineSpec",
@@ -75,6 +74,8 @@ KIND_CLASSICAL_ML = "classical_ml"
 _MODELS = ("column", "lr", "gbm")
 _KIND_OF_MODEL = {"column": KIND_BASELINE, "lr": KIND_CLASSICAL_ML, "gbm": KIND_CLASSICAL_ML}
 
+#: The `meta.csv` statistic columns a scorer may use (PLAN.md §4.3). The scorers themselves are the config's
+#: `replication.baselines.scorers`; these names only validate them.
 #: Appendix A §10: slope mean and std, susceptibility mean and high-class fraction.
 SLOPE_SUSC_FEATURES = ("slope_mean", "slope_std", "susc_mean", "susc_high_frac")
 #: Appendix A §10: the 12 terrain statistics (the `meta.csv` column names of PLAN.md §4.3).
@@ -88,9 +89,6 @@ SPIKE_BEST_NON_CNN = {
     "a": {"baseline": "terrain_stats_lr", "auc": 0.695, "ci_low": 0.678, "ci_high": 0.713},
     "b": {"baseline": "terrain_stats_gbm", "auc": 0.624, "ci_low": 0.603, "ci_high": 0.647},
 }
-
-#: Secondary bootstrap unit when the config has no `eval.bootstrap.secondary_unit` (P1-05 note; Appendix A §8).
-_SECONDARY_UNIT_DEFAULT = "block"
 
 
 @dataclass(frozen=True)
@@ -110,24 +108,13 @@ class BaselineSpec:
         return self.model != "column"
 
 
-DEFAULT_SPECS = (
-    BaselineSpec("slope_only", "column", ("slope_mean",)),
-    BaselineSpec("susceptibility", "column", ("susc_mean",)),
-    BaselineSpec("slope_susc_lr", "lr", SLOPE_SUSC_FEATURES),
-    BaselineSpec("terrain_stats_lr", "lr", TERRAIN_FEATURES),
-    BaselineSpec("terrain_stats_gbm", "gbm", TERRAIN_FEATURES),
-)
-
-
 def baseline_specs(cfg: Mapping[str, Any]) -> tuple[BaselineSpec, ...]:
-    """The scorers: `DEFAULT_SPECS` (Appendix A §10), or `replication.baselines.scorers` if the config has it.
+    """The scorers of Appendix A §10, from the config's `replication.baselines.scorers`.
 
     The config form is a list of {"name", "model", "features"}. Names must be unique, models one of "column", "lr",
     "gbm" (a "column" scorer has exactly one feature) and features `meta.csv` statistic columns.
     """
-    block = cfg.get("replication", {}).get("baselines", {}).get("scorers")
-    if block is None:
-        return DEFAULT_SPECS
+    block = cfg["replication"]["baselines"]["scorers"]
     specs = tuple(BaselineSpec(str(s["name"]), str(s["model"]), tuple(str(f) for f in s["features"])) for s in block)
     names = [s.name for s in specs]
     if len(set(names)) != len(names) or not specs:
@@ -149,9 +136,9 @@ def random_state(cfg: Mapping[str, Any]) -> int:
 
 
 def bootstrap_units(cfg: Mapping[str, Any]) -> tuple[str, str]:
-    """(primary, secondary) cluster units: `eval.bootstrap.unit` ("sheet") and the secondary unit ("block")."""
-    b = cfg["eval"]["bootstrap"]
-    units = (str(b["unit"]), str(b.get("secondary_unit", _SECONDARY_UNIT_DEFAULT)))
+    """(primary, secondary) cluster units: `eval.bootstrap.unit` ("sheet") and
+    `replication.eval.secondary_bootstrap_unit` ("block"; Appendix A §8 "block-level bootstrap CI")."""
+    units = (str(cfg["eval"]["bootstrap"]["unit"]), str(cfg["replication"]["eval"]["secondary_bootstrap_unit"]))
     if units[0] == units[1]:
         raise ValueError(f"the two bootstrap units must differ, got {units}")
     return units

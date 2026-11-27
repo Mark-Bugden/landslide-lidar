@@ -38,20 +38,21 @@ def main(argv: list[str] | None = None) -> int:
     setup_logging(paths.logs / "fetch_register.log")
     log = get_logger("fetch_register")
     epsg = S.epsg_code(cfg)
+    url = S.source_url(cfg, "register")
     with Client() as client:
-        meta = S.layer_metadata(client, S.REGISTER_URL)
-        log.info("%s: %s, %s, maxRecordCount %s, SR %s", S.REGISTER_URL, meta.get("name"),
+        meta = S.layer_metadata(client, url)
+        log.info("%s: %s, %s, maxRecordCount %s, SR %s", url, meta.get("name"),
                  meta.get("geometryType"), meta.get("maxRecordCount"), meta.get("sourceSpatialReference"))
         if S.native_wkid(meta) != epsg:
             log.error("native SR is %s, not EPSG:%d", S.native_wkid(meta), epsg)
             return 1
-        n = S.count_features(client, S.REGISTER_URL)
+        n = S.count_features(client, url)
         log.info("count: %d", n)
         if args.count_only:
-            print(json.dumps({"url": S.REGISTER_URL, "where": "1=1", "count": n, "metadata": meta},
+            print(json.dumps({"url": url, "where": "1=1", "count": n, "metadata": meta},
                              indent=1, ensure_ascii=False))
             return 0
-        res = S.query_pages(client, S.REGISTER_URL, "1=1", "*", "json", int(meta["maxRecordCount"]),
+        res = S.query_pages(client, url, "1=1", "*", "json", int(meta["maxRecordCount"]),
                             S.oid_field(meta), args.pages)
     gdf = S.esri_pages_to_frame([args.pages / p["file"] for p in res["pages"]], epsg)
     if len(gdf) != n:

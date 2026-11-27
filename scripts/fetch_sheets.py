@@ -22,6 +22,7 @@ from pathlib import Path
 import numpy as np
 
 from landslide import sheets as S
+from landslide.config import load_config
 from landslide.logs import get_logger, setup_logging
 from landslide.net import Client
 from landslide.paths import Paths
@@ -40,6 +41,7 @@ def _lonlat_range(fc: dict) -> tuple[float, float, float, float]:
 
 
 def main(argv: list[str] | None = None) -> int:
+    cfg = load_config()
     paths = Paths()
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--count-only", action="store_true", help="read the metadata and count; download nothing")
@@ -50,17 +52,18 @@ def main(argv: list[str] | None = None) -> int:
 
     setup_logging(paths.logs / "fetch_sheets.log")
     log = get_logger("fetch_sheets")
+    url = S.source_url(cfg, "sheets")
     with Client() as client:
-        meta = S.layer_metadata(client, S.SHEETS_URL)
-        log.info("%s: %s, %s, maxRecordCount %s, SR %s", S.SHEETS_URL, meta.get("name"), meta.get("geometryType"),
+        meta = S.layer_metadata(client, url)
+        log.info("%s: %s, %s, maxRecordCount %s, SR %s", url, meta.get("name"), meta.get("geometryType"),
                  meta.get("maxRecordCount"), meta.get("sourceSpatialReference"))
-        n = S.count_features(client, S.SHEETS_URL)
+        n = S.count_features(client, url)
         log.info("count: %d", n)
         if args.count_only:
-            print(json.dumps({"url": S.SHEETS_URL, "where": "1=1", "count": n, "metadata": meta},
+            print(json.dumps({"url": url, "where": "1=1", "count": n, "metadata": meta},
                              indent=1, ensure_ascii=False))
             return 0
-        res = S.query_pages(client, S.SHEETS_URL, "1=1", "*", "geojson", int(meta["maxRecordCount"]),
+        res = S.query_pages(client, url, "1=1", "*", "geojson", int(meta["maxRecordCount"]),
                             S.oid_field(meta), args.pages)
     fc = S.geojson_pages_to_collection([args.pages / p["file"] for p in res["pages"]])
     xmin, ymin, xmax, ymax = _lonlat_range(fc)

@@ -28,6 +28,7 @@ from landslide.model import build_model
 from landslide.paths import Paths
 from landslide.predict import Normaliser, tta_predict
 from landslide.sampling import CornerGrid, grid_of_sheet
+from landslide.sheets import grid_origin
 from landslide.sheets import dtm_grid
 from terrain_synth import synthetic_dtm
 
@@ -112,7 +113,7 @@ def test_cnn_cost_estimate():
 
 
 def test_lattice_corners_mod_stride_and_inside():
-    grid = CornerGrid(x0=-600_000.4, y0=-1_150_000.12, cell=2.0, n_rows=401, n_cols=451)
+    grid = CornerGrid(x0=-600_000.4, y0=-1_150_000.12, cell=2.0, n_rows=401, n_cols=451, origin=grid_origin(CFG))
     geom = rotated_square(-600_000.4 + 450, -1_150_000.12 - 400, 400.0, deg=7.0)
     r, c = S2.lattice_corners(geom, grid, 25)
     assert r.size and np.all(r % 25 == 0) and np.all(c % 25 == 0)
@@ -161,7 +162,7 @@ def test_build_lattice_counts_and_coordinates():
     cfg = CFG
     geom = rotated_square(-600_000.4 + 700, -1_150_000.12 - 650, 700.0, deg=4.0)
     row = sheet_row("90-00-01", geom, cfg, False)
-    grid = grid_of_sheet(pd.Series(row), 2.0)
+    grid = grid_of_sheet(pd.Series(row), 2.0, grid_origin(cfg))
     H, W = grid.n_rows - 1, grid.n_cols - 1
     z = synthetic_dtm((H, W), seed=1, border=False, holes=False, lake=False)
     slope = full_channels(z, cfg, names=["slope"])[0]
@@ -532,7 +533,7 @@ def test_smoke_paths_never_write_results(world, tmp_path):
 def _toy_sheet(cfg, seed=4):
     geom = rotated_square(-600_000.4 + 300, -1_150_000.12 - 300, 160.0, deg=2.0)
     row = sheet_row("90-00-03", geom, cfg, True)
-    grid = grid_of_sheet(pd.Series(row), 2.0)
+    grid = grid_of_sheet(pd.Series(row), 2.0, grid_origin(cfg))
     z = synthetic_dtm((grid.n_rows - 1, grid.n_cols - 1), seed=seed, border=False, holes=False, lake=False)
     return row, grid, geom, z
 

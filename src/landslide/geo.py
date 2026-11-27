@@ -329,7 +329,7 @@ def scan_dtm(path: Path | str, cfg: Mapping[str, Any]) -> dict[str, Any]:
     with rasterio.open(path, mode="r") as ds:
         if ds.count != 1:
             raise ValueError(f"{path}: expected 1 band, found {ds.count}")
-        grid = S.grid_from_transform(ds.transform, ds.width, ds.height, cell=cell)
+        grid = S.grid_from_transform(ds.transform, ds.width, ds.height, cell=cell, origin=S.grid_origin(cfg))
         z = ds.read(1)
         nodata = ds.nodata
     out = {"grid": grid, "grid_xmin": grid.xmin, "grid_ymax": grid.ymax, "grid_w": grid.w, "grid_h": grid.h}

@@ -61,8 +61,16 @@ def imagenet_weights(cfg: dict[str, Any]) -> torchvision.models.WeightsEnum:
 
 
 def imagenet_weights_path(cfg: dict[str, Any], paths: Paths) -> Path:
-    """Where torchvision caches the weights file with `TORCH_HOME = paths.torch_home` (`hub/checkpoints/<file>`)."""
-    name = Path(urlparse(imagenet_weights(cfg).url).path).name
+    """Where torchvision caches the weights file with `TORCH_HOME = paths.torch_home` (`hub/checkpoints/<file>`).
+
+    The file name is the config's `sources.weights.file`; it must be the name torchvision gives the weights that
+    `model.init` names, or the config and the download would disagree.
+    """
+    name = str(cfg["sources"]["weights"]["file"])
+    torchvision_name = Path(urlparse(imagenet_weights(cfg).url).path).name
+    if name != torchvision_name:
+        raise ValueError(f"sources.weights.file {name!r} is not torchvision's file for {cfg['model']['init']!r} "
+                         f"({torchvision_name!r})")
     return paths.torch_home / "hub" / "checkpoints" / name
 
 

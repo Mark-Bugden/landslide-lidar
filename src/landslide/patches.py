@@ -35,10 +35,11 @@ import numpy as np
 import pandas as pd
 
 from landslide.channels import channel_params, patch_channels
-from landslide.config import make_rng
+from landslide.config import rng_for
 from landslide.dtm import extract_block, read_dtm
 from landslide.features import STAT_COLUMNS, patch_stats
 from landslide.logs import get_logger, progress
+from landslide.sheets import grid_origin
 from landslide.sampling import COLUMNS as SAMPLE_COLUMNS
 from landslide.sampling import (MATCH_LEVELS, SOURCES, CornerGrid, grid_of_sheet, sampling_params,
                                 slope_bins)
@@ -71,11 +72,9 @@ _INT_COLUMNS = ("id", "label", "row", "col", "polygon_objectid", "source_layer",
                 "slope_bin", "match_level", "pair_id")
 _STR_COLUMNS = ("sheet", "kraj", "source", "group_b", "block", "stratum")
 
-#: The seeded rows the verification re-extracts are drawn from SeedSequence([replication.seed, stream id]). The
-#: stream `verify_sample` is requested for `replication.streams`; until it is there, this id (the next free one) is
-#: used.
+#: The seeded rows the verification re-extracts are drawn from SeedSequence([replication.seed, stream id]), with the
+#: id registered for this stream in `replication.streams` (11).
 VERIFY_STREAM = "verify_sample"
-VERIFY_STREAM_ID_DEFAULT = 11
 
 
 class PatchError(RuntimeError):
@@ -155,9 +154,9 @@ class SheetWindow:
                              f"{self.susc.shape} differ")
 
 
-def _lattice_of(transform: Any, height: int, width: int, what: str) -> CornerGrid:
+def _lattice_of(transform: Any, height: int, width: int, what: str, origin: tuple[float, float]) -> CornerGrid:
     try:
-        return CornerGrid.from_transform(transform, height, width)
+        return CornerGrid.from_transform(transform, height, width, origin=origin)
     except ValueError as e:
         raise PatchError(f"{what}: {e}") from e
 
@@ -178,13 +177,15 @@ def read_sheet_window(src: SheetSource, rows: np.ndarray, cols: np.ndarray, cfg:
     if r0 < 0 or c0 < 0 or r0 + h > H or c0 + w > W:
         raise PatchError(f"{src.sheet}: a patch plus its {pp.context_px} px context leaves the {H} x {W} raster")
     dtm = read_dtm(src.dtm_path, cfg, window=(r0, c0, h, w))
+    origin = grid_origin(cfg)
     gi0, gj0 = src.grid.lattice_offset()
-    if _lattice_of(dtm.transform, h, w, f"{src.sheet} DTM").lattice_offset() != (gi0 + c0, gj0 - r0):
+    if _lattice_of(dtm.transform, h, w, f"{src.sheet} DTM", origin).lattice_offset() != (gi0 + c0, gj0 - r0):
         raise PatchError(f"{src.sheet}: the DTM raster is not on the grid of sheets.parquet")
     with rasterio.open(src.susc_path, mode="r") as ds:
         if ds.count != 1 or ds.dtypes[0] != "uint8":
             raise PatchError(f"{src.susc_path}: expected one uint8 band, got {ds.count} x {ds.dtypes}")
-        if not _lattice_of(ds.transform, ds.height, ds.width, f"{src.sheet} susceptibility").same_lattice(src.grid):
+        if not _lattice_of(ds.transform, ds.height, ds.width, f"{src.sheet} susceptibility",
+                           origin).same_lattice(src.grid):
             raise PatchError(f"{src.sheet}: the susceptibility raster is not on the sheet's DTM grid")
         susc = ds.read(1, window=Window(c0, r0, w, h))
     return SheetWindow(sheet=src.sheet, z=dtm.z, susc=susc, row_off=r0, col_off=c0)
@@ -545,15 +546,7 @@ class Check:
 
 def verify_rng(cfg: Mapping[str, Any]) -> np.random.Generator:
     """SeedSequence([replication.seed, stream id of `verify_sample`]) (D02)."""
-    rep = cfg["replication"]
-    streams = {k: int(v) for k, v in rep.get("streams", {}).items()}
-    if VERIFY_STREAM in streams:
-        sid = streams[VERIFY_STREAM]
-    else:
-        sid = VERIFY_STREAM_ID_DEFAULT
-        if sid in streams.values():
-            raise ValueError(f"default stream id {sid} for {VERIFY_STREAM!r} is already registered")
-    return make_rng(int(rep["seed"]), sid)
+    return rng_for(dict(cfg), int(cfg["replication"]["seed"]), VERIFY_STREAM)
 
 
 def verify_rows(cfg: Mapping[str, Any], n: int, n_check: int) -> np.ndarray:
@@ -753,7 +746,7 @@ def verify_dataset(cfg: Mapping[str, Any], patches_path: Path, meta_path: Path, 
             raise AssertionError("a patch on a sheet that is not a stage-1 sheet")
         h = sp.half_m
         for s, g in meta.groupby("sheet", sort=False):
-            grid = grid_of_sheet(sh.loc[s], sp.cell_m)
+            grid = grid_of_sheet(sh.loc[s], sp.cell_m, sp.grid_origin)
             x, y = grid.xy(g["row"].to_numpy(), g["col"].to_numpy())
             if not ((x == g["x"].to_numpy()).all() and (y == g["y"].to_numpy()).all()):
                 raise AssertionError(f"{s}: x, y are not the pixel corners (row, col)")

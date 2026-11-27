@@ -148,8 +148,9 @@ def main(argv: list[str] | None = None) -> int:
     sha = sha256_file(target)
     m = _HUB_HASH.search(target.name)
     prefix_ok = bool(m and sha.startswith(m.group(1)))
-    log.info("%s: %d bytes, sha256 %s (file-name prefix %s)", target.name, target.stat().st_size, sha,
-             "ok" if prefix_ok else "MISMATCH")
+    want_sha = str(cfg["sources"]["weights"]["sha256"])
+    log.info("%s: %d bytes, sha256 %s (file-name prefix %s; config sources.weights.sha256 %s)", target.name,
+             target.stat().st_size, sha, "ok" if prefix_ok else "MISMATCH", "ok" if sha == want_sha else "MISMATCH")
 
     env = {**os.environ, "TORCH_HOME": str(paths.torch_home), "PYTHONIOENCODING": "utf-8"}
     proc = subprocess.run([sys.executable, str(Path(__file__).resolve()), OFFLINE_FLAG], env=env,
@@ -184,8 +185,8 @@ def main(argv: list[str] | None = None) -> int:
         "n_requests": 1 if downloaded else 0,
     }
     update_sources(sj, SECTION, section)
-    ok = prefix_ok and check["network_blocked"] and check["loaded"] and check["backbone_tensors_equal_file"] \
-        and check["conv1_from_rgb"] and check["output_finite"]
+    ok = prefix_ok and sha == want_sha and check["network_blocked"] and check["loaded"] \
+        and check["backbone_tensors_equal_file"] and check["conv1_from_rgb"] and check["output_finite"]
     log.info("weights %s; sources.json updated", "OK" if ok else "FAILED")
     return 0 if ok else 1
 

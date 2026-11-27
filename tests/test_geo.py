@@ -10,11 +10,13 @@ import shapely
 from shapely.geometry import Polygon, box
 
 from landslide import geo as G
+from landslide.config import load_config
 
 CFG = {"labels": {"skupina": 1, "in_mapped": True, "min_area_m2": 3000},
        "dtm": {"cell_m": 2.0, "invalid_rule": "z <= 0 (ImageServer returns 0.0 outside the border) or z > 2000 -> NaN"},
        "flysch": {"closing_m": 2000, "subregions": ["A", "B"], "min_sheet_frac": 0.5},
-       "replication": {"flysch": {"fill_holes": True, "min_part_km2": 1.0, "buffer_quad_segs": 8}}}
+       "replication": {"flysch": {"fill_holes": True, "min_part_km2": 1.0, "buffer_quad_segs": 8}},
+       "sources": {"dtm": load_config()["sources"]["dtm"]}}  # the DMR 5G lattice origin for scan_dtm
 FP = G.flysch_params(CFG)
 
 

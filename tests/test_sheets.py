@@ -8,11 +8,23 @@ import numpy as np
 import pytest
 
 from landslide import sheets as S
+from landslide.config import load_config
 from landslide.paths import Paths
 
 CFG = {"crs": "EPSG:5514", "dtm": {"cell_m": 2.0, "margin_m": 250,
                                    "service": "https://ags.cuzk.gov.cz/arcgis2/rest/services/dmr5g/ImageServer (x)"},
+       "sources": {"dtm": load_config()["sources"]["dtm"]},
        "replication": {"seed": 2611, "streams": {"provenance_sample": 1}, "provenance": {"n_sheets": 12}}}
+O = S.grid_origin(CFG)  # (0.4, -0.12): the config's sources.dtm.grid_origin_m
+VR = S.package_valid_range(CFG)  # (-100, 2000): sources.dtm.package_valid_range_m
+
+
+def compare_dtm(*args, **kw):
+    return S.compare_dtm(*args, valid_range=VR, **kw)
+
+
+def test_source_values():
+    assert O == (0.4, -0.12) and VR == (-100.0, 2000.0)
 
 
 def _on_x(v):
@@ -27,7 +39,7 @@ def _on_y(v):
 
 def test_snap_known_sheet():
     # Hand-over sheet 14-34-07: fetch log xmin -606223.6, ymax -1087020.12, 2848 x 2394.
-    g = S.snap_out(-606223.1, -1091807.5, -600528.3, -1087021.0)
+    g = S.snap_out(-606223.1, -1091807.5, -600528.3, -1087021.0, origin=O)
     assert (g.xmin, g.ymax, g.w, g.h) == (-606223.6, -1087020.12, 2848, 2394)
     assert (g.xmax, g.ymin) == (-600527.6, -1091808.12)
 
@@ -38,7 +50,7 @@ def test_snap_contains_box_and_is_minimal(seed):
     for _ in range(200):
         x, y = rng.uniform(-900_000, -430_000), rng.uniform(-1_230_000, -935_000)
         w, h = rng.uniform(1, 7000), rng.uniform(1, 7000)
-        g = S.snap_out(x, y, x + w, y + h)
+        g = S.snap_out(x, y, x + w, y + h, origin=O)
         assert g.xmin <= x and g.ymin <= y and g.xmax >= x + w and g.ymax >= y + h
         assert x - g.xmin < 2 and y - g.ymin < 2 and g.xmax - (x + w) < 2 and g.ymax - (y + h) < 2
         assert all(_on_x(v) for v in (g.xmin, g.xmax)) and all(_on_y(v) for v in (g.ymin, g.ymax))
@@ -47,28 +59,28 @@ def test_snap_contains_box_and_is_minimal(seed):
 
 def test_snap_on_lattice_stays_put():
     # Edges already on the lattice (with float noise from the decimal origin) are not pushed out by a pixel.
-    g = S.snap_out(-606223.6, -1091808.12, -600527.6, -1087020.12)
+    g = S.snap_out(-606223.6, -1091808.12, -600527.6, -1087020.12, origin=O)
     assert (g.xmin, g.ymin, g.xmax, g.ymax) == (-606223.6, -1091808.12, -600527.6, -1087020.12)
     assert (g.w, g.h) == (2848, 2394)
-    g = S.snap_out(0.4, -0.12, 2.4, 1.88)
+    g = S.snap_out(0.4, -0.12, 2.4, 1.88, origin=O)
     assert (g.i0, g.j1, g.w, g.h) == (0, 1, 1, 1)
 
 
 def test_snap_just_off_lattice_goes_out():
-    g = S.snap_out(0.4 + 1e-4, -0.12 + 1e-4, 2.4 - 1e-4, 1.88 - 1e-4)
+    g = S.snap_out(0.4 + 1e-4, -0.12 + 1e-4, 2.4 - 1e-4, 1.88 - 1e-4, origin=O)
     assert (g.i0, g.j1, g.w, g.h) == (0, 1, 1, 1)
-    g = S.snap_out(0.4 - 1e-4, -0.12 - 1e-4, 2.4 + 1e-4, 1.88 + 1e-4)
+    g = S.snap_out(0.4 - 1e-4, -0.12 - 1e-4, 2.4 + 1e-4, 1.88 + 1e-4, origin=O)
     assert (g.i0, g.j1, g.w, g.h) == (-1, 2, 3, 3)
 
 
 def test_snap_rejects_empty_box():
     with pytest.raises(ValueError):
-        S.snap_out(1, 1, 1, 2)
+        S.snap_out(1, 1, 1, 2, origin=O)
 
 
 def test_dtm_grid_adds_margin():
     g = S.dtm_grid((-605973.1, -1091557.5, -600778.3, -1087271.0), CFG)
-    assert g.key() == S.snap_out(-606223.1, -1091807.5, -600528.3, -1087021.0).key()
+    assert g.key() == S.snap_out(-606223.1, -1091807.5, -600528.3, -1087021.0, origin=O).key()
 
 
 def test_edge_clearance():
@@ -83,26 +95,26 @@ def test_edge_clearance():
 # ---- grid from corner / transform, and comparison ----
 
 def test_grid_from_corner_roundtrip_and_offgrid():
-    g = S.snap_out(-606223.1, -1091807.5, -600528.3, -1087021.0)
-    assert S.grid_from_corner(g.xmin, g.ymax, g.w, g.h).key() == g.key()
-    assert S.grid_from_transform(g.transform, g.w, g.h).key() == g.key()
+    g = S.snap_out(-606223.1, -1091807.5, -600528.3, -1087021.0, origin=O)
+    assert S.grid_from_corner(g.xmin, g.ymax, g.w, g.h, origin=O).key() == g.key()
+    assert S.grid_from_transform(g.transform, g.w, g.h, origin=O).key() == g.key()
     with pytest.raises(S.OffGrid):
-        S.grid_from_corner(g.xmin + 0.01, g.ymax, g.w, g.h)
+        S.grid_from_corner(g.xmin + 0.01, g.ymax, g.w, g.h, origin=O)
     with pytest.raises(S.OffGrid):
-        S.grid_from_transform((2.0, 0.0, g.xmin, 0.0, 2.0, g.ymax), g.w, g.h)  # south-up
+        S.grid_from_transform((2.0, 0.0, g.xmin, 0.0, 2.0, g.ymax), g.w, g.h, origin=O)  # south-up
     with pytest.raises(S.OffGrid):
-        S.grid_from_transform((1.0, 0.0, g.xmin, 0.0, -1.0, g.ymax), g.w, g.h)  # wrong cell
+        S.grid_from_transform((1.0, 0.0, g.xmin, 0.0, -1.0, g.ymax), g.w, g.h, origin=O)  # wrong cell
 
 
 def test_compare_grids_counts_and_mismatches():
-    a = S.snap_out(0.4, -0.12, 100.4, 99.88)
-    b = S.snap_out(1000.4, -0.12, 1100.4, 99.88)
+    a = S.snap_out(0.4, -0.12, 100.4, 99.88, origin=O)
+    b = S.snap_out(1000.4, -0.12, 1100.4, 99.88, origin=O)
     recipe = {"01-01-01": a, "01-01-02": b}
     log = {"01-01-01": {"xmin": a.xmin, "ymax": a.ymax, "w": a.w, "h": a.h},
            "01-01-02": {"xmin": b.xmin + 2.0, "ymax": b.ymax, "w": b.w - 1, "h": b.h}}
     rasters = {"01-01-01": {"transform": a.transform, "width": a.w, "height": a.h},
                "01-01-02": {"transform": b.transform, "width": b.w, "height": b.h}}
-    res = S.compare_grids(recipe, log, rasters, 2.0)
+    res = S.compare_grids(recipe, log, rasters, 2.0, origin=O)
     assert res["equal"] == {"recipe_vs_fetch_log": 1, "recipe_vs_raster": 2, "fetch_log_vs_raster": 1}
     assert res["n_mismatched_sheets"] == 1
     m = res["mismatches"][0]
@@ -110,8 +122,8 @@ def test_compare_grids_counts_and_mismatches():
 
 
 def test_compare_grids_missing_entries():
-    a = S.snap_out(0.4, -0.12, 100.4, 99.88)
-    res = S.compare_grids({"01-01-01": a}, {}, {"01-01-01": {"error": "missing"}}, 2.0)
+    a = S.snap_out(0.4, -0.12, 100.4, 99.88, origin=O)
+    res = S.compare_grids({"01-01-01": a}, {}, {"01-01-01": {"error": "missing"}}, 2.0, origin=O)
     assert res["n_mismatched_sheets"] == 1
     assert res["mismatches"][0]["fetch_log"] == "missing" and res["mismatches"][0]["raster"] == "missing"
 
@@ -119,7 +131,7 @@ def test_compare_grids_missing_entries():
 # ---- export parameters ----
 
 def test_export_params_follow_recipe_without_outsr():
-    g = S.snap_out(-606223.1, -1091807.5, -600528.3, -1087021.0)
+    g = S.snap_out(-606223.1, -1091807.5, -600528.3, -1087021.0, origin=O)
     p = S.export_image_params(g, 5514)
     assert p == {"bbox": "-606223.6,-1091808.12,-600527.6,-1087020.12", "bboxSR": 5514, "imageSR": 5514,
                  "size": "2848,2394", "format": "tiff", "pixelType": "F32", "interpolation": "RSP_NearestNeighbor",
@@ -138,7 +150,7 @@ def _pair(seed=0, shape=(40, 50)):
 
 def test_compare_identical():
     pkg, dl = _pair()
-    r = S.compare_dtm(pkg, dl)
+    r = compare_dtm(pkg, dl)
     assert r["ok"] and r["n_compared"] == pkg.size == r["n_bitwise_equal"] and r["diff"]["n"] == 0
 
 
@@ -147,7 +159,7 @@ def test_compare_counts_value_differences_with_magnitudes():
     dl[0, 0] = np.nextafter(dl[0, 0], np.float32(1e9))  # one ulp
     dl[1, 1] += np.float32(0.5)
     dl[2, 2] += np.float32(25.0)
-    r = S.compare_dtm(pkg, dl)
+    r = compare_dtm(pkg, dl)
     assert not r["ok"]
     d = r["diff"]
     assert d["n"] == 3 and d["max_abs"] == pytest.approx(25.0, abs=1e-3)
@@ -159,7 +171,7 @@ def test_compare_counts_value_differences_with_magnitudes():
 def test_compare_is_bitwise_signed_zero():
     pkg, dl = _pair()
     pkg[3, 3], dl[3, 3] = np.float32(0.0), np.float32(-0.0)
-    r = S.compare_dtm(pkg, dl)
+    r = compare_dtm(pkg, dl)
     assert r["diff"]["n"] == 1 and r["diff"]["max_abs"] == 0.0 and not r["ok"]
 
 
@@ -172,7 +184,7 @@ def test_compare_nan_explained_by_nodata_and_range():
     dl[4, 0] = pkg[4, 0] = -100.0         # the range is closed: these stay values
     dl[4, 1] = pkg[4, 1] = 2000.0
     pkg[0, :5] = pkg[1, :4] = pkg[2, :3] = pkg[3, :2] = np.nan
-    r = S.compare_dtm(pkg, dl, download_nodata=-9999.0)
+    r = compare_dtm(pkg, dl, download_nodata=-9999.0)
     assert r["ok"], r
     assert r["n_package_nan"] == 14
     assert r["package_nan_explained"] == {"nodata": 9, "below_range": 3, "above_range": 2}
@@ -182,7 +194,7 @@ def test_compare_nan_explained_by_nodata_and_range():
 def test_compare_flags_unexplained_nan():
     pkg, dl = _pair()
     pkg[5, 5] = np.nan
-    r = S.compare_dtm(pkg, dl)
+    r = compare_dtm(pkg, dl)
     assert not r["ok"] and r["n_package_nan_unexplained"] == 1
     assert r["unexplained_examples_row_col_download"][0][:2] == [5, 5]
 
@@ -190,30 +202,30 @@ def test_compare_flags_unexplained_nan():
 def test_compare_flags_invalid_value_kept_in_package():
     pkg, dl = _pair()
     dl[6, 6] = pkg[6, 6] = np.float32(2500.0)  # bitwise equal, but the package should have NaN here
-    r = S.compare_dtm(pkg, dl)
+    r = compare_dtm(pkg, dl)
     assert r["diff"]["n"] == 0 and r["n_download_invalid_but_package_valued"] == 1 and not r["ok"]
 
 
 def test_compare_zero_border_is_valid():
     pkg, dl = _pair()
     dl[:, :3] = pkg[:, :3] = 0.0  # the service's 0 m outside the border is inside [-100, 2000]
-    r = S.compare_dtm(pkg, dl)
+    r = compare_dtm(pkg, dl)
     assert r["ok"] and r["download"]["n_zero"] == 120 and r["package_n_zero"] == 120
 
 
 def test_compare_shape_mismatch_and_dtype():
     pkg, dl = _pair()
-    assert S.compare_dtm(pkg, dl[:, :-1])["ok"] is False
+    assert compare_dtm(pkg, dl[:, :-1])["ok"] is False
     with pytest.raises(TypeError):
-        S.compare_dtm(pkg.astype(np.float64), dl.astype(np.float64))
+        compare_dtm(pkg.astype(np.float64), dl.astype(np.float64))
 
 
 def test_to_package_array_matches_compare():
     _, dl = _pair()
     dl[0, 0], dl[1, 1], dl[2, 2] = np.nan, -500.0, 3000.0
-    pkg = S.to_package_array(dl, None)
+    pkg = S.to_package_array(dl, None, VR)
     assert np.isnan(pkg[[0, 1, 2], [0, 1, 2]]).all()
-    assert S.compare_dtm(pkg, dl)["ok"]
+    assert compare_dtm(pkg, dl)["ok"]
 
 
 def test_package_stats_and_fetch_log_comparison():
@@ -240,7 +252,7 @@ def test_geotiff_georef_roundtrip(tmp_path):
     import rasterio
     from rasterio.transform import Affine
 
-    g = S.snap_out(-606223.1, -1091807.5, -606123.3, -1091707.0)
+    g = S.snap_out(-606223.1, -1091807.5, -606123.3, -1091707.0, origin=O)
     z = np.full((g.h, g.w), 300.0, np.float32)
     paths = []
     for name, extra in (("a.tif", {}), ("b.tif", {"compress": "deflate", "nodata": float("nan")})):
@@ -385,7 +397,7 @@ def test_redact_coordinates_removes_sheet_grids():
                                                   Paths().root / "scripts" / "provenance_check.py")
     pc = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(pc)
-    g = S.snap_out(-606223.1, -1091807.5, -600528.3, -1087021.0)
+    g = S.snap_out(-606223.1, -1091807.5, -600528.3, -1087021.0, origin=O)
     meta = {"extent": {"xmin": -874935.2}, "maxRecordCount": 1000}
     result = {"dtm": {"per_sheet": [{"sheet": "14-34-07", "grid": g.as_dict(),
                                      "request": {"url": "u", "params": S.export_image_params(g, 5514)}}]},
@@ -417,5 +429,5 @@ def test_recipe_matches_fetch_log_for_all_sheets():
     assert len(gdf) == 860 and set(gdf["sheet"]) == set(log)
     for r in gdf.itertuples():
         rec = log[r.sheet]
-        want = S.grid_from_corner(rec["xmin"], rec["ymax"], rec["w"], rec["h"])
+        want = S.grid_from_corner(rec["xmin"], rec["ymax"], rec["w"], rec["h"], origin=S.grid_origin(cfg))
         assert S.dtm_grid(r.geometry.bounds, cfg).key() == want.key(), r.sheet

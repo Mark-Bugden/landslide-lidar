@@ -53,7 +53,7 @@ from landslide.dtm import Dtm, corner_xy
 from landslide.geo import assign_to_sheets, repair
 from landslide.logs import get_logger, progress
 from landslide.sat import ValueSat, corner_box_sums, integral
-from landslide.sheets import GRID_ORIGIN
+from landslide.sheets import grid_origin
 
 log = get_logger("sampling")
 
@@ -65,10 +65,8 @@ MATCH_LEVELS: dict[int, tuple[str, int]] = {1: ("sheet", 0), 2: ("block", 0), 3:
                                             5: ("stratum", 0), 6: ("stratum", 1)}
 #: Look-alikes are matched in the exact bin only, so at levels 1, 2 and 5 (D15).
 LOOKALIKE_LEVELS = (1, 2, 5)
-#: ZABAGED layer ids (BRIEF.md data-source row 6) by role. Read from `replication.zabaged_layers` if the config has it
-#: (key requested from P1-02/P1-16); these are the brief's ids.
-ZABAGED_LAYERS_DEFAULT: dict[str, int] = {"quarry": 118, "spoil": 119, "rock": 130, "landslide": 129, "road": 79,
-                                          "railway": 75}
+#: The ZABAGED roles this module reads; their layer ids are the config's `sources.zabaged.layers` (BRIEF.md row 6).
+ZABAGED_ROLES = ("quarry", "spoil", "rock", "landslide", "road", "railway")
 #: Roles whose geometries give look-alike candidates by type; roads and railways give the "cut" type.
 LOOKALIKE_AREA_ROLES = ("quarry", "spoil", "rock")
 CUT_ROLES = ("road", "railway")
@@ -111,6 +109,7 @@ class SamplingParams:
     stage2_buffer_m: float
     background_n: int
     zabaged_layers: dict[str, int]
+    grid_origin: tuple[float, float]
 
     @property
     def context_half_px(self) -> int:
@@ -150,11 +149,15 @@ def sampling_params(cfg: Mapping[str, Any]) -> SamplingParams:
         lookalike_max_per_polygon=int(s["lookalike_max_per_polygon"]),
         cut_point_step_m=float(s["cut_point_step_m"]), cut_window_px=int(s["cut_window_px"]),
         cut_slope_p90_deg=float(s["cut_slope_p90_deg"]),
-        # Appendix A §4: "never touch any stage-2 sheet buffered by 150 m" -- half a stage-2 window, which is a patch.
-        stage2_buffer_m=float(rep.get("sampling", {}).get("stage2_buffer_m", size_m / 2.0)),
+        # Appendix A §4: "never touch any stage-2 sheet buffered by 150 m" (half a stage-2 window, which is a patch).
+        stage2_buffer_m=float(rep["sampling"]["stage2_buffer_m"]),
         background_n=int(cfg["stage2"]["background_n"]),
-        zabaged_layers={**ZABAGED_LAYERS_DEFAULT, **{k: int(v) for k, v in rep.get("zabaged_layers", {}).items()}},
+        zabaged_layers={str(k): int(v) for k, v in cfg["sources"]["zabaged"]["layers"].items()},
+        grid_origin=grid_origin(cfg),
     )
+    if set(p.zabaged_layers) != set(ZABAGED_ROLES):
+        raise ValueError(f"sources.zabaged.layers must give exactly the roles {ZABAGED_ROLES}, "
+                         f"got {sorted(p.zabaged_layers)}")
     step = p.neg_candidate_spacing_m / cell
     if abs(step - round(step)) > 1e-9:
         raise ValueError(f"neg_candidate_spacing_m ({p.neg_candidate_spacing_m}) must be a multiple of the cell")
@@ -217,12 +220,16 @@ class CornerGrid:
     cell: float
     n_rows: int
     n_cols: int
+    #: The national DMR 5G lattice origin (`sheets.grid_origin(cfg)`): keyword-only and required.
+    origin: tuple[float, float] = field(kw_only=True)
 
     @classmethod
-    def from_transform(cls, transform: Affine, height: int, width: int) -> CornerGrid:
+    def from_transform(cls, transform: Affine, height: int, width: int, *,
+                       origin: tuple[float, float]) -> CornerGrid:
         if transform.b != 0 or transform.d != 0 or transform.a <= 0 or transform.e >= 0 or transform.a != -transform.e:
             raise ValueError(f"need a north-up raster with square pixels, got {transform}")
-        return cls(float(transform.c), float(transform.f), float(transform.a), int(height) + 1, int(width) + 1)
+        return cls(float(transform.c), float(transform.f), float(transform.a), int(height) + 1, int(width) + 1,
+                   origin=(float(origin[0]), float(origin[1])))
 
     @property
     def transform(self) -> Affine:
@@ -233,8 +240,8 @@ class CornerGrid:
 
     def lattice_offset(self) -> tuple[int, int]:
         """(gi, gj) of corner (0, 0) on the national lattice x = x_origin + cell * gi, y = y_origin + cell * gj."""
-        fi = (self.x0 - GRID_ORIGIN[0]) / self.cell
-        fj = (self.y0 - GRID_ORIGIN[1]) / self.cell
+        fi = (self.x0 - self.origin[0]) / self.cell
+        fj = (self.y0 - self.origin[1]) / self.cell
         gi, gj = round(fi), round(fj)
         if abs(fi - gi) > 1e-6 or abs(fj - gj) > 1e-6:
             raise ValueError(f"raster origin ({self.x0}, {self.y0}) is not on the DMR 5G lattice")
@@ -519,10 +526,10 @@ class SheetGeometry:
         return r, c
 
 
-def grid_of_sheet(row: Any, cell_m: float) -> CornerGrid:
+def grid_of_sheet(row: Any, cell_m: float, origin: tuple[float, float]) -> CornerGrid:
     """The corner grid of a sheet raster from its `sheets.parquet` row (P1-08 read the grid from the raster)."""
     t = Affine(float(cell_m), 0.0, float(row.grid_xmin), 0.0, -float(cell_m), float(row.grid_ymax))
-    return CornerGrid.from_transform(t, int(row.grid_h), int(row.grid_w))
+    return CornerGrid.from_transform(t, int(row.grid_h), int(row.grid_w), origin=origin)
 
 
 def stage2_dilated(stage2_geoms: Sequence[Any], h: float) -> list[Any]:
@@ -1100,7 +1107,7 @@ class Inputs:
     - `sheets`: `sheets.parquet` (sheet, geometry, grid_xmin, grid_ymax, grid_w, grid_h, flysch, kraj, group_b,
       stratum, block, fold_a, is_stage1, is_stage2).
     - `polygons`: `polygons.parquet` (objectid, eligible, area_m2, sheet, geometry): all register polygons.
-    - `zabaged`: role -> frame with `objectid` and `geometry` (EPSG:5514); roles in `ZABAGED_LAYERS_DEFAULT`.
+    - `zabaged`: role -> frame with `objectid` and `geometry` (EPSG:5514); roles in `ZABAGED_ROLES`.
     - `read_dtm(sheet)`: the sheet's DTM with the invalid rule applied (`landslide.dtm.read_dtm`).
     """
 
@@ -1156,7 +1163,7 @@ def build_samples(cfg: Mapping[str, Any], inputs: Inputs, show_progress: bool = 
     ppts: list[dict[str, Any]] = []
     by_sheet = {s: g for s, g in elig.groupby("sheet", sort=True)}
     for row in bar(list(stage1.itertuples(index=False)), desc="pass 1 (positives)", unit="sheet"):
-        sg = sheet_geometry(row.sheet, row.geometry, grid_of_sheet(row, p.cell_m), s2d, p)
+        sg = sheet_geometry(row.sheet, row.geometry, grid_of_sheet(row, p.cell_m, p.grid_origin), s2d, p)
         geoms[row.sheet] = sg
         g = by_sheet.get(row.sheet)
         if g is None:
@@ -1195,7 +1202,7 @@ def build_samples(cfg: Mapping[str, Any], inputs: Inputs, show_progress: bool = 
     for row in bar(list(stage1.itertuples(index=False)), desc="pass 2 (DTM)", unit="sheet"):
         sg = geoms[row.sheet]
         dtm = inputs.read_dtm(row.sheet)
-        if not CornerGrid.from_transform(dtm.transform, *dtm.shape).same_lattice(sg.grid):
+        if not CornerGrid.from_transform(dtm.transform, *dtm.shape, origin=p.grid_origin).same_lattice(sg.grid):
             raise AssertionError(f"{row.sheet}: the raster grid differs from sheets.parquet")
         sr = sheet_raster(dtm.z, cfg)
         del dtm
@@ -1445,7 +1452,7 @@ def check_samples(cfg: Mapping[str, Any], samples: pd.DataFrame, inputs: Inputs,
     out["match_levels"] = {str(k): int(v) for k, v in sorted(Counter(lv.tolist()).items())}
 
     # spacing: negatives and background >= neg_min_spacing_m apart (exact, on the national lattice)
-    gi, gj = _lattice(nonpos)
+    gi, gj = _lattice(nonpos, p)
     if len(nonpos) > 1:
         tree = cKDTree(np.column_stack([gi, gj]).astype(np.float64))
         d, _ = tree.query(np.column_stack([gi, gj]).astype(np.float64), k=2)
@@ -1481,7 +1488,7 @@ def check_samples(cfg: Mapping[str, Any], samples: pd.DataFrame, inputs: Inputs,
         out["min_square_distance_to_stage2_m"] = float(np.min(dd))
     # the corner convention: x, y are the corners (row, col) of the sheet rasters
     for s, g in S.groupby("sheet", sort=False):
-        grid = grid_of_sheet(sheets.loc[s], p.cell_m)
+        grid = grid_of_sheet(sheets.loc[s], p.cell_m, p.grid_origin)
         gx, gy = grid.xy(g["row"].to_numpy(), g["col"].to_numpy())
         assert (gx == g["x"].to_numpy()).all() and (gy == g["y"].to_numpy()).all(), f"{s}: x, y are not the corners"
 
@@ -1492,7 +1499,7 @@ def check_samples(cfg: Mapping[str, Any], samples: pd.DataFrame, inputs: Inputs,
     assert pg["eligible"].astype(bool).all(), "a positive from an ineligible polygon"
     inside = shapely.contains_xy(repair(pg["geometry"].to_numpy()), pos["x"].to_numpy(), pos["y"].to_numpy())
     assert inside.all(), "a positive outside its polygon"
-    gi, gj = _lattice(pos)
+    gi, gj = _lattice(pos, p)
     pos_ = pos.assign(_gi=gi, _gj=gj)
     min_pp = math.inf
     for _, g in pos_.groupby("polygon_objectid"):
@@ -1509,9 +1516,9 @@ def check_samples(cfg: Mapping[str, Any], samples: pd.DataFrame, inputs: Inputs,
     return out
 
 
-def _lattice(df: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
-    fi = (df["x"].to_numpy() - GRID_ORIGIN[0]) / 2.0
-    fj = (df["y"].to_numpy() - GRID_ORIGIN[1]) / 2.0
+def _lattice(df: pd.DataFrame, p: SamplingParams) -> tuple[np.ndarray, np.ndarray]:
+    fi = (df["x"].to_numpy() - p.grid_origin[0]) / p.cell_m
+    fj = (df["y"].to_numpy() - p.grid_origin[1]) / p.cell_m
     gi, gj = np.rint(fi), np.rint(fj)
     assert np.abs(fi - gi).max(initial=0) < 1e-6 and np.abs(fj - gj).max(initial=0) < 1e-6, "off-lattice samples"
     return gi.astype(np.int64), gj.astype(np.int64)
@@ -1547,7 +1554,7 @@ def recheck_windows(cfg: Mapping[str, Any], S: pd.DataFrame, inputs: Inputs) -> 
 
 
 def load_zabaged(cfg: Mapping[str, Any], paths: Any) -> dict[str, pd.DataFrame]:
-    """The six ZABAGED layers this task uses, by role (`ZABAGED_LAYERS_DEFAULT`), each a GeoDataFrame with `objectid`
+    """The six ZABAGED layers this task uses, by role (`sources.zabaged.layers`), each a GeoDataFrame with `objectid`
     and `geometry` in EPSG:5514.
 
     PROVISIONAL until P1-07 is merged: reads `paths.zabaged("<layer id>")` (`data/cache/zabaged/<id>.gpkg`) with

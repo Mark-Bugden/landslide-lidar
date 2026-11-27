@@ -8,7 +8,11 @@ import numpy as np
 import pytest
 
 from landslide import sheets as S
+from landslide.config import load_config
 from landslide.paths import Paths
+
+CFG = load_config()
+SERVICE = "https://ags.cuzk.gov.cz/arcgis/rest/services/ZABAGED_POLOHOPIS/MapServer"
 
 
 def _script():
@@ -114,7 +118,8 @@ def test_envelope_client_adds_the_filter_and_refuses_clashes():
 def test_fetch_pair_paginates_inside_the_envelope(tmp_path):
     layer = FakeLayer(_layer())
     # features 3..12 (x 300..1210) intersect; ids 10, 13, ..., 37 -> 10 ids, pages of 4
-    rec = FZ.fetch_pair(layer, 130, META, "01-01-01", (305.0, -5.0, 1205.0, 5.0), 5514, tmp_path / "p")
+    rec = FZ.fetch_pair(layer, 130, META, "01-01-01", (305.0, -5.0, 1205.0, 5.0), 5514, tmp_path / "p",
+                        service=SERVICE)
     want = [3 * k + 1 for k in range(3, 13)]
     assert rec["n_ids"] == 10 and rec["n_pages"] == 3 and [p["n"] for p in rec["pages"]] == [4, 4, 2]
     got = [f["attributes"][OID] for p in rec["pages"]
@@ -127,7 +132,7 @@ def test_fetch_pair_paginates_inside_the_envelope(tmp_path):
 
 def test_fetch_pair_empty_envelope_leaves_no_directory(tmp_path):
     rec = FZ.fetch_pair(FakeLayer(_layer()), 129, META, "01-01-01", (-500.0, -500.0, -400.0, -400.0), 5514,
-                        tmp_path / "empty")
+                        tmp_path / "empty", service=SERVICE)
     assert rec["n_ids"] == 0 and rec["n_pages"] == 0 and rec["pages"] == []
     assert not (tmp_path / "empty").exists()
 
@@ -143,7 +148,7 @@ def test_fetch_pair_detects_a_short_page(tmp_path):
 
     layer.get = short
     with pytest.raises(RuntimeError):
-        FZ.fetch_pair(layer, 130, META, "s", (0.0, 0.0, 1000.0, 5.0), 5514, tmp_path / "p")
+        FZ.fetch_pair(layer, 130, META, "s", (0.0, 0.0, 1000.0, 5.0), 5514, tmp_path / "p", service=SERVICE)
 
 
 def _two_sheets(tmp_path):
@@ -153,7 +158,7 @@ def _two_sheets(tmp_path):
     recs = []
     for sheet, bbox in (("01-01-01", (0.0, -5.0, 1000.0, 5.0)), ("01-01-02", (600.0, -5.0, 1800.0, 5.0))):
         recs.append(FZ.fetch_pair(layer, 130, META, sheet, bbox, 5514,
-                                  root / "130" / sheet.replace("-", "_")))
+                                  root / "130" / sheet.replace("-", "_"), service=SERVICE))
     return layer, root, recs
 
 
@@ -201,9 +206,14 @@ def test_dedup_flags_conflicting_versions():
 
 
 def test_layers_and_keys():
-    assert list(FZ.LAYERS) == [118, 119, 130, 129, 79, 75]
+    # BRIEF.md row 6, from the config's sources.zabaged block
+    assert FZ.service_url(CFG) == SERVICE
+    assert FZ.layers(CFG) == {118: "quarry", 119: "spoil heap", 130: "rock formation", 129: "landslide/scree",
+                              79: "road", 75: "railway"}
+    assert list(FZ.layers(CFG)) == [118, 119, 130, 129, 79, 75]
     assert Paths().zabaged(FZ.layer_key(129)).name == "129.gpkg"
-    assert FZ.envelope_params(S.snap_out(0.4, -0.12, 4.4, 3.88).bbox, 5514)["geometry"] == "0.4,-0.12,4.4,3.88"
+    g = S.snap_out(0.4, -0.12, 4.4, 3.88, origin=S.grid_origin(CFG))
+    assert FZ.envelope_params(g.bbox, 5514)["geometry"] == "0.4,-0.12,4.4,3.88"
 
 
 # ---- weights: the offline guard (in a subprocess, so this test process keeps its network) ----

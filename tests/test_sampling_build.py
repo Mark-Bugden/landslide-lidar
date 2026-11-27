@@ -25,7 +25,7 @@ def _brute_rules(inputs, cfg, sheet, r, c, valid_only=False):
     """Every candidate rule, by brute force on the actual squares and raster windows."""
     p = S.sampling_params(cfg)
     sh = inputs.sheets.set_index("sheet")
-    g = S.grid_of_sheet(sh.loc[sheet], p.cell_m)
+    g = S.grid_of_sheet(sh.loc[sheet], p.cell_m, p.grid_origin)
     x, y = g.xy(r, c)
     h = p.half_m
     sq = shapely.box(x - h, y - h, x + h, y + h)
@@ -65,7 +65,7 @@ def test_positive_feasibility_brute_force(world):
     polys = inputs.polygons.set_index("objectid")
     for row in res.polygons.itertuples(index=False):
         geom = polys.loc[row.objectid, "geometry"]
-        g = S.grid_of_sheet(sh.loc[row.sheet], p.cell_m)
+        g = S.grid_of_sheet(sh.loc[row.sheet], p.cell_m, p.grid_origin)
         xmin, ymin, xmax, ymax = geom.bounds
         c = np.arange(int(np.floor((xmin - g.x0) / 2)) - 1, int(np.ceil((xmax - g.x0) / 2)) + 2)
         r = np.arange(int(np.floor((g.y0 - ymax) / 2)) - 1, int(np.ceil((g.y0 - ymin) / 2)) + 2)
@@ -139,7 +139,7 @@ def test_random_candidates_equal_brute_force(world):
     sh = inputs.sheets.set_index("sheet")
     cand = res.candidates
     for s in sh.index[sh["is_stage1"].astype(bool)]:
-        g = S.grid_of_sheet(sh.loc[s], p.cell_m)
+        g = S.grid_of_sheet(sh.loc[s], p.cell_m, p.grid_origin)
         rr, cc = S.random_grid(g, p, S.sheet_rng(cfg, p.seed, "negative_jitter", s))
         inside = g.inside(rr, cc)
         rr, cc = rr[inside], cc[inside]
@@ -165,7 +165,7 @@ def test_lookalike_candidates(world):
     pts = S.cut_points(zab.rename(columns={"geometry": "geom"}), p.cut_point_step_m)
     sh = inputs.sheets.set_index("sheet")
     for s, g in cuts.groupby("sheet"):
-        grid = S.grid_of_sheet(sh.loc[s], p.cell_m)
+        grid = S.grid_of_sheet(sh.loc[s], p.cell_m, p.grid_origin)
         sr = S.sheet_raster(inputs.read_dtm(s).z, cfg)
         r, c = grid.snap(pts["x"], pts["y"])
         for row, col in zip(g["row"], g["col"]):

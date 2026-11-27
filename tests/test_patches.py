@@ -380,7 +380,9 @@ def test_verify_rechecks_the_patch_rule(world, copy):
     sh = world.sheets.set_index("sheet")
     s = bad.at[2, "sheet"]
     from landslide.sampling import grid_of_sheet
-    g = grid_of_sheet(sh.loc[s], 2.0)
+    from landslide.config import load_config
+    from landslide.sheets import grid_origin
+    g = grid_of_sheet(sh.loc[s], 2.0, grid_origin(load_config()))
     bad.loc[2, ["row", "col"]] = [110, 110]
     bad.loc[2, "x"], bad.loc[2, "y"] = (float(v) for v in g.xy(110, 110))
     P.write_meta(bad, copy / "meta.csv")

@@ -42,20 +42,21 @@ def main(argv: list[str] | None = None) -> int:
     log = get_logger("fetch_geology")
     epsg = S.epsg_code(cfg)
     where = S.sql_in("subregion", cfg["flysch"]["subregions"])
+    url = S.source_url(cfg, "geology")
     with Client() as client:
-        meta = S.layer_metadata(client, S.GEOLOGY_URL)
-        log.info("%s: %s, %s, maxRecordCount %s, SR %s", S.GEOLOGY_URL, meta.get("name"),
+        meta = S.layer_metadata(client, url)
+        log.info("%s: %s, %s, maxRecordCount %s, SR %s", url, meta.get("name"),
                  meta.get("geometryType"), meta.get("maxRecordCount"), meta.get("sourceSpatialReference"))
         if S.native_wkid(meta) != epsg:
             log.error("native SR is %s, not EPSG:%d", S.native_wkid(meta), epsg)
             return 1
-        n = S.count_features(client, S.GEOLOGY_URL, where)
+        n = S.count_features(client, url, where)
         log.info("count (%s): %d", where, n)
         if args.count_only:
-            print(json.dumps({"url": S.GEOLOGY_URL, "where": where, "count": n, "metadata": meta},
+            print(json.dumps({"url": url, "where": where, "count": n, "metadata": meta},
                              indent=1, ensure_ascii=False))
             return 0
-        res = S.query_pages(client, S.GEOLOGY_URL, where, ",".join(S.GEOLOGY_FIELDS), "json",
+        res = S.query_pages(client, url, where, ",".join(S.geology_fields(cfg)), "json",
                             int(meta["maxRecordCount"]), S.oid_field(meta), args.pages)
     gdf = S.esri_pages_to_frame([args.pages / p["file"] for p in res["pages"]], epsg)
     if len(gdf) != n:

@@ -12,8 +12,10 @@ Contents:
   must be NoData or outside [-100, 2000] m in the download).
 - **Manifest.** Streaming sha256 of the hand-over files against `MANIFEST.csv`.
 
-The lattice origin and the package's valid range are not keys of `configs/landslide.json`; they are taken from the
-brief's note 1 (module constants below). Cell size, margin and CRS come from the config.
+Every value comes from `configs/landslide.json`: cell size, margin and CRS from Appendix B's `dtm` block; the service
+URLs, the lattice origin, the package's valid range and the expected counts from the `sources` block (BRIEF.md
+"Data sources", note 1 and "Provenance check"; added at the freeze, P1-16). The lattice helpers take the origin as
+an argument, so no grid is built from a value the config does not hold.
 """
 
 from __future__ import annotations
@@ -24,7 +26,7 @@ import json
 import math
 from collections import Counter
 from collections.abc import Callable, Iterable, Mapping, Sequence
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from itertools import pairwise
 from pathlib import Path
@@ -34,29 +36,47 @@ import numpy as np
 
 from landslide.config import rng_for, stream_id
 
-# ---- constants from the brief (BRIEF.md, Data sources) ----
-
-#: Native DMR 5G pixel edges: x = 0.4 and y = -0.12 (mod cell). BRIEF.md note 1.
-GRID_ORIGIN: tuple[float, float] = (0.4, -0.12)
-#: The package set NoData and values outside this closed range to NaN. BRIEF.md note 1.
-PACKAGE_VALID_RANGE: tuple[float, float] = (-100.0, 2000.0)
 #: Snapping tolerance in cells, so a value that should sit exactly on a pixel edge is not pushed out by float noise.
 SNAP_TOL_CELLS = 1e-9
-
-#: Rows 2-4 of the brief's data-source table. Row 1 comes from the config (`dtm.service`).
-REGISTER_URL = "https://mapy.geology.cz/arcgis/rest/services/Geohazardy/svahove_nestability/MapServer/1"
-SHEETS_URL = ("https://mapy.geology.cz/arcgis/rest/services/Prozkoumanost/prehled_mapovani_svahove_nestability/"
-              "MapServer/0")
-GEOLOGY_URL = "https://mapy.geology.cz/arcgis/rest/services/Geologie/geologicka_mapa500_CR/MapServer/7"
-#: Fields of the geology package file (BRIEF.md note 4).
-GEOLOGY_FIELDS = ("objectid", "region", "subregion", "hor_karto")
 #: The value of `poznamka` that marks a full ZM10 sheet.
 FULL_SHEET = "list celý"
 
 
+# ---- source facts from the config's `sources` block (BRIEF.md, Data sources) ----
+
+
 def dtm_service_url(cfg: Mapping[str, Any]) -> str:
-    """The DMR 5G ImageServer URL: the first token of the config's `dtm.service`."""
-    return str(cfg["dtm"]["service"]).split()[0].rstrip("/")
+    """The DMR 5G ImageServer URL (`sources.dtm.service`; the first token of Appendix B's `dtm.service`)."""
+    return str(cfg["sources"]["dtm"]["service"]).rstrip("/")
+
+
+def grid_origin(cfg: Mapping[str, Any]) -> tuple[float, float]:
+    """Native DMR 5G pixel edges sit at x = x0 and y = y0 (mod cell): (0.4, -0.12). BRIEF.md note 1."""
+    x0, y0 = (float(v) for v in cfg["sources"]["dtm"]["grid_origin_m"])
+    return (x0, y0)
+
+
+def package_valid_range(cfg: Mapping[str, Any]) -> tuple[float, float]:
+    """The package set NoData and values outside this closed range to NaN: [-100, 2000] m. BRIEF.md note 1."""
+    lo, hi = (float(v) for v in cfg["sources"]["dtm"]["package_valid_range_m"])
+    if not lo < hi:
+        raise ValueError(f"sources.dtm.package_valid_range_m must be increasing, got {(lo, hi)}")
+    return (lo, hi)
+
+
+def source_url(cfg: Mapping[str, Any], name: str) -> str:
+    """The layer URL of row 2 (`register`), 3 (`sheets`) or 4 (`geology`) of the brief's data-source table."""
+    return str(cfg["sources"][name]["url"]).rstrip("/")
+
+
+def expected_count(cfg: Mapping[str, Any], name: str) -> int:
+    """The brief's 2026-11-25 feature count of `register` (21,356) or `sheets` (860)."""
+    return int(cfg["sources"][name]["expected_count"])
+
+
+def geology_fields(cfg: Mapping[str, Any]) -> tuple[str, ...]:
+    """Fields of the geology package file (BRIEF.md note 4)."""
+    return tuple(str(f) for f in cfg["sources"]["geology"]["fields"])
 
 
 def epsg_code(cfg: Mapping[str, Any]) -> int:
@@ -84,8 +104,9 @@ class Grid:
     w: int
     h: int
     cell: float = 2.0
-    x0: float = GRID_ORIGIN[0]
-    y0: float = GRID_ORIGIN[1]
+    #: The lattice origin (`grid_origin(cfg)`): keyword-only and required.
+    x0: float = field(kw_only=True)
+    y0: float = field(kw_only=True)
 
     @staticmethod
     def _coord(origin: float, cell: float, k: int) -> float:
@@ -124,8 +145,8 @@ class Grid:
         return {"xmin": self.xmin, "ymax": self.ymax, "w": self.w, "h": self.h, "xmax": self.xmax, "ymin": self.ymin}
 
 
-def snap_out(xmin: float, ymin: float, xmax: float, ymax: float, cell: float = 2.0,
-             origin: tuple[float, float] = GRID_ORIGIN, tol_cells: float = SNAP_TOL_CELLS) -> Grid:
+def snap_out(xmin: float, ymin: float, xmax: float, ymax: float, cell: float = 2.0, *,
+             origin: tuple[float, float], tol_cells: float = SNAP_TOL_CELLS) -> Grid:
     """The smallest lattice grid that contains the box (edges snapped outwards)."""
     if not (xmax > xmin and ymax > ymin):
         raise ValueError(f"empty box {(xmin, ymin, xmax, ymax)}")
@@ -142,7 +163,7 @@ def dtm_grid(bounds: Sequence[float], cfg: Mapping[str, Any]) -> Grid:
     m = float(cfg["dtm"]["margin_m"])
     cell = float(cfg["dtm"]["cell_m"])
     xmin, ymin, xmax, ymax = (float(v) for v in bounds)
-    return snap_out(xmin - m, ymin - m, xmax + m, ymax + m, cell=cell)
+    return snap_out(xmin - m, ymin - m, xmax + m, ymax + m, cell=cell, origin=grid_origin(cfg))
 
 
 def edge_clearance(bounds: Sequence[float], cfg: Mapping[str, Any]) -> float:
@@ -153,7 +174,7 @@ def edge_clearance(bounds: Sequence[float], cfg: Mapping[str, Any]) -> float:
     m = float(cfg["dtm"]["margin_m"])
     cell = float(cfg["dtm"]["cell_m"])
     xmin, ymin, xmax, ymax = (float(v) for v in bounds)
-    x0, y0 = GRID_ORIGIN
+    x0, y0 = grid_origin(cfg)
     out = math.inf
     for v, o in ((xmin - m, x0), (xmax + m, x0), (ymin - m, y0), (ymax + m, y0)):
         t = (v - o) / cell
@@ -165,8 +186,8 @@ class OffGrid(ValueError):
     """A corner that does not sit on the native lattice."""
 
 
-def grid_from_corner(xmin: float, ymax: float, w: int, h: int, cell: float = 2.0,
-                     origin: tuple[float, float] = GRID_ORIGIN, tol_m: float = 1e-6) -> Grid:
+def grid_from_corner(xmin: float, ymax: float, w: int, h: int, cell: float = 2.0, *,
+                     origin: tuple[float, float], tol_m: float = 1e-6) -> Grid:
     """The lattice grid with this top-left corner and size. Raises `OffGrid` if the corner is off the lattice."""
     x0, y0 = origin
     ti, tj = (xmin - x0) / cell, (ymax - y0) / cell
@@ -177,8 +198,8 @@ def grid_from_corner(xmin: float, ymax: float, w: int, h: int, cell: float = 2.0
     return Grid(i0=int(i0), j1=int(j1), w=int(w), h=int(h), cell=cell, x0=x0, y0=y0)
 
 
-def grid_from_transform(transform: Sequence[float], width: int, height: int, cell: float = 2.0,
-                        origin: tuple[float, float] = GRID_ORIGIN) -> Grid:
+def grid_from_transform(transform: Sequence[float], width: int, height: int, cell: float = 2.0, *,
+                        origin: tuple[float, float]) -> Grid:
     """The lattice grid of a raster. Raises `OffGrid` unless it is north-up with `cell` pixels on the lattice."""
     a, b, c, d, e, f = (float(v) for v in tuple(transform)[:6])
     if (a, b, d, e) != (cell, 0.0, 0.0, -cell):
@@ -290,7 +311,8 @@ def read_fetch_log(path: Path | str) -> dict[str, dict[str, Any]]:
 
 
 def compare_grids(recipe: Mapping[str, Grid], log: Mapping[str, Mapping[str, Any]],
-                  rasters: Mapping[str, Mapping[str, Any]], cell: float) -> dict[str, Any]:
+                  rasters: Mapping[str, Mapping[str, Any]], cell: float, *,
+                  origin: tuple[float, float]) -> dict[str, Any]:
     """Compare the recipe grid of every sheet with the fetch log and with each raster's own transform and size.
 
     `rasters` maps sheet -> {"transform": 6 coefficients, "width", "height"} (or {"error": text}).
@@ -306,7 +328,8 @@ def compare_grids(recipe: Mapping[str, Grid], log: Mapping[str, Mapping[str, Any
         if s in log:
             r = log[s]
             try:
-                g_log = grid_from_corner(float(r["xmin"]), float(r["ymax"]), int(r["w"]), int(r["h"]), cell=cell)
+                g_log = grid_from_corner(float(r["xmin"]), float(r["ymax"]), int(r["w"]), int(r["h"]), cell=cell,
+                                         origin=origin)
             except OffGrid as e:
                 problems["fetch_log"] = str(e)
         else:
@@ -314,7 +337,8 @@ def compare_grids(recipe: Mapping[str, Grid], log: Mapping[str, Mapping[str, Any
         if s in rasters and "error" not in rasters[s]:
             r = rasters[s]
             try:
-                g_ras = grid_from_transform(r["transform"], int(r["width"]), int(r["height"]), cell=cell)
+                g_ras = grid_from_transform(r["transform"], int(r["width"]), int(r["height"]), cell=cell,
+                                            origin=origin)
             except OffGrid as e:
                 problems["raster"] = str(e)
         else:
@@ -486,7 +510,7 @@ def _bits(a: np.ndarray) -> np.ndarray:
 
 
 def invalid_masks(z: np.ndarray, nodata: float | None,
-                  valid_range: tuple[float, float] = PACKAGE_VALID_RANGE) -> tuple[np.ndarray, np.ndarray]:
+                  valid_range: tuple[float, float]) -> tuple[np.ndarray, np.ndarray]:
     """(nodata, out_of_range) masks of a downloaded raster. NaN counts as NoData; the range is closed."""
     nod = np.isnan(z)
     if nodata is not None and not (isinstance(nodata, float) and math.isnan(nodata)):
@@ -508,8 +532,8 @@ def _examples(mask: np.ndarray, *arrays: np.ndarray, k: int = 10) -> list[list[f
     return out
 
 
-def compare_dtm(package: np.ndarray, download: np.ndarray, download_nodata: float | None = None,
-                valid_range: tuple[float, float] = PACKAGE_VALID_RANGE) -> dict[str, Any]:
+def compare_dtm(package: np.ndarray, download: np.ndarray, download_nodata: float | None = None, *,
+                valid_range: tuple[float, float]) -> dict[str, Any]:
     """Compare a package raster with its unmodified re-download (both float32, same shape).
 
     - Where the package is not NaN, the values must be bitwise equal. Any difference is counted, with magnitudes.
@@ -595,7 +619,7 @@ def compare_fetch_log_stats(stats: Mapping[str, Any], rec: Mapping[str, Any]) ->
 
 
 def to_package_array(download: np.ndarray, nodata: float | None,
-                     valid_range: tuple[float, float] = PACKAGE_VALID_RANGE) -> np.ndarray:
+                     valid_range: tuple[float, float]) -> np.ndarray:
     """The manifest's stated change: NoData and values outside the valid range set to NaN (float32)."""
     z = np.array(download, dtype=np.float32, copy=True)
     nod, oor = invalid_masks(z, nodata, valid_range)
@@ -603,12 +627,13 @@ def to_package_array(download: np.ndarray, nodata: float | None,
     return z
 
 
-def write_package_raster(download_path: Path, out_path: Path, epsg: int) -> None:
+def write_package_raster(download_path: Path, out_path: Path, epsg: int,
+                         valid_range: tuple[float, float]) -> None:
     """Rebuild a package-format raster from a download: NaN for invalid cells, deflate-tiled GeoTIFF, same grid."""
     import rasterio
 
     with rasterio.open(download_path) as src:
-        z = to_package_array(src.read(1), src.nodata)
+        z = to_package_array(src.read(1), src.nodata, valid_range)
         profile = {"driver": "GTiff", "dtype": "float32", "count": 1, "width": src.width, "height": src.height,
                    "transform": src.transform, "crs": f"EPSG:{epsg}", "nodata": float("nan"), "tiled": True,
                    "blockxsize": 256, "blockysize": 256, "compress": "deflate"}
