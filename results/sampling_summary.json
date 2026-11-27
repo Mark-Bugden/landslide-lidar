@@ -1,0 +1,739 @@
+{
+  "config_hash": "4a66e6a87e42ffddb4ce157be21f3057b7f8c0a1aeace0479b90dd1c309c8899",
+  "git_commit": "04f193cc5c652bcc75196be078c6129425057a85",
+  "inputs": {
+    "splits_config_hash": "4a66e6a87e42ffddb4ce157be21f3057b7f8c0a1aeace0479b90dd1c309c8899",
+    "zabaged_features": {
+      "quarry": 149,
+      "spoil": 46,
+      "rock": 10500,
+      "landslide": 184,
+      "road": 9323,
+      "railway": 1303
+    },
+    "zabaged_layers": {
+      "quarry": 118,
+      "spoil": 119,
+      "rock": 130,
+      "landslide": 129,
+      "road": 79,
+      "railway": 75
+    }
+  },
+  "positives": {
+    "eligible_stage1_polygons": 14617,
+    "infeasible_polygons": 793,
+    "feasible_polygons": 13824,
+    "polygons_by_k_target": {
+      "1": 11297,
+      "2": 859,
+      "3": 1668
+    },
+    "polygons_by_k": {
+      "1": 11308,
+      "2": 854,
+      "3": 1662
+    },
+    "polygons_with_k_reduced_for_room": 16,
+    "feasible_points": 18002,
+    "pools": {
+      "flysch": {
+        "eligible_polygons": 8575,
+        "budget": 2347,
+        "sheets_with_feasible_polygons": 284,
+        "feasible_polygons": 8092,
+        "feasible_points": 10290,
+        "cap": 8,
+        "selected_points": 2207,
+        "total_at_cap_plus_1": 2473,
+        "selected_polygons": 1695,
+        "validity_dropped": 2,
+        "kept": 2205,
+        "totals_by_cap": {
+          "1": 383,
+          "2": 676,
+          "3": 923,
+          "4": 1183,
+          "5": 1462,
+          "6": 1731,
+          "7": 1990,
+          "8": 2207,
+          "9": 2473,
+          "10": 2713,
+          "11": 2937,
+          "12": 3166,
+          "13": 3380,
+          "14": 3604,
+          "15": 3834,
+          "16": 4057,
+          "17": 4241,
+          "18": 4462,
+          "19": 4662,
+          "20": 4841,
+          "21": 5061,
+          "22": 5243,
+          "23": 5412,
+          "24": 5592,
+          "25": 5763,
+          "26": 5943,
+          "27": 6103,
+          "28": 6263,
+          "29": 6425,
+          "30": 6572,
+          "31": 6708,
+          "32": 6840,
+          "33": 6993,
+          "34": 7122,
+          "35": 7254,
+          "36": 7385,
+          "37": 7500,
+          "38": 7615,
+          "39": 7723,
+          "40": 7837,
+          "41": 7933,
+          "42": 8027,
+          "43": 8124,
+          "44": 8215,
+          "45": 8298,
+          "46": 8376,
+          "47": 8461,
+          "48": 8533,
+          "49": 8613,
+          "50": 8687,
+          "51": 8759,
+          "52": 8820,
+          "53": 8885,
+          "54": 8941,
+          "55": 8999,
+          "56": 9048,
+          "57": 9111,
+          "58": 9153,
+          "59": 9197,
+          "60": 9238,
+          "61": 9283,
+          "62": 9326,
+          "63": 9363,
+          "64": 9396,
+          "65": 9433,
+          "66": 9463,
+          "67": 9503,
+          "68": 9535,
+          "69": 9562,
+          "70": 9594,
+          "71": 9627,
+          "72": 9660,
+          "73": 9691,
+          "74": 9720,
+          "75": 9744,
+          "76": 9773,
+          "77": 9795,
+          "78": 9817,
+          "79": 9842,
+          "80": 9867,
+          "81": 9885,
+          "82": 9907,
+          "83": 9928,
+          "84": 9944,
+          "85": 9968,
+          "86": 9985,
+          "87": 9994,
+          "88": 10003,
+          "89": 10018,
+          "90": 10033,
+          "91": 10043,
+          "92": 10053,
+          "93": 10067,
+          "94": 10075,
+          "95": 10086,
+          "96": 10097,
+          "97": 10109,
+          "98": 10118,
+          "99": 10129,
+          "100": 10142,
+          "101": 10149,
+          "102": 10157,
+          "103": 10162,
+          "104": 10168,
+          "105": 10173,
+          "106": 10175,
+          "107": 10180,
+          "108": 10184,
+          "109": 10188,
+          "110": 10193,
+          "111": 10195,
+          "112": 10198,
+          "113": 10209,
+          "114": 10209,
+          "115": 10211,
+          "116": 10214,
+          "117": 10219,
+          "118": 10224,
+          "119": 10226,
+          "120": 10228,
+          "121": 10233,
+          "122": 10237,
+          "123": 10238,
+          "124": 10240,
+          "125": 10246,
+          "126": 10247,
+          "127": 10249,
+          "128": 10252,
+          "129": 10257,
+          "130": 10259,
+          "131": 10263,
+          "132": 10264,
+          "133": 10267,
+          "134": 10268,
+          "135": 10269,
+          "136": 10271,
+          "137": 10273,
+          "138": 10278,
+          "139": 10278,
+          "140": 10279,
+          "141": 10282,
+          "142": 10283,
+          "143": 10285,
+          "144": 10287,
+          "145": 10288,
+          "146": 10289,
+          "147": 10290
+        }
+      },
+      "nonflysch": {
+        "eligible_polygons": 6042,
+        "budget": 1653,
+        "sheets_with_feasible_polygons": 462,
+        "feasible_polygons": 5732,
+        "feasible_points": 7712,
+        "cap": 3,
+        "selected_points": 1385,
+        "total_at_cap_plus_1": 1784,
+        "selected_polygons": 1033,
+        "validity_dropped": 24,
+        "kept": 1361,
+        "totals_by_cap": {
+          "1": 647,
+          "2": 1068,
+          "3": 1385,
+          "4": 1784,
+          "5": 2143,
+          "6": 2444,
+          "7": 2769,
+          "8": 3058,
+          "9": 3326,
+          "10": 3598,
+          "11": 3876,
+          "12": 4117,
+          "13": 4337,
+          "14": 4551,
+          "15": 4759,
+          "16": 4939,
+          "17": 5162,
+          "18": 5312,
+          "19": 5468,
+          "20": 5604,
+          "21": 5757,
+          "22": 5870,
+          "23": 5989,
+          "24": 6100,
+          "25": 6201,
+          "26": 6309,
+          "27": 6400,
+          "28": 6472,
+          "29": 6568,
+          "30": 6646,
+          "31": 6698,
+          "32": 6769,
+          "33": 6829,
+          "34": 6888,
+          "35": 6939,
+          "36": 6986,
+          "37": 7034,
+          "38": 7085,
+          "39": 7121,
+          "40": 7157,
+          "41": 7192,
+          "42": 7226,
+          "43": 7255,
+          "44": 7280,
+          "45": 7304,
+          "46": 7326,
+          "47": 7351,
+          "48": 7371,
+          "49": 7390,
+          "50": 7409,
+          "51": 7429,
+          "52": 7446,
+          "53": 7457,
+          "54": 7472,
+          "55": 7484,
+          "56": 7494,
+          "57": 7509,
+          "58": 7521,
+          "59": 7531,
+          "60": 7535,
+          "61": 7544,
+          "62": 7551,
+          "63": 7559,
+          "64": 7567,
+          "65": 7576,
+          "66": 7582,
+          "67": 7593,
+          "68": 7595,
+          "69": 7599,
+          "70": 7605,
+          "71": 7612,
+          "72": 7619,
+          "73": 7621,
+          "74": 7627,
+          "75": 7632,
+          "76": 7635,
+          "77": 7640,
+          "78": 7645,
+          "79": 7652,
+          "80": 7653,
+          "81": 7655,
+          "82": 7661,
+          "83": 7664,
+          "84": 7667,
+          "85": 7671,
+          "86": 7678,
+          "87": 7680,
+          "88": 7684,
+          "89": 7686,
+          "90": 7689,
+          "91": 7692,
+          "92": 7692,
+          "93": 7693,
+          "94": 7697,
+          "95": 7697,
+          "96": 7697,
+          "97": 7700,
+          "98": 7700,
+          "99": 7700,
+          "100": 7701,
+          "101": 7704,
+          "102": 7704,
+          "103": 7704,
+          "104": 7705,
+          "105": 7708,
+          "106": 7708,
+          "107": 7708,
+          "108": 7711,
+          "109": 7711,
+          "110": 7711,
+          "111": 7712
+        }
+      }
+    },
+    "selected_polygons": 2728,
+    "selected_sheets": 746,
+    "selected_points": 3592,
+    "validity_dropped": 26,
+    "validity_dropped_whole_polygons": 17,
+    "kept": 3566,
+    "matched": 3566,
+    "unmatched": 0,
+    "by_stratum": {
+      "F_ZLMS": {
+        "selected": 1920,
+        "validity_dropped": 2,
+        "kept": 1918,
+        "matched": 1918,
+        "unmatched": 0
+      },
+      "F_other": {
+        "selected": 287,
+        "validity_dropped": 0,
+        "kept": 287,
+        "matched": 287,
+        "unmatched": 0
+      },
+      "N_ZLMS": {
+        "selected": 110,
+        "validity_dropped": 7,
+        "kept": 103,
+        "matched": 103,
+        "unmatched": 0
+      },
+      "N_other": {
+        "selected": 1275,
+        "validity_dropped": 17,
+        "kept": 1258,
+        "matched": 1258,
+        "unmatched": 0
+      }
+    }
+  },
+  "candidates": {
+    "random_steps": {
+      "clear_of_stage2": 3213470,
+      "far_from_register": 2361204,
+      "far_from_zabaged_landslide": 2360439,
+      "in_grid": 5649380,
+      "in_sheet": 3225418,
+      "points": 5716455,
+      "valid": 3092501
+    },
+    "lookalike_steps": {
+      "cut:candidates": 19563,
+      "cut:clear_of_stage2": 99449,
+      "cut:far_from_register": 79689,
+      "cut:far_from_zabaged_landslide": 79687,
+      "cut:in_grid": 117251,
+      "cut:in_sheet": 99821,
+      "cut:points": 117251,
+      "cut:steep": 19947,
+      "cut:valid": 99336,
+      "quarry:candidates": 210,
+      "quarry:clear_of_stage2": 6947861,
+      "quarry:far_from_register": 5416641,
+      "quarry:far_from_zabaged_landslide": 5416641,
+      "quarry:features": 124,
+      "quarry:features_with_candidates": 105,
+      "quarry:in_grid": 10104377,
+      "quarry:in_sheet": 6947863,
+      "quarry:points": 10104377,
+      "quarry:valid": 6947861,
+      "rock:candidates": 11341,
+      "rock:clear_of_stage2": 6055539,
+      "rock:far_from_register": 3538013,
+      "rock:far_from_zabaged_landslide": 3521251,
+      "rock:features": 9281,
+      "rock:features_with_candidates": 5677,
+      "rock:in_grid": 7290217,
+      "rock:in_sheet": 6081980,
+      "rock:points": 7290217,
+      "rock:valid": 5980766,
+      "spoil:candidates": 52,
+      "spoil:clear_of_stage2": 844480,
+      "spoil:far_from_register": 805197,
+      "spoil:far_from_zabaged_landslide": 805197,
+      "spoil:features": 34,
+      "spoil:features_with_candidates": 26,
+      "spoil:in_grid": 1307681,
+      "spoil:in_sheet": 844480,
+      "spoil:points": 1307681,
+      "spoil:valid": 844480
+    },
+    "lookalike_sources": {
+      "quarry": {
+        "features": 149,
+        "polygonal": 149,
+        "point": 0,
+        "other_geometry": 0,
+        "in_stage1_sheets": 124
+      },
+      "spoil": {
+        "features": 46,
+        "polygonal": 46,
+        "point": 0,
+        "other_geometry": 0,
+        "in_stage1_sheets": 34
+      },
+      "rock": {
+        "features": 10500,
+        "polygonal": 10500,
+        "point": 0,
+        "other_geometry": 0,
+        "in_stage1_sheets": 9281
+      },
+      "road": {
+        "features": 9323
+      },
+      "railway": {
+        "features": 1303
+      },
+      "cut_points": 165867,
+      "cut_points_in_stage1_sheets": 117251
+    },
+    "by_source": {
+      "cut": 19563,
+      "quarry": 210,
+      "random": 2360439,
+      "rock": 11341,
+      "spoil": 52
+    },
+    "by_stratum": {
+      "F_ZLMS": 669754,
+      "F_other": 146846,
+      "N_ZLMS": 103154,
+      "N_other": 1471851
+    }
+  },
+  "matching": {
+    "lookalike_quota": 428,
+    "lookalike_matched": 428,
+    "lookalike_matched_by_type": {
+      "cut": 187,
+      "quarry": 41,
+      "rock": 188,
+      "spoil": 12
+    },
+    "by_level": {
+      "1": 3473,
+      "2": 83,
+      "3": 3,
+      "5": 7
+    },
+    "by_source": {
+      "cut": 187,
+      "quarry": 41,
+      "random": 3138,
+      "rock": 188,
+      "spoil": 12
+    },
+    "by_level_and_source": {
+      "1": {
+        "cut": 187,
+        "quarry": 41,
+        "random": 3045,
+        "rock": 188,
+        "spoil": 12
+      },
+      "2": {
+        "random": 83
+      },
+      "3": {
+        "random": 3
+      },
+      "5": {
+        "random": 7
+      }
+    },
+    "unmatched_positives": 0
+  },
+  "background": {
+    "n": 4000,
+    "target": 4000,
+    "available_random_candidates": 2300221
+  },
+  "samples": {
+    "n": 11132,
+    "by_label": {
+      "0": 7566,
+      "1": 3566
+    },
+    "by_source": {
+      "background": 4000,
+      "cut": 187,
+      "positive": 3566,
+      "quarry": 41,
+      "random": 3138,
+      "rock": 188,
+      "spoil": 12
+    },
+    "by_stratum": {
+      "F_ZLMS": {
+        "positive": 1918,
+        "negative": 1918,
+        "background": 1090
+      },
+      "F_other": {
+        "positive": 287,
+        "negative": 287,
+        "background": 215
+      },
+      "N_ZLMS": {
+        "positive": 103,
+        "negative": 103,
+        "background": 179
+      },
+      "N_other": {
+        "positive": 1258,
+        "negative": 1258,
+        "background": 2516
+      }
+    },
+    "by_fold": {
+      "-1": {
+        "positive": 1361,
+        "negative": 1361,
+        "background": 2695
+      },
+      "0": {
+        "positive": 336,
+        "negative": 336,
+        "background": 204
+      },
+      "1": {
+        "positive": 478,
+        "negative": 478,
+        "background": 275
+      },
+      "2": {
+        "positive": 500,
+        "negative": 500,
+        "background": 278
+      },
+      "3": {
+        "positive": 495,
+        "negative": 495,
+        "background": 284
+      },
+      "4": {
+        "positive": 396,
+        "negative": 396,
+        "background": 264
+      }
+    },
+    "by_group_b": {
+      "test": {
+        "positive": 1545,
+        "negative": 1545,
+        "background": 2731
+      },
+      "train": {
+        "positive": 2021,
+        "negative": 2021,
+        "background": 1269
+      }
+    },
+    "by_kraj": {
+      "Hlavní město Praha": {
+        "positive": 3,
+        "negative": 3,
+        "background": 5
+      },
+      "Jihomoravský": {
+        "positive": 570,
+        "negative": 572,
+        "background": 998
+      },
+      "Karlovarský": {
+        "positive": 34,
+        "negative": 34,
+        "background": 61
+      },
+      "Královéhradecký": {
+        "positive": 180,
+        "negative": 180,
+        "background": 317
+      },
+      "Liberecký": {
+        "positive": 112,
+        "negative": 111,
+        "background": 187
+      },
+      "Moravskoslezský": {
+        "positive": 650,
+        "negative": 653,
+        "background": 462
+      },
+      "Olomoucký": {
+        "positive": 102,
+        "negative": 102,
+        "background": 169
+      },
+      "Pardubický": {
+        "positive": 91,
+        "negative": 91,
+        "background": 192
+      },
+      "Plzeňský": {
+        "positive": 3,
+        "negative": 3,
+        "background": 12
+      },
+      "Středočeský": {
+        "positive": 85,
+        "negative": 85,
+        "background": 187
+      },
+      "Vysočina": {
+        "positive": 28,
+        "negative": 27,
+        "background": 68
+      },
+      "Zlínský": {
+        "positive": 1371,
+        "negative": 1368,
+        "background": 807
+      },
+      "Ústecký": {
+        "positive": 337,
+        "negative": 337,
+        "background": 535
+      }
+    },
+    "by_flysch": {
+      "False": {
+        "positive": 1361,
+        "negative": 1361,
+        "background": 2695
+      },
+      "True": {
+        "positive": 2205,
+        "negative": 2205,
+        "background": 1305
+      }
+    },
+    "sheets_with_samples": 751
+  },
+  "checks": {
+    "n_pairs": 3566,
+    "match_levels": {
+      "1": 3473,
+      "2": 83,
+      "3": 3,
+      "5": 7
+    },
+    "min_negative_spacing_m": 150.0,
+    "min_negative_distance_to_register_m": 150.01306272144762,
+    "min_negative_distance_to_zabaged_landslide_m": 155.1820605524339,
+    "min_square_distance_to_stage2_m": 150.13373566750275,
+    "min_point_spacing_within_polygon_m": 100.0199980003999,
+    "max_slope_mean_diff_deg": 1.3713474800169934e-12,
+    "slope_bin_flips_vs_per_patch": 0,
+    "windows_rechecked": 11132
+  },
+  "determinism": {
+    "rebuilt": true,
+    "samples_identical": true,
+    "summary_identical": true
+  },
+  "spike_comparison": [
+    {
+      "quantity": "eligible stage-1 polygons",
+      "spike": 14617,
+      "ours": 14617,
+      "equal": true
+    },
+    {
+      "quantity": "eligible stage-1 polygons with no feasible patch",
+      "spike": 870,
+      "ours": 793,
+      "equal": false
+    },
+    {
+      "quantity": "water-filling cap, flysch (points per sheet)",
+      "spike": 8,
+      "ours": 8,
+      "equal": true
+    },
+    {
+      "quantity": "water-filling cap, non-flysch (points per sheet)",
+      "spike": 3,
+      "ours": 3,
+      "equal": true
+    },
+    {
+      "quantity": "positives selected",
+      "spike": 3613,
+      "ours": 3592,
+      "equal": false
+    },
+    {
+      "quantity": "positives dropped by validity",
+      "spike": 29,
+      "ours": 26,
+      "equal": false
+    },
+    {
+      "quantity": "positives kept (before matching)",
+      "spike": 3584,
+      "ours": 3566,
+      "equal": false
+    }
+  ]
+}

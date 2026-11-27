@@ -1,0 +1,843 @@
+{
+  "task": "P1-11",
+  "config_hash": "4a66e6a87e42ffddb4ce157be21f3057b7f8c0a1aeace0479b90dd1c309c8899",
+  "git_commit": "04f193cc5c652bcc75196be078c6129425057a85",
+  "inputs": {
+    "meta_csv_sha256": "769b7c61e407efe20c74277040024f01cbdc8420ac3afa9a4668c1d50d8cb49f",
+    "meta_rows": 11132,
+    "splits_json_sha256": "5490ef822916507eef27e96c6c9c7a26faf45dcdfd15c7eb75453a86327ead79",
+    "splits_config_hash": "4a66e6a87e42ffddb4ce157be21f3057b7f8c0a1aeace0479b90dd1c309c8899"
+  },
+  "outputs": {
+    "preds_a": "data/baselines/preds_a.csv",
+    "preds_b": "data/baselines/preds_b.csv",
+    "build_info": "data/baselines/build_info.json",
+    "table": "results/baselines.csv"
+  },
+  "bootstrap": {
+    "n": 2000,
+    "seed": 123,
+    "ci": 0.95,
+    "method": "percentile",
+    "units": [
+      "sheet",
+      "block"
+    ],
+    "primary_unit": "sheet"
+  },
+  "random_state": 2611,
+  "scorers": {
+    "slope_only": {
+      "kind": "baseline",
+      "model": "column",
+      "features": [
+        "slope_mean"
+      ],
+      "settings": {
+        "score": "meta.slope_mean as it is (no fitting)"
+      }
+    },
+    "susceptibility": {
+      "kind": "baseline",
+      "model": "column",
+      "features": [
+        "susc_mean"
+      ],
+      "settings": {
+        "score": "meta.susc_mean as it is (no fitting)"
+      }
+    },
+    "slope_susc_lr": {
+      "kind": "classical_ml",
+      "model": "lr",
+      "features": [
+        "slope_mean",
+        "slope_std",
+        "susc_mean",
+        "susc_high_frac"
+      ],
+      "settings": {
+        "scaler": {
+          "class": "StandardScaler",
+          "params": {
+            "copy": true,
+            "with_mean": true,
+            "with_std": true
+          }
+        },
+        "lr": {
+          "class": "LogisticRegression",
+          "params": {
+            "C": 1.0,
+            "class_weight": null,
+            "dual": false,
+            "fit_intercept": true,
+            "intercept_scaling": 1,
+            "l1_ratio": 0.0,
+            "max_iter": 100,
+            "n_jobs": null,
+            "penalty": "deprecated",
+            "random_state": 2611,
+            "solver": "lbfgs",
+            "tol": 0.0001,
+            "verbose": 0,
+            "warm_start": false
+          }
+        }
+      }
+    },
+    "terrain_stats_lr": {
+      "kind": "classical_ml",
+      "model": "lr",
+      "features": [
+        "slope_mean",
+        "slope_std",
+        "slope_p90",
+        "lrm_s_std",
+        "lrm_l_std",
+        "curv_prof_std",
+        "curv_plan_std",
+        "svf_mean",
+        "svf_std",
+        "detr_std",
+        "detr_range_2_98",
+        "tri"
+      ],
+      "settings": {
+        "scaler": {
+          "class": "StandardScaler",
+          "params": {
+            "copy": true,
+            "with_mean": true,
+            "with_std": true
+          }
+        },
+        "lr": {
+          "class": "LogisticRegression",
+          "params": {
+            "C": 1.0,
+            "class_weight": null,
+            "dual": false,
+            "fit_intercept": true,
+            "intercept_scaling": 1,
+            "l1_ratio": 0.0,
+            "max_iter": 100,
+            "n_jobs": null,
+            "penalty": "deprecated",
+            "random_state": 2611,
+            "solver": "lbfgs",
+            "tol": 0.0001,
+            "verbose": 0,
+            "warm_start": false
+          }
+        }
+      }
+    },
+    "terrain_stats_gbm": {
+      "kind": "classical_ml",
+      "model": "gbm",
+      "features": [
+        "slope_mean",
+        "slope_std",
+        "slope_p90",
+        "lrm_s_std",
+        "lrm_l_std",
+        "curv_prof_std",
+        "curv_plan_std",
+        "svf_mean",
+        "svf_std",
+        "detr_std",
+        "detr_range_2_98",
+        "tri"
+      ],
+      "settings": {
+        "HistGradientBoostingClassifier": {
+          "class": "HistGradientBoostingClassifier",
+          "params": {
+            "categorical_features": "from_dtype",
+            "class_weight": null,
+            "early_stopping": "auto",
+            "interaction_cst": null,
+            "l2_regularization": 0.0,
+            "learning_rate": 0.1,
+            "loss": "log_loss",
+            "max_bins": 255,
+            "max_depth": null,
+            "max_features": 1.0,
+            "max_iter": 100,
+            "max_leaf_nodes": 31,
+            "min_samples_leaf": 20,
+            "monotonic_cst": null,
+            "n_iter_no_change": 10,
+            "random_state": 2611,
+            "scoring": "loss",
+            "tol": 1e-07,
+            "validation_fraction": 0.1,
+            "verbose": 0,
+            "warm_start": false
+          }
+        }
+      }
+    }
+  },
+  "tests": {
+    "a": {
+      "definition": "pooled out-of-fold ROC AUC over all held-out flysch patches (5 folds)",
+      "runs": [
+        "a_f0",
+        "a_f1",
+        "a_f2",
+        "a_f3",
+        "a_f4"
+      ],
+      "n": 4410,
+      "n_pos": 2205,
+      "n_neg": 2205,
+      "n_sheets": 284,
+      "n_blocks": 52,
+      "n_by_source": {
+        "cut": 117,
+        "positive": 2205,
+        "quarry": 13,
+        "random": 2048,
+        "rock": 23,
+        "spoil": 4
+      },
+      "results": {
+        "slope_only": {
+          "kind": "baseline",
+          "auc": 0.5073577367454919,
+          "sheet_ci": [
+            0.5042870882597277,
+            0.5106943930532032
+          ],
+          "sheet_n_used": 2000,
+          "sheet_n_degenerate": 0,
+          "block_ci": [
+            0.5047392135164112,
+            0.5107382769866216
+          ],
+          "block_n_used": 2000,
+          "block_n_degenerate": 0
+        },
+        "susceptibility": {
+          "kind": "baseline",
+          "auc": 0.5404745964901456,
+          "sheet_ci": [
+            0.524838107249459,
+            0.5551168155945723
+          ],
+          "sheet_n_used": 2000,
+          "sheet_n_degenerate": 0,
+          "block_ci": [
+            0.5254961749010889,
+            0.5556995184285737
+          ],
+          "block_n_used": 2000,
+          "block_n_degenerate": 0
+        },
+        "slope_susc_lr": {
+          "kind": "classical_ml",
+          "auc": 0.5768783582972116,
+          "sheet_ci": [
+            0.5588921786693786,
+            0.5949354116869903
+          ],
+          "sheet_n_used": 2000,
+          "sheet_n_degenerate": 0,
+          "block_ci": [
+            0.5585883250959319,
+            0.5963828299465438
+          ],
+          "block_n_used": 2000,
+          "block_n_degenerate": 0
+        },
+        "terrain_stats_lr": {
+          "kind": "classical_ml",
+          "auc": 0.6852225153099789,
+          "sheet_ci": [
+            0.6661489888899793,
+            0.7039544455961494
+          ],
+          "sheet_n_used": 2000,
+          "sheet_n_degenerate": 0,
+          "block_ci": [
+            0.6643561645202537,
+            0.7056013765299411
+          ],
+          "block_n_used": 2000,
+          "block_n_degenerate": 0
+        },
+        "terrain_stats_gbm": {
+          "kind": "classical_ml",
+          "auc": 0.6693439461952582,
+          "sheet_ci": [
+            0.6516353289749177,
+            0.687325047801643
+          ],
+          "sheet_n_used": 2000,
+          "sheet_n_degenerate": 0,
+          "block_ci": [
+            0.652167638510974,
+            0.687531091436555
+          ],
+          "block_n_used": 2000,
+          "block_n_degenerate": 0
+        }
+      },
+      "best": {
+        "baseline": "terrain_stats_lr",
+        "kind": "classical_ml",
+        "auc": 0.6852225153099789,
+        "sheet_ci": [
+          0.6661489888899793,
+          0.7039544455961494
+        ],
+        "sheet_n_used": 2000,
+        "sheet_n_degenerate": 0,
+        "block_ci": [
+          0.6643561645202537,
+          0.7056013765299411
+        ],
+        "block_n_used": 2000,
+        "block_n_degenerate": 0
+      },
+      "best_baseline": {
+        "baseline": "susceptibility",
+        "auc": 0.5404745964901456,
+        "sheet_ci": [
+          0.524838107249459,
+          0.5551168155945723
+        ]
+      },
+      "best_classical_ml": {
+        "baseline": "terrain_stats_lr",
+        "auc": 0.6852225153099789,
+        "sheet_ci": [
+          0.6661489888899793,
+          0.7039544455961494
+        ]
+      },
+      "per_fold_auc": {
+        "0": {
+          "slope_only": 0.5113112953514739,
+          "susceptibility": 0.5713311366213152,
+          "slope_susc_lr": 0.5915532879818595,
+          "terrain_stats_lr": 0.7055254393424036,
+          "terrain_stats_gbm": 0.7021860827664399
+        },
+        "1": {
+          "slope_only": 0.512530417884841,
+          "susceptibility": 0.5266276850895467,
+          "slope_susc_lr": 0.54386302760806,
+          "terrain_stats_lr": 0.6819864848304477,
+          "terrain_stats_gbm": 0.6381497172668545
+        },
+        "2": {
+          "slope_only": 0.503492,
+          "susceptibility": 0.524178,
+          "slope_susc_lr": 0.57138,
+          "terrain_stats_lr": 0.676748,
+          "terrain_stats_gbm": 0.67208
+        },
+        "3": {
+          "slope_only": 0.5036914600550965,
+          "susceptibility": 0.5279767370676461,
+          "slope_susc_lr": 0.5935843281297827,
+          "terrain_stats_lr": 0.6952719110294868,
+          "terrain_stats_gbm": 0.666793184368942
+        },
+        "4": {
+          "slope_only": 0.5105282624222018,
+          "susceptibility": 0.5659945413733293,
+          "slope_susc_lr": 0.6057162534435262,
+          "terrain_stats_lr": 0.6798732272217121,
+          "terrain_stats_gbm": 0.680912661973268
+        }
+      },
+      "spike_reference": {
+        "baseline": "terrain_stats_lr",
+        "auc": 0.695,
+        "ci_low": 0.678,
+        "ci_high": 0.713,
+        "ours": 0.6852225153099789,
+        "ours_inside_spike_ci": true
+      }
+    },
+    "b": {
+      "definition": "ROC AUC on all patches of non-Zlínský/non-Moravskoslezský sheets",
+      "runs": [
+        "b"
+      ],
+      "n": 3090,
+      "n_pos": 1545,
+      "n_neg": 1545,
+      "n_sheets": 465,
+      "n_blocks": 114,
+      "n_by_source": {
+        "cut": 80,
+        "positive": 1545,
+        "quarry": 29,
+        "random": 1265,
+        "rock": 167,
+        "spoil": 4
+      },
+      "results": {
+        "slope_only": {
+          "kind": "baseline",
+          "auc": 0.5103243577256208,
+          "sheet_ci": [
+            0.5039743717435954,
+            0.5168850307063023
+          ],
+          "sheet_n_used": 2000,
+          "sheet_n_degenerate": 0,
+          "block_ci": [
+            0.5065596163589566,
+            0.5149487992589582
+          ],
+          "block_n_used": 2000,
+          "block_n_degenerate": 0
+        },
+        "susceptibility": {
+          "kind": "baseline",
+          "auc": 0.5251130591426566,
+          "sheet_ci": [
+            0.5105379440979121,
+            0.5405553801746746
+          ],
+          "sheet_n_used": 2000,
+          "sheet_n_degenerate": 0,
+          "block_ci": [
+            0.5064161746093455,
+            0.543722168223085
+          ],
+          "block_n_used": 2000,
+          "block_n_degenerate": 0
+        },
+        "slope_susc_lr": {
+          "kind": "classical_ml",
+          "auc": 0.5163289031325604,
+          "sheet_ci": [
+            0.4957728970370839,
+            0.5364748592343102
+          ],
+          "sheet_n_used": 2000,
+          "sheet_n_degenerate": 0,
+          "block_ci": [
+            0.48869886191074025,
+            0.5448635046614676
+          ],
+          "block_n_used": 2000,
+          "block_n_degenerate": 0
+        },
+        "terrain_stats_lr": {
+          "kind": "classical_ml",
+          "auc": 0.6236185209622856,
+          "sheet_ci": [
+            0.6039912149089106,
+            0.6422559082546846
+          ],
+          "sheet_n_used": 2000,
+          "sheet_n_degenerate": 0,
+          "block_ci": [
+            0.603573727905079,
+            0.6448599371094959
+          ],
+          "block_n_used": 2000,
+          "block_n_degenerate": 0
+        },
+        "terrain_stats_gbm": {
+          "kind": "classical_ml",
+          "auc": 0.6180722866329427,
+          "sheet_ci": [
+            0.5973250045962638,
+            0.6386500150438904
+          ],
+          "sheet_n_used": 2000,
+          "sheet_n_degenerate": 0,
+          "block_ci": [
+            0.5901004970253174,
+            0.6447538090047842
+          ],
+          "block_n_used": 2000,
+          "block_n_degenerate": 0
+        }
+      },
+      "best": {
+        "baseline": "terrain_stats_lr",
+        "kind": "classical_ml",
+        "auc": 0.6236185209622856,
+        "sheet_ci": [
+          0.6039912149089106,
+          0.6422559082546846
+        ],
+        "sheet_n_used": 2000,
+        "sheet_n_degenerate": 0,
+        "block_ci": [
+          0.603573727905079,
+          0.6448599371094959
+        ],
+        "block_n_used": 2000,
+        "block_n_degenerate": 0
+      },
+      "best_baseline": {
+        "baseline": "susceptibility",
+        "auc": 0.5251130591426566,
+        "sheet_ci": [
+          0.5105379440979121,
+          0.5405553801746746
+        ]
+      },
+      "best_classical_ml": {
+        "baseline": "terrain_stats_lr",
+        "auc": 0.6236185209622856,
+        "sheet_ci": [
+          0.6039912149089106,
+          0.6422559082546846
+        ]
+      },
+      "spike_reference": {
+        "baseline": "terrain_stats_gbm",
+        "auc": 0.624,
+        "ci_low": 0.603,
+        "ci_high": 0.647,
+        "ours": 0.6180722866329427,
+        "ours_inside_spike_ci": true
+      }
+    }
+  },
+  "matching_check": {
+    "scorer": "slope_only",
+    "expected": "about 0.5 (Appendix A §8)",
+    "a": {
+      "kind": "baseline",
+      "auc": 0.5073577367454919,
+      "sheet_ci": [
+        0.5042870882597277,
+        0.5106943930532032
+      ],
+      "sheet_n_used": 2000,
+      "sheet_n_degenerate": 0,
+      "block_ci": [
+        0.5047392135164112,
+        0.5107382769866216
+      ],
+      "block_n_used": 2000,
+      "block_n_degenerate": 0,
+      "sheet_ci_contains_0.5": false,
+      "per_fold_auc": {
+        "0": 0.5113112953514739,
+        "1": 0.512530417884841,
+        "2": 0.503492,
+        "3": 0.5036914600550965,
+        "4": 0.5105282624222018
+      }
+    },
+    "b": {
+      "kind": "baseline",
+      "auc": 0.5103243577256208,
+      "sheet_ci": [
+        0.5039743717435954,
+        0.5168850307063023
+      ],
+      "sheet_n_used": 2000,
+      "sheet_n_degenerate": 0,
+      "block_ci": [
+        0.5065596163589566,
+        0.5149487992589582
+      ],
+      "block_n_used": 2000,
+      "block_n_degenerate": 0,
+      "sheet_ci_contains_0.5": false
+    }
+  },
+  "fits": [
+    {
+      "run": "a_f0",
+      "baseline": "slope_susc_lr",
+      "model": "lr",
+      "n_fit": 3738,
+      "n_fit_pos": 1869,
+      "n_fit_neg": 1869,
+      "n_train": 2968,
+      "n_inner_val": 770,
+      "n_test": 672,
+      "converged": true,
+      "n_iter": 10,
+      "early_stopping": null,
+      "warnings": []
+    },
+    {
+      "run": "a_f0",
+      "baseline": "terrain_stats_lr",
+      "model": "lr",
+      "n_fit": 3738,
+      "n_fit_pos": 1869,
+      "n_fit_neg": 1869,
+      "n_train": 2968,
+      "n_inner_val": 770,
+      "n_test": 672,
+      "converged": true,
+      "n_iter": 67,
+      "early_stopping": null,
+      "warnings": []
+    },
+    {
+      "run": "a_f0",
+      "baseline": "terrain_stats_gbm",
+      "model": "gbm",
+      "n_fit": 3738,
+      "n_fit_pos": 1869,
+      "n_fit_neg": 1869,
+      "n_train": 2968,
+      "n_inner_val": 770,
+      "n_test": 672,
+      "converged": null,
+      "n_iter": 100,
+      "early_stopping": false,
+      "warnings": []
+    },
+    {
+      "run": "a_f1",
+      "baseline": "slope_susc_lr",
+      "model": "lr",
+      "n_fit": 3454,
+      "n_fit_pos": 1727,
+      "n_fit_neg": 1727,
+      "n_train": 2664,
+      "n_inner_val": 790,
+      "n_test": 956,
+      "converged": true,
+      "n_iter": 10,
+      "early_stopping": null,
+      "warnings": []
+    },
+    {
+      "run": "a_f1",
+      "baseline": "terrain_stats_lr",
+      "model": "lr",
+      "n_fit": 3454,
+      "n_fit_pos": 1727,
+      "n_fit_neg": 1727,
+      "n_train": 2664,
+      "n_inner_val": 790,
+      "n_test": 956,
+      "converged": true,
+      "n_iter": 58,
+      "early_stopping": null,
+      "warnings": []
+    },
+    {
+      "run": "a_f1",
+      "baseline": "terrain_stats_gbm",
+      "model": "gbm",
+      "n_fit": 3454,
+      "n_fit_pos": 1727,
+      "n_fit_neg": 1727,
+      "n_train": 2664,
+      "n_inner_val": 790,
+      "n_test": 956,
+      "converged": null,
+      "n_iter": 100,
+      "early_stopping": false,
+      "warnings": []
+    },
+    {
+      "run": "a_f2",
+      "baseline": "slope_susc_lr",
+      "model": "lr",
+      "n_fit": 3410,
+      "n_fit_pos": 1705,
+      "n_fit_neg": 1705,
+      "n_train": 2936,
+      "n_inner_val": 474,
+      "n_test": 1000,
+      "converged": true,
+      "n_iter": 10,
+      "early_stopping": null,
+      "warnings": []
+    },
+    {
+      "run": "a_f2",
+      "baseline": "terrain_stats_lr",
+      "model": "lr",
+      "n_fit": 3410,
+      "n_fit_pos": 1705,
+      "n_fit_neg": 1705,
+      "n_train": 2936,
+      "n_inner_val": 474,
+      "n_test": 1000,
+      "converged": true,
+      "n_iter": 64,
+      "early_stopping": null,
+      "warnings": []
+    },
+    {
+      "run": "a_f2",
+      "baseline": "terrain_stats_gbm",
+      "model": "gbm",
+      "n_fit": 3410,
+      "n_fit_pos": 1705,
+      "n_fit_neg": 1705,
+      "n_train": 2936,
+      "n_inner_val": 474,
+      "n_test": 1000,
+      "converged": null,
+      "n_iter": 100,
+      "early_stopping": false,
+      "warnings": []
+    },
+    {
+      "run": "a_f3",
+      "baseline": "slope_susc_lr",
+      "model": "lr",
+      "n_fit": 3420,
+      "n_fit_pos": 1710,
+      "n_fit_neg": 1710,
+      "n_train": 2882,
+      "n_inner_val": 538,
+      "n_test": 990,
+      "converged": true,
+      "n_iter": 9,
+      "early_stopping": null,
+      "warnings": []
+    },
+    {
+      "run": "a_f3",
+      "baseline": "terrain_stats_lr",
+      "model": "lr",
+      "n_fit": 3420,
+      "n_fit_pos": 1710,
+      "n_fit_neg": 1710,
+      "n_train": 2882,
+      "n_inner_val": 538,
+      "n_test": 990,
+      "converged": true,
+      "n_iter": 52,
+      "early_stopping": null,
+      "warnings": []
+    },
+    {
+      "run": "a_f3",
+      "baseline": "terrain_stats_gbm",
+      "model": "gbm",
+      "n_fit": 3420,
+      "n_fit_pos": 1710,
+      "n_fit_neg": 1710,
+      "n_train": 2882,
+      "n_inner_val": 538,
+      "n_test": 990,
+      "converged": null,
+      "n_iter": 100,
+      "early_stopping": false,
+      "warnings": []
+    },
+    {
+      "run": "a_f4",
+      "baseline": "slope_susc_lr",
+      "model": "lr",
+      "n_fit": 3618,
+      "n_fit_pos": 1809,
+      "n_fit_neg": 1809,
+      "n_train": 2994,
+      "n_inner_val": 624,
+      "n_test": 792,
+      "converged": true,
+      "n_iter": 10,
+      "early_stopping": null,
+      "warnings": []
+    },
+    {
+      "run": "a_f4",
+      "baseline": "terrain_stats_lr",
+      "model": "lr",
+      "n_fit": 3618,
+      "n_fit_pos": 1809,
+      "n_fit_neg": 1809,
+      "n_train": 2994,
+      "n_inner_val": 624,
+      "n_test": 792,
+      "converged": true,
+      "n_iter": 68,
+      "early_stopping": null,
+      "warnings": []
+    },
+    {
+      "run": "a_f4",
+      "baseline": "terrain_stats_gbm",
+      "model": "gbm",
+      "n_fit": 3618,
+      "n_fit_pos": 1809,
+      "n_fit_neg": 1809,
+      "n_train": 2994,
+      "n_inner_val": 624,
+      "n_test": 792,
+      "converged": null,
+      "n_iter": 100,
+      "early_stopping": false,
+      "warnings": []
+    },
+    {
+      "run": "b",
+      "baseline": "slope_susc_lr",
+      "model": "lr",
+      "n_fit": 4042,
+      "n_fit_pos": 2021,
+      "n_fit_neg": 2021,
+      "n_train": 3396,
+      "n_inner_val": 646,
+      "n_test": 3090,
+      "converged": true,
+      "n_iter": 9,
+      "early_stopping": null,
+      "warnings": []
+    },
+    {
+      "run": "b",
+      "baseline": "terrain_stats_lr",
+      "model": "lr",
+      "n_fit": 4042,
+      "n_fit_pos": 2021,
+      "n_fit_neg": 2021,
+      "n_train": 3396,
+      "n_inner_val": 646,
+      "n_test": 3090,
+      "converged": true,
+      "n_iter": 59,
+      "early_stopping": null,
+      "warnings": []
+    },
+    {
+      "run": "b",
+      "baseline": "terrain_stats_gbm",
+      "model": "gbm",
+      "n_fit": 4042,
+      "n_fit_pos": 2021,
+      "n_fit_neg": 2021,
+      "n_train": 3396,
+      "n_inner_val": 646,
+      "n_test": 3090,
+      "converged": null,
+      "n_iter": 100,
+      "early_stopping": false,
+      "warnings": []
+    }
+  ],
+  "all_lr_fits_converged": true,
+  "spike_reference": {
+    "note": "the spike's best non-CNN result per test (BRIEF.md); reference only, never used to change anything",
+    "a": {
+      "baseline": "terrain_stats_lr",
+      "auc": 0.695,
+      "ci_low": 0.678,
+      "ci_high": 0.713
+    },
+    "b": {
+      "baseline": "terrain_stats_gbm",
+      "auc": 0.624,
+      "ci_low": 0.603,
+      "ci_high": 0.647
+    }
+  }
+}

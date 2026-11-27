@@ -4,7 +4,8 @@ Decisions taken while reviewing task branches, before any training. Each also si
 noted. P1-16 folds them into `PREREGISTRATION.md`.
 
 **Mark's review (2026-11-27, before any training).** Mark approved O2, O3, O5 and O6 as recommended, and approved the
-orchestrator running P1-09's sampling build (I2).
+orchestrator running P1-09's sampling build (I2). After the investigation of the sampling counts, he approved
+O8 the same day.
 
 ## O1 · Config hash leaves out `status` (P1-01, D02a)
 
@@ -42,6 +43,8 @@ after the fact.
 - **Decision.** Keep Appendix A's literal rule (it reproduces the spike's dataset construction). Once
   `samples.parquet` exists, count the stage-1 patches that overlap any stage-2 window and the overlap areas, and
   report them as a known limitation. Not changed after seeing results.
+- **Count [E] (final sampling build, 2026-11-27).** Of 11,132 samples, one (a random negative) overlaps one of the
+  146,622 stage-2 windows, by 4 m × 50 m = 200 m², 0.2 % of the window. No positive overlaps any window.
 
 ## O6 · Float32 head under bf16 autocast (P1-06), approved by Mark
 
@@ -54,6 +57,24 @@ Several tasks asked for keys for values that now sit in module constants (source
 susceptibility alpha threshold, the stage-2 buffer, the verification stream, `eval.bootstrap.secondary_unit`, the
 stage-2 bootstrap rule). P1-16 adds them in one batch, then re-runs every deterministic build (geo, samples,
 patches, baselines, stage-2 baselines) under the final config and confirms the content is unchanged.
+
+## O8 · Water-filling fills each sheet until it reaches the cap (P1-09, D13), approved by Mark
+
+- **Finding.** The first sampling build (polygons taken only while the sheet stays ≤ the cap) gave caps 8 / 4 and
+  3,779 positives against the spike's 8 / 3 and 3,613; at equal caps it selected about 6 % fewer points.
+- **Investigation.** Read-only, with four readings of the cap and four of feasibility fixed before computing. Only
+  "take polygons until the sheet reaches the cap" gives caps 8 / 3 (in all 21 order seeds tried), overshoots both
+  budgets at cap + 1 as the spike says, and puts 3,613 inside its seed range (3,592–3,652).
+- **Decision.** Adopt it, as PLAN §5 allows for genuinely ambiguous text. Mark approved it on 2026-11-27, before any
+  training.
+
+## O9 · 793 vs 870 infeasible polygons: unexplained, kept as a reported difference
+
+Our exact patch rule leaves 793 of 14,617 eligible stage-1 polygons with no feasible patch; the spike reports 870.
+None of the alternatives fixed in advance gives 870: the square plus its 56 m context inside the sheet (1,379), the
+pixel-centre test (780), the stage-2 rule on the raster extent (971). Feasibility is seed-free, so randomness can't
+explain it. The literal rule is kept, and the 77-polygon difference (0.5 %) is reported as a discrepancy rather than
+searched further.
 
 ## I1 · Incident: a test run wrote synthetic files into the real data tree (2026-11-26, fixed)
 
