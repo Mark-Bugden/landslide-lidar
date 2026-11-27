@@ -38,7 +38,8 @@ If this plan and the brief disagree, the brief wins. On anything technical about
 | 1 | Agents | P1-01 … P1-18, then **■ STOP and report** |
 | 2 | Mark | Runs one command overnight (training → evaluation → stage 2 → verdict) |
 | 3 (when told) | Agent | P3-01: audit the run and write `REPLICATION.md`, then **■ STOP** |
-| 4 (when told, only if REPLICATED) | Agents | The demo, planned at that point (§10) |
+| 3b (when told, after phase 3) | Agents | Model improvement on the verified baseline, planned at that point (§10a) |
+| 4 (when told, only if REPLICATED) | Agents | The demo, planned at that point (§10), with the best verified model |
 
 **Phase-1 waves.** Tasks in the same wave can run in parallel. Use one git worktree per agent.
 
@@ -106,6 +107,10 @@ M0 ─► P1-01 ─┬─► P1-02 (config + pre-reg draft) ──────�
    - The order of commits on `phase-1` proves that the freeze came before any training.
    - The flow for phases 3 and 4 is decided later.
 5. **Stub release (P1-15): not yet.** Mark and the agents work on it on 2026-11-27.
+6. **Project goal (2026-11-27).** This is a portfolio project, ideally with real-world use. Phases 1–3 verify the
+   spike's claims with its exact, fixed recipe, so the project rests on reproducible results rather than unverified
+   ones. The brief's "fixed settings, no hyperparameter search" applies to that verification only. Once it's done,
+   aiming for the best model is welcome (§10a).
 
 ---
 
@@ -811,6 +816,25 @@ Deliberately not planned yet. The demo is designed and split into tasks only aft
 (G6), working from the brief's "Phase 4" section and the site contract. Until then, no agent spends effort on demo
 details. Phases 1–3 need nothing beyond what they already produce: `results/metrics.json` and the stage-2 outputs in
 `data/stage2/`.
+
+## 10a. Model improvement (planned after verification)
+
+Not split into tasks yet; planned with Mark after phase 3. Agreed principles (2026-11-27):
+
+- **Start from the verified baseline.** The frozen replication run is the reference every change is compared with.
+  It is never re-run with changed settings; improvements are new, separately recorded runs.
+- **Honest evaluation.**
+  - Nested spatial cross-validation: all tuning (hyperparameters, architectures, augmentation, sample sizes) happens
+    inside the training folds; the outer folds give the performance estimate. Folds are spatial blocks, never random
+    patches, because nearby terrain is correlated.
+  - Several seeds for every compared configuration, with their spread reported.
+  - The 20 reserved stage-2 sheets stay untouched until one final, pre-registered check of the chosen model. They are
+    also where the demo's map explorer lives.
+- **Candidate directions.** More of the 15,000 eligible landslides (the spike's recipe uses about 3,600); tuned
+  optimisation and longer training; more augmentation or larger models; optimising for the whole-sheet detection task
+  (stage 2), the closest to real use.
+- **Claims.** The register was mapped on the same LiDAR hillshade, so the model learns to agree with the mappers;
+  any real-world claim says so (brief: "Claims").
 
 ---
 
