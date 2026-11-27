@@ -1,8 +1,9 @@
 # Pre-registration: independent replication of the landslide kill test
 
-**Status: DRAFT.** Not frozen. §7 "Decisions" and §8 "Deviations" are filled from `docs/decisions/` (P1-16). The
-freeze commit sets the config's `status` to FROZEN, records `configs/landslide.sha256` and fills §9, all before any CNN
-training (the smoke test included). After that commit, nothing in this file, the method or the config changes.
+**Status: FROZEN on 2026-11-27**, in the commit "Freeze pre-registration" on `phase-1`, before any CNN training
+(the smoke test included). From this commit on, nothing in this file, the method or the config changes; the config
+hash is recorded in `configs/landslide.sha256`, and the overnight runner refuses to train unless the committed config
+matches it.
 
 ## 1. Purpose
 
@@ -473,14 +474,21 @@ the results.
 
 ## 9. Freeze record
 
-*The orchestrator fills this section in the freeze commit.*
-
-- **Freeze date:** `<YYYY-MM-DD>`
-- **Config hash** (`configs/landslide.sha256`, sha256 of the canonical config without `status`): `<hash>`
-- **Freeze commit** on `phase-1`: `<sha>` ("Freeze pre-registration")
-- **Artefacts rebuilt under the frozen config:** `<geo, samples, patches, baselines, stage-2 baselines: content
-  unchanged / differences>`
-- **Run directories:** `<the 21 synthetic run directories of I1 removed from data/runs/; no run directory exists at
-  the freeze>`
-- **No CNN had seen a real patch before this commit.** `<statement and evidence: e.g. no best.pt anywhere under
-  data/, no data/smoke/ directory, the order of commits on phase-1>`
+- **Freeze date:** 2026-11-27.
+- **Config hash** (`configs/landslide.sha256`, sha256 of the canonical config without `status`):
+  `1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb`.
+- **Freeze commit:** the commit on `phase-1` that adds this record, titled "Freeze pre-registration". (A commit can't
+  contain its own id; the runner records it in `results/run_summary.json`, and the phase-1 report quotes it.)
+- **Artefacts rebuilt under the frozen config** (commit "Rebuild every artefact under the final config", just before
+  this one): the geo build, sampling (built twice in one run, identical), patches, the dataset check (16 of 16
+  checks), the stage-1 baselines (computed twice, identical) and the stage-2 baselines. Compared with the build made
+  before the last config keys were added, every file's content is unchanged: `sheets.parquet`, `polygons.parquet`,
+  `splits.json`, `samples.parquet`, `meta.csv`, `patches.npy` (same sha256), the baseline predictions, the stage-2
+  detections and all 80 stage-2 score files. Only fields that record the config hash or commit differ (including the
+  20 stage-2 lattice files, which store the hash).
+- **Run directories:** the 21 synthetic run directories of incident I1 were removed from `data/runs/`; no run
+  directory exists at the freeze.
+- **No CNN had seen a real patch before this commit.** No model checkpoint exists anywhere under `data/` (the only
+  `.pth` file is the cached ImageNet weights), there is no `data/runs/` or `data/smoke/` directory, every test of the
+  training, prediction and stage-2 CNN code ran on random tensors or toy rasters, and the order of commits on
+  `phase-1` shows this freeze before the smoke test.

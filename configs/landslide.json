@@ -1,6 +1,6 @@
 {
   "name": "landslide_lidar_replication",
-  "status": "DRAFT (not frozen). P1-16 freezes it before any CNN training, including the smoke test.",
+  "status": "FROZEN 2026-11-27 at the pre-registration commit (before any CNN training, including the smoke test)",
   "crs": "EPSG:5514",
   "paths": {
     "note": "Our layout; src/landslide/paths.py resolves every file. Appendix B's spike paths do not apply.",
