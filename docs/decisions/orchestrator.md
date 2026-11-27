@@ -3,6 +3,9 @@
 Decisions taken while reviewing task branches, before any training. Each also sits in the owning task's file where
 noted. P1-16 folds them into `PREREGISTRATION.md`.
 
+**Mark's review (2026-11-27, before any training).** Mark approved O2, O3, O5 and O6 as recommended, and approved the
+orchestrator running P1-09's sampling build (I2).
+
 ## O1 · Config hash leaves out `status` (P1-01, D02a)
 
 Setting `status` to FROZEN at the freeze must not change the hash recorded by files built before it. Any other
@@ -40,10 +43,10 @@ after the fact.
   `samples.parquet` exists, count the stage-1 patches that overlap any stage-2 window and the overlap areas, and
   report them as a known limitation. Not changed after seeing results.
 
-## O6 · Float32 head under bf16 autocast (P1-06), flagged to Mark
+## O6 · Float32 head under bf16 autocast (P1-06), approved by Mark
 
 Only the final 512 → 1 layer runs in float32, so scores aren't rounded to bf16. The literal reading of "bf16
-autocast" would give bf16 logits. Recorded as a decision, not a deviation; Mark may veto before the freeze.
+autocast" would give bf16 logits. Recorded as a decision, not a deviation; Mark approved it on 2026-11-27.
 
 ## O7 · Config keys are added in one batch at the freeze (P1-16)
 
@@ -67,4 +70,6 @@ patches, baselines, stage-2 baselines) under the final config and confirms the c
 ## I2 · P1-09's real build was blocked by the permission system
 
 The P1-09 agent was denied reading the ZABAGED cache, a real-data dry run and a `git merge`. The orchestrator did not
-run the build in its place and asked Mark how to proceed.
+run the build in its place and asked Mark how to proceed. The likely cause was the orchestrator's own earlier
+instruction to that agent not to read the cache while it was still downloading. On 2026-11-27 Mark approved the
+orchestrator running the build (`scripts/build_samples.py --check-determinism`) from the main checkout.
