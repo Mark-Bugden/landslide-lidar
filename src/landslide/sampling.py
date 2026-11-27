@@ -589,14 +589,15 @@ def positive_points_sheet(cfg: Mapping[str, Any], p: SamplingParams, sg: SheetGe
 
 
 def fill_sheet(ks: Sequence[int], cap: int) -> np.ndarray:
-    """Polygons (in order, k points each) taken whole while the sheet's points stay <= cap; a polygon that doesn't fit
-    is skipped and the next one is tried (D13)."""
+    """Polygons (in order, k points each) taken whole while the sheet's points are still below the cap, so the last
+    polygon taken may take the sheet over it (D13, "water-filled up to a common per-sheet cap")."""
     taken = np.zeros(len(ks), dtype=bool)
     acc = 0
     for i, k in enumerate(ks):
-        if acc + k <= cap:
-            taken[i] = True
-            acc += k
+        if acc >= cap:
+            break
+        taken[i] = True
+        acc += k
     return taken
 
 

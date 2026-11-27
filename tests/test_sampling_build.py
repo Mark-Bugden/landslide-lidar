@@ -98,8 +98,8 @@ def test_positive_points_rules(world):
 
 
 def test_waterfill_and_validity_order(world):
-    """Water-filling selects whole polygons under the cap; validity drops selected points afterwards, without top-up;
-    only kept positives are matched."""
+    """Water-filling selects whole polygons until each sheet reaches the cap; validity drops selected points
+    afterwards, without top-up; only kept positives are matched."""
     inputs, cfg, res = world
     poly, pos, S_ = res.polygons, res.positives, res.samples
     summ = res.summary["positives"]
@@ -109,7 +109,7 @@ def test_waterfill_and_validity_order(world):
         flysch = name == "flysch"
         sheets = inputs.sheets.set_index("sheet")["flysch"].astype(bool)
         per_sheet = taken[taken["sheet"].map(sheets) == flysch].groupby("sheet")["k"].sum()
-        assert (per_sheet <= f["cap"]).all()
+        assert (per_sheet <= f["cap"] + int(cfg["sampling"]["max_pts_per_poly"]) - 1).all()
         assert f["selected_points"] <= f["budget"] < (f["total_at_cap_plus_1"] or 10**9)
     assert summ["validity_dropped"] == int((~pos["valid"]).sum()) > 0
     assert summ["kept"] == summ["selected_points"] - summ["validity_dropped"]
