@@ -235,11 +235,15 @@ def test_greedy_spaced():
     assert pk.size == 2
 
 
-def test_fill_sheet_takes_polygons_whole_and_skips():
+def test_fill_sheet_takes_polygons_whole_until_the_cap_is_reached():
+    # Polygons are taken in order while the sheet is below the cap; the last one may take it over.
+    assert S.fill_sheet([3, 1, 2], 0).tolist() == [False, False, False]
+    assert S.fill_sheet([3, 1, 2], 2).tolist() == [True, False, False]
     assert S.fill_sheet([3, 1, 2], 3).tolist() == [True, False, False]
     assert S.fill_sheet([3, 1, 2], 4).tolist() == [True, True, False]
-    assert S.fill_sheet([3, 1, 2], 2).tolist() == [False, True, False]
-    assert S.fill_sheet([3, 1, 2], 6).tolist() == [True, True, True]
+    assert S.fill_sheet([3, 1, 2], 5).tolist() == [True, True, True]
+    assert S.fill_sheet([1, 3, 1], 2).tolist() == [True, True, False]   # 1 < 2 -> take 3 -> 4 >= 2, stop
+    assert S.fill_sheet([3, 1, 2], 9).tolist() == [True, True, True]
 
 
 def test_waterfill_budget_split_and_largest_cap():
@@ -261,7 +265,11 @@ def test_waterfill_budget_split_and_largest_cap():
         assert all(t > f.budget for cap, t in f.totals_by_cap.items() if cap > f.cap)
         sel = poly[taken & (poly["sheet"].map(pool) == name)]
         assert int(sel["k"].sum()) == f.total
-        assert (sel.groupby("sheet")["k"].sum() <= f.cap).all()
+        # each sheet stops once it reaches the cap, so it ends below cap + the largest k
+        assert (sel.groupby("sheet")["k"].sum() <= f.cap + p.max_pts_per_poly - 1).all()
+        for sheet, g in sel.groupby("sheet"):
+            avail = poly[(poly["sheet"] == sheet) & (poly["k"] >= 1)]
+            assert int(g["k"].sum()) >= f.cap or len(g) == len(avail)
     assert not taken[poly["k"].to_numpy() == 0].any()
     # the order is the sheet's own permutation: reproducible
     taken2, _ = S.waterfill(cfg, p, poly, pool, n_elig)
