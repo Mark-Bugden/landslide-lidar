@@ -1,0 +1,400 @@
+{
+  "name": "landslide_lidar_replication",
+  "status": "FROZEN 2026-11-27 at the pre-registration commit (before any CNN training, including the smoke test)",
+  "crs": "EPSG:5514",
+  "paths": {
+    "note": "Our layout; src/landslide/paths.py resolves every file. Appendix B's spike paths do not apply.",
+    "raw_dir": "data/raw_data",
+    "data_dir": "data",
+    "results_dir": "results",
+    "smoke_dir": "data/smoke"
+  },
+  "dtm": {
+    "service": "https://ags.cuzk.gov.cz/arcgis2/rest/services/dmr5g/ImageServer (DMR 5G, native 2 m)",
+    "cell_m": 2.0,
+    "margin_m": 250,
+    "invalid_rule": "z <= 0 (ImageServer returns 0.0 outside the national border) or z > 2000 -> NaN"
+  },
+  "labels": {
+    "skupina": 1,
+    "in_mapped": true,
+    "min_area_m2": 3000
+  },
+  "patch": {
+    "size_m": 300,
+    "px": 150
+  },
+  "channels": [
+    "slope",
+    "lrm_s",
+    "lrm_l",
+    "curv_prof",
+    "curv_plan",
+    "svf",
+    "detr"
+  ],
+  "channel_params": {
+    "lrm_small_px": 11,
+    "lrm_large_px": 51,
+    "curv_sigma_px": 1.0,
+    "curv_k0": 0.001,
+    "svf_radius_px": 20,
+    "svf_dirs": 16
+  },
+  "flysch": {
+    "source": "ČGS geologická mapa 1:500 000 (Geologie/geologicka_mapa500_CR, layer 7 Horniny)",
+    "subregions": [
+      "Marinní terciér vnějších Karpat",
+      "Mezozoické sedimenty Karpat",
+      "Marinní mezozoikum a terciér vnějších a vnitřních Karpat",
+      "Vulkanity vnějších Karpat",
+      "Vulkanity vnějších a vnitřních Karpat"
+    ],
+    "closing_m": 2000,
+    "sheet_rule": "sheet is flysch if >= 50% of its area lies inside the closed flysch outline",
+    "min_sheet_frac": 0.5
+  },
+  "sampling": {
+    "seed": 11,
+    "max_pos": 4000,
+    "max_neg": 4000,
+    "pts_area_unit_m2": 40000,
+    "max_pts_per_poly": 3,
+    "min_pt_spacing_m": 100,
+    "neg_min_dist_to_polygon_m": 150,
+    "neg_exclude_zabaged_landslide_m": 150,
+    "neg_candidate_spacing_m": 60,
+    "neg_min_spacing_m": 150,
+    "slope_bin_deg": 2.0,
+    "lookalike_frac": 0.12,
+    "lookalike_types": [
+      "quarry",
+      "spoil",
+      "rock",
+      "cut"
+    ],
+    "lookalike_max_per_polygon": 2,
+    "cut_point_step_m": 100,
+    "cut_window_px": 21,
+    "cut_slope_p90_deg": 20.0
+  },
+  "splits": {
+    "block_km": 15,
+    "n_folds_a": 5,
+    "inner_val_frac": 0.15,
+    "transfer_train_kraje": [
+      "Zlínský",
+      "Moravskoslezský"
+    ],
+    "sheet_kraj_rule": "majority gen_kraj (first-listed kraj) of all register polygons intersecting the sheet",
+    "stage2": {
+      "n_flysch": 10,
+      "n_nonflysch": 10,
+      "min_eligible_polygons": 5,
+      "full_sheets_only": true,
+      "seed": 2026,
+      "require_valid_dtm": "whole cached raster (sheet bbox + 250 m) valid: no 0-m cells (outside the border) or NaN"
+    }
+  },
+  "model": {
+    "arch": "resnet18",
+    "init": "torchvision IMAGENET1K_V1; conv1 = mean of RGB filters replicated over channels x 3/C",
+    "in_channels": 7,
+    "head": "single logit"
+  },
+  "train": {
+    "loss": "BCEWithLogits",
+    "optimizer": "AdamW",
+    "lr": 0.0003,
+    "weight_decay": 0.01,
+    "batch_size": 64,
+    "max_epochs": 40,
+    "warmup_epochs": 2,
+    "schedule": "linear warmup then cosine to 0 over max_epochs",
+    "early_stopping": {
+      "metric": "inner-val ROC AUC",
+      "patience": 8,
+      "restore_best": true
+    },
+    "amp": "bf16 autocast",
+    "augmentation": "random dihedral D4 (8 rotations/flips, exact on the pixel grid)",
+    "normalisation": "per-channel mean/std from the run's training patches",
+    "tta": "mean of sigmoid over the 8 D4 views",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "ensemble": "mean of seed probabilities",
+    "deterministic": true
+  },
+  "eval": {
+    "primary_a": "pooled out-of-fold ROC AUC over all held-out flysch patches (5 folds)",
+    "primary_b": "ROC AUC on all patches of non-Zlínský/non-Moravskoslezský sheets",
+    "bootstrap": {
+      "unit": "sheet",
+      "n": 2000,
+      "ci": 0.95,
+      "method": "percentile",
+      "seed": 123
+    },
+    "thresholds": {
+      "a_auc_min": 0.75,
+      "b_auc_min": 0.65,
+      "stage2_recall": 0.5,
+      "stage2_precision_min": 0.3
+    }
+  },
+  "stage2": {
+    "model": "same configuration retrained on all stage-1 patches (matched) PLUS the unmatched background sample (4,000 patches, uniform over the stage-1 sheets' feasible area, >= 150 m from polygons) as extra negatives; 15% of blocks as inner validation; seeds [0,1,2]; ensemble",
+    "background_n": 4000,
+    "stride_px": 25,
+    "nms_radius_m": 150,
+    "match_buffer_m": 50,
+    "ignore_buffer_m": 150,
+    "object_rule": "detections = greedy NMS (radius 150 m) of the 50 m window-score lattice; TP = first detection inside a target (eligible polygon assigned to the sheet) buffered 50 m; duplicate on a matched target = ignored; within 150 m of any register polygon = ignored; else FP",
+    "precision_rule": "precision at the highest threshold whose object recall >= 0.5 (primary); interpolated max precision at recall >= 0.5 (secondary)",
+    "rule_change_note": "3x3 local maxima (first draft) capped max recall at 0.41-0.45 for smooth baseline maps; replaced before any CNN training using baseline maps only"
+  },
+  "runner": {
+    "wall_clock_h": 6.0,
+    "min_free_disk_gb": 10,
+    "num_workers": 0
+  },
+  "smoke": {
+    "patch_frac": 0.05,
+    "max_epochs": 2,
+    "folds": [
+      0
+    ],
+    "seeds": [
+      0
+    ],
+    "runs": [
+      "a_f0",
+      "b",
+      "s2"
+    ],
+    "stage2_sheets": 1,
+    "note": "proves the code runs end to end; smoke metrics are never used to change the configuration"
+  },
+  "sources": {
+    "note": "Source facts from BRIEF.md 'Data sources' (rows 1-6 and 8), its notes 1-5 and its provenance check, read by the fetch scripts, the provenance check, the lattice checks and the susceptibility code (added at the freeze, P1-16). Not part of Appendix B.",
+    "dtm": {
+      "service": "https://ags.cuzk.gov.cz/arcgis2/rest/services/dmr5g/ImageServer",
+      "grid_origin_m": [
+        0.4,
+        -0.12
+      ],
+      "package_valid_range_m": [
+        -100.0,
+        2000.0
+      ],
+      "provenance_min_sheets": 10
+    },
+    "register": {
+      "url": "https://mapy.geology.cz/arcgis/rest/services/Geohazardy/svahove_nestability/MapServer/1",
+      "expected_count": 21356
+    },
+    "sheets": {
+      "url": "https://mapy.geology.cz/arcgis/rest/services/Prozkoumanost/prehled_mapovani_svahove_nestability/MapServer/0",
+      "expected_count": 860
+    },
+    "geology": {
+      "url": "https://mapy.geology.cz/arcgis/rest/services/Geologie/geologicka_mapa500_CR/MapServer/7",
+      "fields": [
+        "objectid",
+        "region",
+        "subregion",
+        "hor_karto"
+      ]
+    },
+    "susceptibility": {
+      "service": "https://mapy.geology.cz/arcgis/rest/services/Geohazardy/sesuvna_nachylnost/MapServer",
+      "layer_id": 0,
+      "class_field": "struktura",
+      "classes": {
+        "mid": {
+          "code": 1,
+          "like": "Třída střední%"
+        },
+        "high": {
+          "code": 2,
+          "like": "Třída vysoké%"
+        }
+      },
+      "low": {
+        "code": 0,
+        "like": "Třída nízké%"
+      },
+      "alpha_min": 128,
+      "dpi": 96,
+      "format": "png32"
+    },
+    "zabaged": {
+      "service": "https://ags.cuzk.gov.cz/arcgis/rest/services/ZABAGED_POLOHOPIS/MapServer",
+      "layers": {
+        "quarry": 118,
+        "spoil": 119,
+        "rock": 130,
+        "landslide": 129,
+        "road": 79,
+        "railway": 75
+      }
+    },
+    "weights": {
+      "file": "resnet18-f37072fd.pth",
+      "sha256": "f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec"
+    }
+  },
+  "replication": {
+    "note": "Our own fixed choices where Appendix A/B is silent (PLAN.md §6). Not part of Appendix B. The ZABAGED layer ids by role live in sources.zabaged.layers.",
+    "seed": 2611,
+    "seed_note": "base seed for replication-only random steps that Appendix B does not seed; sampling steps use sampling.seed",
+    "streams": {
+      "provenance_sample": 1,
+      "positive_points": 2,
+      "waterfill": 3,
+      "negative_jitter": 4,
+      "lookalike_points": 5,
+      "matching": 6,
+      "background": 7,
+      "smoke_subset": 8,
+      "nms_jitter": 9,
+      "random_baseline": 10,
+      "verify_sample": 11
+    },
+    "provenance": {
+      "n_sheets": 12
+    },
+    "negative_jitter_m": 15.0,
+    "nms_jitter_scale": 1e-09,
+    "verdict_words": [
+      "REPLICATED",
+      "NOT REPLICATED",
+      "INCOMPLETE"
+    ],
+    "channels": {
+      "context_px": 28,
+      "curv_truncate": 4.0,
+      "curv_flat_eps": 1e-12,
+      "svf_r_min_px": 1
+    },
+    "splits": {
+      "note": "Appendix A §3-§4 values that Appendix B has no key for, plus our tie rules (P1-08)",
+      "stage2_sheets": {
+        "flysch": [
+          "24-43-19",
+          "24-44-17",
+          "25-14-17",
+          "25-23-01",
+          "25-23-04",
+          "25-24-01",
+          "25-32-22",
+          "25-33-01",
+          "25-41-05",
+          "35-12-16"
+        ],
+        "nonflysch": [
+          "02-41-01",
+          "02-41-18",
+          "03-34-01",
+          "03-34-04",
+          "14-13-14",
+          "14-14-22",
+          "24-12-21",
+          "24-14-16",
+          "24-42-23",
+          "25-12-22"
+        ]
+      },
+      "fold_seed": 11,
+      "inner_val_seeds": {
+        "a_base": 1000,
+        "b": 2000,
+        "s2": 3000
+      },
+      "kraj_tie_rule": "lowest_objectid"
+    },
+    "flysch": {
+      "fill_holes": true,
+      "min_part_km2": 1.0,
+      "buffer_quad_segs": 8
+    },
+    "sampling": {
+      "stage2_buffer_m": 150
+    },
+    "baselines": {
+      "scorers": [
+        {
+          "name": "slope_only",
+          "model": "column",
+          "features": [
+            "slope_mean"
+          ]
+        },
+        {
+          "name": "susceptibility",
+          "model": "column",
+          "features": [
+            "susc_mean"
+          ]
+        },
+        {
+          "name": "slope_susc_lr",
+          "model": "lr",
+          "features": [
+            "slope_mean",
+            "slope_std",
+            "susc_mean",
+            "susc_high_frac"
+          ]
+        },
+        {
+          "name": "terrain_stats_lr",
+          "model": "lr",
+          "features": [
+            "slope_mean",
+            "slope_std",
+            "slope_p90",
+            "lrm_s_std",
+            "lrm_l_std",
+            "curv_prof_std",
+            "curv_plan_std",
+            "svf_mean",
+            "svf_std",
+            "detr_std",
+            "detr_range_2_98",
+            "tri"
+          ]
+        },
+        {
+          "name": "terrain_stats_gbm",
+          "model": "gbm",
+          "features": [
+            "slope_mean",
+            "slope_std",
+            "slope_p90",
+            "lrm_s_std",
+            "lrm_l_std",
+            "curv_prof_std",
+            "curv_plan_std",
+            "svf_mean",
+            "svf_std",
+            "detr_std",
+            "detr_range_2_98",
+            "tri"
+          ]
+        }
+      ]
+    },
+    "eval": {
+      "secondary_bootstrap_unit": "block",
+      "stage2_bootstrap_not_reached": "precision_0"
+    },
+    "runner": {
+      "min_free_gpu_gb": 7,
+      "eval_reserve_min": 15
+    }
+  }
+}

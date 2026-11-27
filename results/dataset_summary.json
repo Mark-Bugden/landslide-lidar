@@ -1,0 +1,261 @@
+{
+  "config_hash": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+  "git_commit": "815bb2c096dddfc1582542d54d37a41f42ad2e52",
+  "n_patches": 11132,
+  "patch_shape": [
+    7,
+    150,
+    150
+  ],
+  "channels": [
+    "slope",
+    "lrm_s",
+    "lrm_l",
+    "curv_prof",
+    "curv_plan",
+    "svf",
+    "detr"
+  ],
+  "by_label": {
+    "0": 7566,
+    "1": 3566
+  },
+  "by_kind": {
+    "background": 4000,
+    "negative": 3566,
+    "positive": 3566
+  },
+  "by_source": {
+    "background": 4000,
+    "cut": 187,
+    "positive": 3566,
+    "quarry": 41,
+    "random": 3138,
+    "rock": 188,
+    "spoil": 12
+  },
+  "by_kraj": {
+    "Hlavní město Praha": {
+      "positive": 3,
+      "negative": 3,
+      "background": 5,
+      "total": 11
+    },
+    "Jihomoravský": {
+      "positive": 570,
+      "negative": 572,
+      "background": 998,
+      "total": 2140
+    },
+    "Karlovarský": {
+      "positive": 34,
+      "negative": 34,
+      "background": 61,
+      "total": 129
+    },
+    "Královéhradecký": {
+      "positive": 180,
+      "negative": 180,
+      "background": 317,
+      "total": 677
+    },
+    "Liberecký": {
+      "positive": 112,
+      "negative": 111,
+      "background": 187,
+      "total": 410
+    },
+    "Moravskoslezský": {
+      "positive": 650,
+      "negative": 653,
+      "background": 462,
+      "total": 1765
+    },
+    "Olomoucký": {
+      "positive": 102,
+      "negative": 102,
+      "background": 169,
+      "total": 373
+    },
+    "Pardubický": {
+      "positive": 91,
+      "negative": 91,
+      "background": 192,
+      "total": 374
+    },
+    "Plzeňský": {
+      "positive": 3,
+      "negative": 3,
+      "background": 12,
+      "total": 18
+    },
+    "Středočeský": {
+      "positive": 85,
+      "negative": 85,
+      "background": 187,
+      "total": 357
+    },
+    "Vysočina": {
+      "positive": 28,
+      "negative": 27,
+      "background": 68,
+      "total": 123
+    },
+    "Zlínský": {
+      "positive": 1371,
+      "negative": 1368,
+      "background": 807,
+      "total": 3546
+    },
+    "Ústecký": {
+      "positive": 337,
+      "negative": 337,
+      "background": 535,
+      "total": 1209
+    }
+  },
+  "by_flysch": {
+    "False": {
+      "positive": 1361,
+      "negative": 1361,
+      "background": 2695,
+      "total": 5417
+    },
+    "True": {
+      "positive": 2205,
+      "negative": 2205,
+      "background": 1305,
+      "total": 5715
+    }
+  },
+  "by_fold": {
+    "-1": {
+      "positive": 1361,
+      "negative": 1361,
+      "background": 2695,
+      "total": 5417
+    },
+    "0": {
+      "positive": 336,
+      "negative": 336,
+      "background": 204,
+      "total": 876
+    },
+    "1": {
+      "positive": 478,
+      "negative": 478,
+      "background": 275,
+      "total": 1231
+    },
+    "2": {
+      "positive": 500,
+      "negative": 500,
+      "background": 278,
+      "total": 1278
+    },
+    "3": {
+      "positive": 495,
+      "negative": 495,
+      "background": 284,
+      "total": 1274
+    },
+    "4": {
+      "positive": 396,
+      "negative": 396,
+      "background": 264,
+      "total": 1056
+    }
+  },
+  "by_group_b": {
+    "test": {
+      "positive": 1545,
+      "negative": 1545,
+      "background": 2731,
+      "total": 5821
+    },
+    "train": {
+      "positive": 2021,
+      "negative": 2021,
+      "background": 1269,
+      "total": 5311
+    }
+  },
+  "by_stratum": {
+    "F_ZLMS": {
+      "positive": 1918,
+      "negative": 1918,
+      "background": 1090,
+      "total": 4926
+    },
+    "F_other": {
+      "positive": 287,
+      "negative": 287,
+      "background": 215,
+      "total": 789
+    },
+    "N_ZLMS": {
+      "positive": 103,
+      "negative": 103,
+      "background": 179,
+      "total": 385
+    },
+    "N_other": {
+      "positive": 1258,
+      "negative": 1258,
+      "background": 2516,
+      "total": 5032
+    }
+  },
+  "by_match_level": {
+    "1": 3473,
+    "2": 83,
+    "3": 3,
+    "5": 7
+  },
+  "by_match_level_and_source": {
+    "1": {
+      "cut": 187,
+      "quarry": 41,
+      "random": 3045,
+      "rock": 188,
+      "spoil": 12
+    },
+    "2": {
+      "random": 83
+    },
+    "3": {
+      "random": 3
+    },
+    "5": {
+      "random": 7
+    }
+  },
+  "test_sets": {
+    "a_flysch_folds_pooled": {
+      "positive": 2205,
+      "negative": 2205,
+      "sheets": 284
+    },
+    "b_test": {
+      "positive": 1545,
+      "negative": 1545,
+      "sheets": 465
+    },
+    "b_train": {
+      "positive": 2021,
+      "negative": 2021,
+      "sheets": 281
+    }
+  },
+  "pairs": {
+    "n": 3566,
+    "same_sheet": 3476,
+    "same_slope_bin": 3563,
+    "abs_slope_mean_diff_deg": {
+      "median": 0.5889248336503004,
+      "p90": 1.4068557236782646,
+      "max": 2.4984398912617145
+    }
+  },
+  "sheets_with_patches": 751
+}

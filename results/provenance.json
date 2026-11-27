@@ -1,0 +1,1738 @@
+{
+ "task": "P1-03",
+ "started_utc": "2026-11-26T19:48:49+00:00",
+ "git_commit": "3f73522829893d7f201c858fccf6d897d0ded96a",
+ "config_hash": "e9969c41baecb16bbe95760eb168f341822ec50eaf9844af15fca1d0424dff5a",
+ "environment": {
+  "rasterio": "1.5.2",
+  "gdal": "3.12.2",
+  "numpy": "2.5.5",
+  "pyogrio": "0.13.0"
+ },
+ "reprojection_D03": {
+  "call": "pyproj.Transformer.from_crs('EPSG:4326', 'EPSG:5514', always_xy=True)",
+  "pyproj": "3.8.0",
+  "proj": "9.8.1",
+  "network_enabled": false,
+  "n_vertices": 1320,
+  "operations_used": [
+   {
+    "description": "Inverse of S-JTSK to WGS 84 (5) + Krovak East North (Greenwich) (with axis order normalized for visualization)",
+    "n_vertices": 824,
+    "definition": "proj=pipeline step proj=unitconvert xy_in=deg xy_out=rad step proj=push v_3 step proj=cart ellps=WGS84 step inv proj=helmert x=572.213 y=85.334 z=461.94 rx=-4.9732 ry=-1.529 rz=-5.2484 s=3.5378 convention=coordinate_frame step inv proj=cart ellps=bessel step proj=pop v_3 step proj=krovak lat_0=49.5 lon_0=24.8333333333333 alpha=30.2881397527778 k=0.9999 x_0=0 y_0=0 ellps=bessel"
+   },
+   {
+    "description": "Inverse of S-JTSK to WGS 84 (4) + Krovak East North (Greenwich) (with axis order normalized for visualization)",
+    "n_vertices": 493,
+    "definition": "proj=pipeline step proj=unitconvert xy_in=deg xy_out=rad step proj=push v_3 step proj=cart ellps=WGS84 step inv proj=helmert x=485 y=169.5 z=483.8 rx=7.786 ry=4.398 rz=4.103 s=0 convention=position_vector step inv proj=cart ellps=bessel step proj=pop v_3 step proj=krovak lat_0=49.5 lon_0=24.8333333333333 alpha=30.2881397527778 k=0.9999 x_0=0 y_0=0 ellps=bessel"
+   },
+   {
+    "description": "Inverse of S-JTSK to WGS 84 (3) + Krovak East North (Greenwich) (with axis order normalized for visualization)",
+    "n_vertices": 3,
+    "definition": "proj=pipeline step proj=unitconvert xy_in=deg xy_out=rad step proj=push v_3 step proj=cart ellps=WGS84 step proj=helmert x=-589 y=-76 z=-480 step inv proj=cart ellps=bessel step proj=pop v_3 step proj=krovak lat_0=49.5 lon_0=24.8333333333333 alpha=30.2881397527778 k=0.9999 x_0=0 y_0=0 ellps=bessel"
+   }
+  ],
+  "candidate_operations": [
+   {
+    "description": "Inverse of S-JTSK to WGS 84 (3) + Krovak East North (Greenwich) (with axis order normalized for visualization)",
+    "accuracy_m": 6.0
+   },
+   {
+    "description": "Inverse of S-JTSK to WGS 84 (5) + Krovak East North (Greenwich) (with axis order normalized for visualization)",
+    "accuracy_m": 1.0
+   },
+   {
+    "description": "Inverse of S-JTSK to WGS 84 (1) + Krovak East North (Greenwich) (with axis order normalized for visualization)",
+    "accuracy_m": 1.0
+   },
+   {
+    "description": "Inverse of S-JTSK to WGS 84 (4) + Krovak East North (Greenwich) (with axis order normalized for visualization)",
+    "accuracy_m": 1.0
+   }
+  ],
+  "unavailable_operations": []
+ },
+ "sheets": {
+  "n": 860,
+  "n_full": 843,
+  "n_partial": 17
+ },
+ "sources": {
+  "dtm": {
+   "url": "https://ags.cuzk.gov.cz/arcgis2/rest/services/dmr5g/ImageServer",
+   "metadata": {
+    "name": "dmr5g",
+    "currentVersion": 12,
+    "spatialReference": {
+     "latestVcsWkid": 8357,
+     "latestWkid": 5514,
+     "wkid": 102067,
+     "vcsWkid": 8357
+    },
+    "extent": {
+     "ymin": -1227414.12,
+     "xmin": -904703.6,
+     "ymax": -935118.1200000001,
+     "xmax": -431605.6,
+     "spatialReference": {
+      "latestVcsWkid": 8357,
+      "latestWkid": 5514,
+      "wkid": 102067,
+      "vcsWkid": 8357
+     }
+    },
+    "pixelSizeX": 2,
+    "pixelSizeY": 2,
+    "pixelType": "F32",
+    "bandCount": 1,
+    "maxImageWidth": 15000,
+    "maxImageHeight": 4100,
+    "maxRecordCount": 1000,
+    "heightModelInfo": {
+     "vertCRS": "Baltic_1957_height",
+     "heightModel": "gravity_related_height",
+     "heightUnit": "meter"
+    },
+    "defaultResamplingMethod": "Bilinear",
+    "defaultMosaicMethod": "Northwest",
+    "capabilities": "Catalog,Mensuration,Image,Metadata",
+    "copyrightText": "© ČÚZK",
+    "fields": [
+     [
+      "OBJECTID",
+      "esriFieldTypeOID"
+     ],
+     [
+      "Shape",
+      "esriFieldTypeGeometry"
+     ],
+     [
+      "Name",
+      "esriFieldTypeString"
+     ],
+     [
+      "MinPS",
+      "esriFieldTypeDouble"
+     ],
+     [
+      "MaxPS",
+      "esriFieldTypeDouble"
+     ],
+     [
+      "LowPS",
+      "esriFieldTypeDouble"
+     ],
+     [
+      "HighPS",
+      "esriFieldTypeDouble"
+     ],
+     [
+      "Category",
+      "esriFieldTypeInteger"
+     ],
+     [
+      "Tag",
+      "esriFieldTypeString"
+     ],
+     [
+      "GroupName",
+      "esriFieldTypeString"
+     ],
+     [
+      "ProductName",
+      "esriFieldTypeString"
+     ],
+     [
+      "CenterX",
+      "esriFieldTypeDouble"
+     ],
+     [
+      "CenterY",
+      "esriFieldTypeDouble"
+     ],
+     [
+      "ZOrder",
+      "esriFieldTypeInteger"
+     ],
+     [
+      "Shape_Length",
+      "esriFieldTypeDouble"
+     ],
+     [
+      "Shape_Area",
+      "esriFieldTypeDouble"
+     ]
+    ]
+   }
+  },
+  "register": {
+   "url": "https://mapy.geology.cz/arcgis/rest/services/Geohazardy/svahove_nestability/MapServer/1",
+   "where": "1=1",
+   "metadata": {
+    "name": "Mapované deformace plošné ",
+    "type": "Feature Layer",
+    "geometryType": "esriGeometryPolygon",
+    "maxRecordCount": 1000,
+    "sourceSpatialReference": {
+     "wkid": 102067,
+     "latestWkid": 5514,
+     "xyTolerance": 0.001,
+     "zTolerance": 0.001,
+     "mTolerance": 0.001,
+     "falseX": -33699800,
+     "falseY": -33699800,
+     "xyUnits": 10000,
+     "falseZ": -100000,
+     "zUnits": 10000,
+     "falseM": -100000,
+     "mUnits": 10000
+    },
+    "extent": {
+     "xmin": -893535.0716999993,
+     "ymin": -1212371.8817000017,
+     "xmax": -432849.3088000007,
+     "ymax": -953096.3682999983,
+     "spatialReference": {
+      "wkid": 102067,
+      "latestWkid": 5514,
+      "xyTolerance": 0.001,
+      "zTolerance": 0.001,
+      "mTolerance": 0.001,
+      "falseX": -33699800,
+      "falseY": -33699800,
+      "xyUnits": 133638764.24698351,
+      "falseZ": -100000,
+      "zUnits": 10000,
+      "falseM": -100000,
+      "mUnits": 10000
+     }
+    },
+    "currentVersion": 10.91,
+    "supportedQueryFormats": "JSON, geoJSON, PBF",
+    "capabilities": "Map,Query,Data",
+    "displayField": "cislo_bodu",
+    "copyrightText": "",
+    "fields": [
+     [
+      "objectid",
+      "esriFieldTypeOID"
+     ],
+     [
+      "shape",
+      "esriFieldTypeGeometry"
+     ],
+     [
+      "nazev",
+      "esriFieldTypeSmallInteger"
+     ],
+     [
+      "cislo_bodu",
+      "esriFieldTypeString"
+     ],
+     [
+      "list",
+      "esriFieldTypeString"
+     ],
+     [
+      "list_2",
+      "esriFieldTypeString"
+     ],
+     [
+      "cislo_bodu_2",
+      "esriFieldTypeString"
+     ],
+     [
+      "list_3",
+      "esriFieldTypeString"
+     ],
+     [
+      "cislo_bodu_3",
+      "esriFieldTypeString"
+     ],
+     [
+      "list_4",
+      "esriFieldTypeString"
+     ],
+     [
+      "cislo_bodu_4",
+      "esriFieldTypeString"
+     ],
+     [
+      "aktivita",
+      "esriFieldTypeSmallInteger"
+     ],
+     [
+      "skupina",
+      "esriFieldTypeSmallInteger"
+     ],
+     [
+      "podskupina",
+      "esriFieldTypeSmallInteger"
+     ],
+     [
+      "gen_kraj",
+      "esriFieldTypeString"
+     ],
+     [
+      "gen_okres",
+      "esriFieldTypeString"
+     ],
+     [
+      "nazku_obec",
+      "esriFieldTypeString"
+     ],
+     [
+      "nazku_katastr",
+      "esriFieldTypeString"
+     ],
+     [
+      "st_area(shape)",
+      "esriFieldTypeDouble"
+     ],
+     [
+      "id_teren",
+      "esriFieldTypeString"
+     ]
+    ]
+   },
+   "count_live": 21356,
+   "count_package": 21356,
+   "package_crs": "EPSG:5514",
+   "package_fields": [
+    "objectid",
+    "nazev",
+    "cislo_bodu",
+    "list",
+    "list_2",
+    "cislo_bodu_2",
+    "list_3",
+    "cislo_bodu_3",
+    "list_4",
+    "cislo_bodu_4",
+    "aktivita",
+    "skupina",
+    "podskupina",
+    "gen_kraj",
+    "gen_okres",
+    "nazku_obec",
+    "nazku_katastr",
+    "st_area(shape)",
+    "id_teren"
+   ],
+   "count_expected_brief": 21356,
+   "counts_agree": true,
+   "package_fields_in_layer": true
+  },
+  "sheets": {
+   "url": "https://mapy.geology.cz/arcgis/rest/services/Prozkoumanost/prehled_mapovani_svahove_nestability/MapServer/0",
+   "where": "1=1",
+   "metadata": {
+    "name": "Oblasti mapování svahových deformací",
+    "type": "Feature Layer",
+    "geometryType": "esriGeometryPolygon",
+    "maxRecordCount": 1000,
+    "sourceSpatialReference": {
+     "wkid": 102067,
+     "latestWkid": 5514,
+     "xyTolerance": 0.001,
+     "zTolerance": 0.001,
+     "mTolerance": 0.001,
+     "falseX": -33699800,
+     "falseY": -33699800,
+     "xyUnits": 10000,
+     "falseZ": -100000,
+     "zUnits": 10000,
+     "falseM": -100000,
+     "mUnits": 10000
+    },
+    "currentVersion": 10.91,
+    "supportedQueryFormats": "JSON, geoJSON, PBF",
+    "capabilities": "Map,Query,Data",
+    "displayField": "list",
+    "copyrightText": "",
+    "fields": [
+     [
+      "objectid",
+      "esriFieldTypeOID"
+     ],
+     [
+      "list",
+      "esriFieldTypeString"
+     ],
+     [
+      "poznamka",
+      "esriFieldTypeString"
+     ],
+     [
+      "shape",
+      "esriFieldTypeGeometry"
+     ]
+    ]
+   },
+   "count_live": 860,
+   "count_package": 860,
+   "package_crs": "EPSG:4326",
+   "package_fields": [
+    "objectid",
+    "list",
+    "poznamka"
+   ],
+   "count_expected_brief": 860,
+   "counts_agree": true,
+   "package_fields_in_layer": true
+  },
+  "geology": {
+   "url": "https://mapy.geology.cz/arcgis/rest/services/Geologie/geologicka_mapa500_CR/MapServer/7",
+   "where": "subregion IN ('Marinní terciér vnějších Karpat', 'Mezozoické sedimenty Karpat', 'Marinní mezozoikum a terciér vnějších a vnitřních Karpat', 'Vulkanity vnějších Karpat', 'Vulkanity vnějších a vnitřních Karpat')",
+   "metadata": {
+    "name": "Horniny",
+    "type": "Feature Layer",
+    "geometryType": "esriGeometryPolygon",
+    "maxRecordCount": 2000,
+    "sourceSpatialReference": {
+     "wkid": 102067,
+     "latestWkid": 5514,
+     "xyTolerance": 0.001,
+     "zTolerance": 0.001,
+     "mTolerance": 0.001,
+     "falseX": -33699800,
+     "falseY": -33699800,
+     "xyUnits": 10000,
+     "falseZ": -100000,
+     "zUnits": 10000,
+     "falseM": -100000,
+     "mUnits": 10000
+    },
+    "currentVersion": 10.91,
+    "supportedQueryFormats": "JSON, geoJSON, PBF",
+    "capabilities": "Map,Query,Data",
+    "displayField": "n_leg_id",
+    "copyrightText": "",
+    "fields": [
+     [
+      "objectid",
+      "esriFieldTypeOID"
+     ],
+     [
+      "hor_karto",
+      "esriFieldTypeString"
+     ],
+     [
+      "region",
+      "esriFieldTypeString"
+     ],
+     [
+      "subregion",
+      "esriFieldTypeString"
+     ],
+     [
+      "shape",
+      "esriFieldTypeGeometry"
+     ],
+     [
+      "era",
+      "esriFieldTypeString"
+     ],
+     [
+      "utvar",
+      "esriFieldTypeString"
+     ],
+     [
+      "oddeleni",
+      "esriFieldTypeString"
+     ],
+     [
+      "n_leg_id",
+      "esriFieldTypeInteger"
+     ],
+     [
+      "poradi",
+      "esriFieldTypeDouble"
+     ],
+     [
+      "legenda_region",
+      "esriFieldTypeString"
+     ],
+     [
+      "legenda_era_utvar",
+      "esriFieldTypeString"
+     ],
+     [
+      "legenda_oddeleni",
+      "esriFieldTypeString"
+     ]
+    ]
+   },
+   "count_live": 597,
+   "count_package": 597,
+   "package_crs": "EPSG:5514",
+   "package_fields": [
+    "objectid",
+    "region",
+    "subregion",
+    "hor_karto"
+   ],
+   "counts_agree": true,
+   "package_fields_in_layer": true
+  }
+ },
+ "grids": {
+  "n_sheets": 860,
+  "n_recipe": 860,
+  "n_fetch_log": 860,
+  "n_rasters": 860,
+  "equal": {
+   "recipe_vs_fetch_log": 860,
+   "recipe_vs_raster": 860,
+   "fetch_log_vs_raster": 860
+  },
+  "n_mismatched_sheets": 0,
+  "mismatches": [],
+  "raster_header_problems": [],
+  "rasters_not_in_sheet_layer": [],
+  "min_edge_clearance_m": 7.936311885714531e-05,
+  "min_edge_clearance_sheet": "24-33-01",
+  "n_sheets_clearance_below_1mm": 5,
+  "max_request_w_h": [
+   2902,
+   2496
+  ],
+  "service_max_image_w_h": [
+   15000,
+   4100
+  ],
+  "within_service_limits": true,
+  "agree": true
+ },
+ "dtm": {
+  "sample": {
+   "seed": 2611,
+   "stream": "provenance_sample",
+   "stream_id": 1,
+   "n": 12,
+   "generator": "numpy default_rng(SeedSequence([seed, stream_id])).choice(860 sorted ids, n, replace=False)",
+   "drawn": [
+    "24-44-15",
+    "34-21-20",
+    "12-12-23",
+    "02-24-23",
+    "25-31-05",
+    "15-34-25",
+    "25-14-20",
+    "02-23-18",
+    "25-21-14",
+    "25-24-18",
+    "24-14-18",
+    "04-33-10"
+   ],
+   "drawn_sorted": [
+    "02-23-18",
+    "02-24-23",
+    "04-33-10",
+    "12-12-23",
+    "15-34-25",
+    "24-14-18",
+    "24-44-15",
+    "25-14-20",
+    "25-21-14",
+    "25-24-18",
+    "25-31-05",
+    "34-21-20"
+   ]
+  },
+  "summary": {
+   "n_sheets": 12,
+   "n_ok": 12,
+   "n_pixels": 81849089,
+   "n_compared": 81849089,
+   "n_bitwise_equal": 81849089,
+   "n_diff": 0,
+   "n_package_nan": 0,
+   "n_package_nan_unexplained": 0,
+   "n_download_invalid_but_package_valued": 0,
+   "n_georef_equal": 12
+  },
+  "per_sheet": [
+   {
+    "sheet": "24-44-15",
+    "ok": true,
+    "grid": {
+     "w": 2860,
+     "h": 2399
+    },
+    "request": {
+     "url": "https://ags.cuzk.gov.cz/arcgis2/rest/services/dmr5g/ImageServer/exportImage",
+     "params": {
+      "bbox": "redacted: see data/cache/provenance/<sheet>.json",
+      "bboxSR": 5514,
+      "imageSR": 5514,
+      "size": "2860,2399",
+      "format": "tiff",
+      "pixelType": "F32",
+      "interpolation": "RSP_NearestNeighbor",
+      "f": "image"
+     }
+    },
+    "response": {
+     "retrieved_utc": "2026-11-26T19:48:59+00:00",
+     "status": 200,
+     "content_type": "image/tiff",
+     "etag": "\"ef3583f5\"",
+     "bytes": 28644076,
+     "sha256": "3b82784f5e7fdb1fd9c4d97fd5d43a776e4a39cc7d6739440d4349dbcb51bbc7",
+     "reused_cache": null
+    },
+    "cached_file_sha256_matches_response": true,
+    "georef": {
+     "size": true,
+     "transform": true,
+     "tiepoint": true,
+     "pixel_scale": true,
+     "geokey_GTModelType": true,
+     "geokey_GTRasterType": true,
+     "geokey_ProjectedCSType": true,
+     "geokey_ProjLinearUnits": true,
+     "equal": true,
+     "download_transform_is_recipe": true
+    },
+    "georef_package": {
+     "geokeys": {
+      "GTModelType": 1,
+      "GTRasterType": 1,
+      "ProjectedCSType": 5514,
+      "ProjLinearUnits": 9001
+     },
+     "gdal_crs_epsg": 5514,
+     "nodata": "NaN",
+     "gdal_nodata_tag": "nan"
+    },
+    "georef_download": {
+     "geokeys": {
+      "GTModelType": 1,
+      "GTRasterType": 1,
+      "ProjectedCSType": 5514,
+      "ProjLinearUnits": 9001
+     },
+     "gdal_crs_epsg": null,
+     "nodata": null,
+     "gdal_nodata_tag": null,
+     "gdal_crs_wkt": "LOCAL_CS[\"S-JTSK / Krovak East North\",UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"5514\"]]"
+    },
+    "values": {
+     "shape_equal": true,
+     "n_pixels": 6861140,
+     "n_package_nan": 0,
+     "n_compared": 6861140,
+     "n_bitwise_equal": 6861140,
+     "diff": {
+      "n": 0
+     },
+     "package_nan_explained": {
+      "nodata": 0,
+      "below_range": 0,
+      "above_range": 0
+     },
+     "n_package_nan_unexplained": 0,
+     "unexplained_examples_row_col_download": [],
+     "n_download_invalid_but_package_valued": 0,
+     "download": {
+      "nodata_tag": null,
+      "n_nodata": 0,
+      "n_below_range": 0,
+      "n_above_range": 0,
+      "n_zero": 0,
+      "min": 255.60000610351562,
+      "max": 548.1466674804688
+     },
+     "package_n_zero": 0,
+     "ok": true
+    }
+   },
+   {
+    "sheet": "34-21-20",
+    "ok": true,
+    "grid": {
+     "w": 2877,
+     "h": 2399
+    },
+    "request": {
+     "url": "https://ags.cuzk.gov.cz/arcgis2/rest/services/dmr5g/ImageServer/exportImage",
+     "params": {
+      "bbox": "redacted: see data/cache/provenance/<sheet>.json",
+      "bboxSR": 5514,
+      "imageSR": 5514,
+      "size": "2877,2399",
+      "format": "tiff",
+      "pixelType": "F32",
+      "interpolation": "RSP_NearestNeighbor",
+      "f": "image"
+     }
+    },
+    "response": {
+     "retrieved_utc": "2026-11-26T19:49:04+00:00",
+     "status": 200,
+     "content_type": "image/tiff",
+     "etag": "\"674f19b0\"",
+     "bytes": 28644076,
+     "sha256": "b8239eb43559f100dd561ed65af51a5f187f320b49abfd0d73691591f04b46b4",
+     "reused_cache": null
+    },
+    "cached_file_sha256_matches_response": true,
+    "georef": {
+     "size": true,
+     "transform": true,
+     "tiepoint": true,
+     "pixel_scale": true,
+     "geokey_GTModelType": true,
+     "geokey_GTRasterType": true,
+     "geokey_ProjectedCSType": true,
+     "geokey_ProjLinearUnits": true,
+     "equal": true,
+     "download_transform_is_recipe": true
+    },
+    "georef_package": {
+     "geokeys": {
+      "GTModelType": 1,
+      "GTRasterType": 1,
+      "ProjectedCSType": 5514,
+      "ProjLinearUnits": 9001
+     },
+     "gdal_crs_epsg": 5514,
+     "nodata": "NaN",
+     "gdal_nodata_tag": "nan"
+    },
+    "georef_download": {
+     "geokeys": {
+      "GTModelType": 1,
+      "GTRasterType": 1,
+      "ProjectedCSType": 5514,
+      "ProjLinearUnits": 9001
+     },
+     "gdal_crs_epsg": null,
+     "nodata": null,
+     "gdal_nodata_tag": null,
+     "gdal_crs_wkt": "LOCAL_CS[\"S-JTSK / Krovak East North\",UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"5514\"]]"
+    },
+    "values": {
+     "shape_equal": true,
+     "n_pixels": 6901923,
+     "n_package_nan": 0,
+     "n_compared": 6901923,
+     "n_bitwise_equal": 6901923,
+     "diff": {
+      "n": 0
+     },
+     "package_nan_explained": {
+      "nodata": 0,
+      "below_range": 0,
+      "above_range": 0
+     },
+     "n_package_nan_unexplained": 0,
+     "unexplained_examples_row_col_download": [],
+     "n_download_invalid_but_package_valued": 0,
+     "download": {
+      "nodata_tag": null,
+      "n_nodata": 0,
+      "n_below_range": 0,
+      "n_above_range": 0,
+      "n_zero": 0,
+      "min": 176.3300018310547,
+      "max": 273.3426818847656
+     },
+     "package_n_zero": 0,
+     "ok": true
+    }
+   },
+   {
+    "sheet": "12-12-23",
+    "ok": true,
+    "grid": {
+     "w": 2879,
+     "h": 2459
+    },
+    "request": {
+     "url": "https://ags.cuzk.gov.cz/arcgis2/rest/services/dmr5g/ImageServer/exportImage",
+     "params": {
+      "bbox": "redacted: see data/cache/provenance/<sheet>.json",
+      "bboxSR": 5514,
+      "imageSR": 5514,
+      "size": "2879,2459",
+      "format": "tiff",
+      "pixelType": "F32",
+      "interpolation": "RSP_NearestNeighbor",
+      "f": "image"
+     }
+    },
+    "response": {
+     "retrieved_utc": "2026-11-26T19:49:09+00:00",
+     "status": 200,
+     "content_type": "image/tiff",
+     "etag": "\"1229bab1\"",
+     "bytes": 30151588,
+     "sha256": "7c3c323dfbb32c947fdf2a5695b84887bbca76534f40db8c082a11819dd62ae8",
+     "reused_cache": null
+    },
+    "cached_file_sha256_matches_response": true,
+    "georef": {
+     "size": true,
+     "transform": true,
+     "tiepoint": true,
+     "pixel_scale": true,
+     "geokey_GTModelType": true,
+     "geokey_GTRasterType": true,
+     "geokey_ProjectedCSType": true,
+     "geokey_ProjLinearUnits": true,
+     "equal": true,
+     "download_transform_is_recipe": true
+    },
+    "georef_package": {
+     "geokeys": {
+      "GTModelType": 1,
+      "GTRasterType": 1,
+      "ProjectedCSType": 5514,
+      "ProjLinearUnits": 9001
+     },
+     "gdal_crs_epsg": 5514,
+     "nodata": "NaN",
+     "gdal_nodata_tag": "nan"
+    },
+    "georef_download": {
+     "geokeys": {
+      "GTModelType": 1,
+      "GTRasterType": 1,
+      "ProjectedCSType": 5514,
+      "ProjLinearUnits": 9001
+     },
+     "gdal_crs_epsg": null,
+     "nodata": null,
+     "gdal_nodata_tag": null,
+     "gdal_crs_wkt": "LOCAL_CS[\"S-JTSK / Krovak East North\",UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"5514\"]]"
+    },
+    "values": {
+     "shape_equal": true,
+     "n_pixels": 7079461,
+     "n_package_nan": 0,
+     "n_compared": 7079461,
+     "n_bitwise_equal": 7079461,
+     "diff": {
+      "n": 0
+     },
+     "package_nan_explained": {
+      "nodata": 0,
+      "below_range": 0,
+      "above_range": 0
+     },
+     "n_package_nan_unexplained": 0,
+     "unexplained_examples_row_col_download": [],
+     "n_download_invalid_but_package_valued": 0,
+     "download": {
+      "nodata_tag": null,
+      "n_nodata": 0,
+      "n_below_range": 0,
+      "n_above_range": 0,
+      "n_zero": 0,
+      "min": 311.8299865722656,
+      "max": 517.0
+     },
+     "package_n_zero": 0,
+     "ok": true
+    }
+   },
+   {
+    "sheet": "02-24-23",
+    "ok": true,
+    "grid": {
+     "w": 2842,
+     "h": 2458
+    },
+    "request": {
+     "url": "https://ags.cuzk.gov.cz/arcgis2/rest/services/dmr5g/ImageServer/exportImage",
+     "params": {
+      "bbox": "redacted: see data/cache/provenance/<sheet>.json",
+      "bboxSR": 5514,
+      "imageSR": 5514,
+      "size": "2842,2458",
+      "format": "tiff",
+      "pixelType": "F32",
+      "interpolation": "RSP_NearestNeighbor",
+      "f": "image"
+     }
+    },
+    "response": {
+     "retrieved_utc": "2026-11-26T19:49:13+00:00",
+     "status": 200,
+     "content_type": "image/tiff",
+     "etag": "\"4f929f87\"",
+     "bytes": 30151588,
+     "sha256": "9f5395e7016eb20913471ebad2e6cedcdee625902d96d54f7675ee32863399a2",
+     "reused_cache": null
+    },
+    "cached_file_sha256_matches_response": true,
+    "georef": {
+     "size": true,
+     "transform": true,
+     "tiepoint": true,
+     "pixel_scale": true,
+     "geokey_GTModelType": true,
+     "geokey_GTRasterType": true,
+     "geokey_ProjectedCSType": true,
+     "geokey_ProjLinearUnits": true,
+     "equal": true,
+     "download_transform_is_recipe": true
+    },
+    "georef_package": {
+     "geokeys": {
+      "GTModelType": 1,
+      "GTRasterType": 1,
+      "ProjectedCSType": 5514,
+      "ProjLinearUnits": 9001
+     },
+     "gdal_crs_epsg": 5514,
+     "nodata": "NaN",
+     "gdal_nodata_tag": "nan"
+    },
+    "georef_download": {
+     "geokeys": {
+      "GTModelType": 1,
+      "GTRasterType": 1,
+      "ProjectedCSType": 5514,
+      "ProjLinearUnits": 9001
+     },
+     "gdal_crs_epsg": null,
+     "nodata": null,
+     "gdal_nodata_tag": null,
+     "gdal_crs_wkt": "LOCAL_CS[\"S-JTSK / Krovak East North\",UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"5514\"]]"
+    },
+    "values": {
+     "shape_equal": true,
+     "n_pixels": 6985636,
+     "n_package_nan": 0,
+     "n_compared": 6985636,
+     "n_bitwise_equal": 6985636,
+     "diff": {
+      "n": 0
+     },
+     "package_nan_explained": {
+      "nodata": 0,
+      "below_range": 0,
+      "above_range": 0
+     },
+     "n_package_nan_unexplained": 0,
+     "unexplained_examples_row_col_download": [],
+     "n_download_invalid_but_package_valued": 0,
+     "download": {
+      "nodata_tag": null,
+      "n_nodata": 0,
+      "n_below_range": 0,
+      "n_above_range": 0,
+      "n_zero": 0,
+      "min": 268.6600036621094,
+      "max": 642.0700073242188
+     },
+     "package_n_zero": 0,
+     "ok": true
+    }
+   },
+   {
+    "sheet": "25-31-05",
+    "ok": true,
+    "grid": {
+     "w": 2846,
+     "h": 2361
+    },
+    "request": {
+     "url": "https://ags.cuzk.gov.cz/arcgis2/rest/services/dmr5g/ImageServer/exportImage",
+     "params": {
+      "bbox": "redacted: see data/cache/provenance/<sheet>.json",
+      "bboxSR": 5514,
+      "imageSR": 5514,
+      "size": "2846,2361",
+      "format": "tiff",
+      "pixelType": "F32",
+      "interpolation": "RSP_NearestNeighbor",
+      "f": "image"
+     }
+    },
+    "response": {
+     "retrieved_utc": "2026-11-26T19:49:17+00:00",
+     "status": 200,
+     "content_type": "image/tiff",
+     "etag": "\"82a72e05\"",
+     "bytes": 28644076,
+     "sha256": "c8772cc38a8f213c8329fafa3491331fc60eb1d80044d87c58aa8312737fdd30",
+     "reused_cache": null
+    },
+    "cached_file_sha256_matches_response": true,
+    "georef": {
+     "size": true,
+     "transform": true,
+     "tiepoint": true,
+     "pixel_scale": true,
+     "geokey_GTModelType": true,
+     "geokey_GTRasterType": true,
+     "geokey_ProjectedCSType": true,
+     "geokey_ProjLinearUnits": true,
+     "equal": true,
+     "download_transform_is_recipe": true
+    },
+    "georef_package": {
+     "geokeys": {
+      "GTModelType": 1,
+      "GTRasterType": 1,
+      "ProjectedCSType": 5514,
+      "ProjLinearUnits": 9001
+     },
+     "gdal_crs_epsg": 5514,
+     "nodata": "NaN",
+     "gdal_nodata_tag": "nan"
+    },
+    "georef_download": {
+     "geokeys": {
+      "GTModelType": 1,
+      "GTRasterType": 1,
+      "ProjectedCSType": 5514,
+      "ProjLinearUnits": 9001
+     },
+     "gdal_crs_epsg": null,
+     "nodata": null,
+     "gdal_nodata_tag": null,
+     "gdal_crs_wkt": "LOCAL_CS[\"S-JTSK / Krovak East North\",UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"5514\"]]"
+    },
+    "values": {
+     "shape_equal": true,
+     "n_pixels": 6719406,
+     "n_package_nan": 0,
+     "n_compared": 6719406,
+     "n_bitwise_equal": 6719406,
+     "diff": {
+      "n": 0
+     },
+     "package_nan_explained": {
+      "nodata": 0,
+      "below_range": 0,
+      "above_range": 0
+     },
+     "n_package_nan_unexplained": 0,
+     "unexplained_examples_row_col_download": [],
+     "n_download_invalid_but_package_valued": 0,
+     "download": {
+      "nodata_tag": null,
+      "n_nodata": 0,
+      "n_below_range": 0,
+      "n_above_range": 0,
+      "n_zero": 0,
+      "min": 235.63999938964844,
+      "max": 630.5333251953125
+     },
+     "package_n_zero": 0,
+     "ok": true
+    }
+   },
+   {
+    "sheet": "15-34-25",
+    "ok": true,
+    "grid": {
+     "w": 2822,
+     "h": 2360
+    },
+    "request": {
+     "url": "https://ags.cuzk.gov.cz/arcgis2/rest/services/dmr5g/ImageServer/exportImage",
+     "params": {
+      "bbox": "redacted: see data/cache/provenance/<sheet>.json",
+      "bboxSR": 5514,
+      "imageSR": 5514,
+      "size": "2822,2360",
+      "format": "tiff",
+      "pixelType": "F32",
+      "interpolation": "RSP_NearestNeighbor",
+      "f": "image"
+     }
+    },
+    "response": {
+     "retrieved_utc": "2026-11-26T19:49:21+00:00",
+     "status": 200,
+     "content_type": "image/tiff",
+     "etag": "\"6aed90bd\"",
+     "bytes": 28644076,
+     "sha256": "aaf0f2a071af67f653c7bf1893ce0142a65a12bd894570008cfcdc2ea95ce6d8",
+     "reused_cache": null
+    },
+    "cached_file_sha256_matches_response": true,
+    "georef": {
+     "size": true,
+     "transform": true,
+     "tiepoint": true,
+     "pixel_scale": true,
+     "geokey_GTModelType": true,
+     "geokey_GTRasterType": true,
+     "geokey_ProjectedCSType": true,
+     "geokey_ProjLinearUnits": true,
+     "equal": true,
+     "download_transform_is_recipe": true
+    },
+    "georef_package": {
+     "geokeys": {
+      "GTModelType": 1,
+      "GTRasterType": 1,
+      "ProjectedCSType": 5514,
+      "ProjLinearUnits": 9001
+     },
+     "gdal_crs_epsg": 5514,
+     "nodata": "NaN",
+     "gdal_nodata_tag": "nan"
+    },
+    "georef_download": {
+     "geokeys": {
+      "GTModelType": 1,
+      "GTRasterType": 1,
+      "ProjectedCSType": 5514,
+      "ProjLinearUnits": 9001
+     },
+     "gdal_crs_epsg": null,
+     "nodata": null,
+     "gdal_nodata_tag": null,
+     "gdal_crs_wkt": "LOCAL_CS[\"S-JTSK / Krovak East North\",UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"5514\"]]"
+    },
+    "values": {
+     "shape_equal": true,
+     "n_pixels": 6659920,
+     "n_package_nan": 0,
+     "n_compared": 6659920,
+     "n_bitwise_equal": 6659920,
+     "diff": {
+      "n": 0
+     },
+     "package_nan_explained": {
+      "nodata": 0,
+      "below_range": 0,
+      "above_range": 0
+     },
+     "n_package_nan_unexplained": 0,
+     "unexplained_examples_row_col_download": [],
+     "n_download_invalid_but_package_valued": 0,
+     "download": {
+      "nodata_tag": null,
+      "n_nodata": 0,
+      "n_below_range": 0,
+      "n_above_range": 0,
+      "n_zero": 0,
+      "min": 250.58999633789062,
+      "max": 432.989990234375
+     },
+     "package_n_zero": 0,
+     "ok": true
+    }
+   },
+   {
+    "sheet": "25-14-20",
+    "ok": true,
+    "grid": {
+     "w": 2836,
+     "h": 2362
+    },
+    "request": {
+     "url": "https://ags.cuzk.gov.cz/arcgis2/rest/services/dmr5g/ImageServer/exportImage",
+     "params": {
+      "bbox": "redacted: see data/cache/provenance/<sheet>.json",
+      "bboxSR": 5514,
+      "imageSR": 5514,
+      "size": "2836,2362",
+      "format": "tiff",
+      "pixelType": "F32",
+      "interpolation": "RSP_NearestNeighbor",
+      "f": "image"
+     }
+    },
+    "response": {
+     "retrieved_utc": "2026-11-26T19:49:25+00:00",
+     "status": 200,
+     "content_type": "image/tiff",
+     "etag": "\"ce8289a9\"",
+     "bytes": 28644076,
+     "sha256": "6591061f85e58d4d4bdc6676bcd73cc85bdde85f30ee2f81f8c26e55da6d4df8",
+     "reused_cache": null
+    },
+    "cached_file_sha256_matches_response": true,
+    "georef": {
+     "size": true,
+     "transform": true,
+     "tiepoint": true,
+     "pixel_scale": true,
+     "geokey_GTModelType": true,
+     "geokey_GTRasterType": true,
+     "geokey_ProjectedCSType": true,
+     "geokey_ProjLinearUnits": true,
+     "equal": true,
+     "download_transform_is_recipe": true
+    },
+    "georef_package": {
+     "geokeys": {
+      "GTModelType": 1,
+      "GTRasterType": 1,
+      "ProjectedCSType": 5514,
+      "ProjLinearUnits": 9001
+     },
+     "gdal_crs_epsg": 5514,
+     "nodata": "NaN",
+     "gdal_nodata_tag": "nan"
+    },
+    "georef_download": {
+     "geokeys": {
+      "GTModelType": 1,
+      "GTRasterType": 1,
+      "ProjectedCSType": 5514,
+      "ProjLinearUnits": 9001
+     },
+     "gdal_crs_epsg": null,
+     "nodata": null,
+     "gdal_nodata_tag": null,
+     "gdal_crs_wkt": "LOCAL_CS[\"S-JTSK / Krovak East North\",UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"5514\"]]"
+    },
+    "values": {
+     "shape_equal": true,
+     "n_pixels": 6698632,
+     "n_package_nan": 0,
+     "n_compared": 6698632,
+     "n_bitwise_equal": 6698632,
+     "diff": {
+      "n": 0
+     },
+     "package_nan_explained": {
+      "nodata": 0,
+      "below_range": 0,
+      "above_range": 0
+     },
+     "n_package_nan_unexplained": 0,
+     "unexplained_examples_row_col_download": [],
+     "n_download_invalid_but_package_valued": 0,
+     "download": {
+      "nodata_tag": null,
+      "n_nodata": 0,
+      "n_below_range": 0,
+      "n_above_range": 0,
+      "n_zero": 0,
+      "min": 296.0899963378906,
+      "max": 591.1400146484375
+     },
+     "package_n_zero": 0,
+     "ok": true
+    }
+   },
+   {
+    "sheet": "02-23-18",
+    "ok": true,
+    "grid": {
+     "w": 2848,
+     "h": 2457
+    },
+    "request": {
+     "url": "https://ags.cuzk.gov.cz/arcgis2/rest/services/dmr5g/ImageServer/exportImage",
+     "params": {
+      "bbox": "redacted: see data/cache/provenance/<sheet>.json",
+      "bboxSR": 5514,
+      "imageSR": 5514,
+      "size": "2848,2457",
+      "format": "tiff",
+      "pixelType": "F32",
+      "interpolation": "RSP_NearestNeighbor",
+      "f": "image"
+     }
+    },
+    "response": {
+     "retrieved_utc": "2026-11-26T19:49:30+00:00",
+     "status": 200,
+     "content_type": "image/tiff",
+     "etag": "\"ea8bf05d\"",
+     "bytes": 30151588,
+     "sha256": "02dcdb0437933d17facf6f1d74ebfd79a4f86dd6b6b59c0bb662dd67881fdb06",
+     "reused_cache": null
+    },
+    "cached_file_sha256_matches_response": true,
+    "georef": {
+     "size": true,
+     "transform": true,
+     "tiepoint": true,
+     "pixel_scale": true,
+     "geokey_GTModelType": true,
+     "geokey_GTRasterType": true,
+     "geokey_ProjectedCSType": true,
+     "geokey_ProjLinearUnits": true,
+     "equal": true,
+     "download_transform_is_recipe": true
+    },
+    "georef_package": {
+     "geokeys": {
+      "GTModelType": 1,
+      "GTRasterType": 1,
+      "ProjectedCSType": 5514,
+      "ProjLinearUnits": 9001
+     },
+     "gdal_crs_epsg": 5514,
+     "nodata": "NaN",
+     "gdal_nodata_tag": "nan"
+    },
+    "georef_download": {
+     "geokeys": {
+      "GTModelType": 1,
+      "GTRasterType": 1,
+      "ProjectedCSType": 5514,
+      "ProjLinearUnits": 9001
+     },
+     "gdal_crs_epsg": null,
+     "nodata": null,
+     "gdal_nodata_tag": null,
+     "gdal_crs_wkt": "LOCAL_CS[\"S-JTSK / Krovak East North\",UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"5514\"]]"
+    },
+    "values": {
+     "shape_equal": true,
+     "n_pixels": 6997536,
+     "n_package_nan": 0,
+     "n_compared": 6997536,
+     "n_bitwise_equal": 6997536,
+     "diff": {
+      "n": 0
+     },
+     "package_nan_explained": {
+      "nodata": 0,
+      "below_range": 0,
+      "above_range": 0
+     },
+     "n_package_nan_unexplained": 0,
+     "unexplained_examples_row_col_download": [],
+     "n_download_invalid_but_package_valued": 0,
+     "download": {
+      "nodata_tag": null,
+      "n_nodata": 0,
+      "n_below_range": 0,
+      "n_above_range": 0,
+      "n_zero": 0,
+      "min": 133.5,
+      "max": 721.7899780273438
+     },
+     "package_n_zero": 0,
+     "ok": true
+    }
+   },
+   {
+    "sheet": "25-21-14",
+    "ok": true,
+    "grid": {
+     "w": 2821,
+     "h": 2361
+    },
+    "request": {
+     "url": "https://ags.cuzk.gov.cz/arcgis2/rest/services/dmr5g/ImageServer/exportImage",
+     "params": {
+      "bbox": "redacted: see data/cache/provenance/<sheet>.json",
+      "bboxSR": 5514,
+      "imageSR": 5514,
+      "size": "2821,2361",
+      "format": "tiff",
+      "pixelType": "F32",
+      "interpolation": "RSP_NearestNeighbor",
+      "f": "image"
+     }
+    },
+    "response": {
+     "retrieved_utc": "2026-11-26T19:49:34+00:00",
+     "status": 200,
+     "content_type": "image/tiff",
+     "etag": "\"497c73ad\"",
+     "bytes": 28644076,
+     "sha256": "b18334794f551db1b683271e79142f20e21739dd639dd4b2ebc30bbe992800de",
+     "reused_cache": null
+    },
+    "cached_file_sha256_matches_response": true,
+    "georef": {
+     "size": true,
+     "transform": true,
+     "tiepoint": true,
+     "pixel_scale": true,
+     "geokey_GTModelType": true,
+     "geokey_GTRasterType": true,
+     "geokey_ProjectedCSType": true,
+     "geokey_ProjLinearUnits": true,
+     "equal": true,
+     "download_transform_is_recipe": true
+    },
+    "georef_package": {
+     "geokeys": {
+      "GTModelType": 1,
+      "GTRasterType": 1,
+      "ProjectedCSType": 5514,
+      "ProjLinearUnits": 9001
+     },
+     "gdal_crs_epsg": 5514,
+     "nodata": "NaN",
+     "gdal_nodata_tag": "nan"
+    },
+    "georef_download": {
+     "geokeys": {
+      "GTModelType": 1,
+      "GTRasterType": 1,
+      "ProjectedCSType": 5514,
+      "ProjLinearUnits": 9001
+     },
+     "gdal_crs_epsg": null,
+     "nodata": null,
+     "gdal_nodata_tag": null,
+     "gdal_crs_wkt": "LOCAL_CS[\"S-JTSK / Krovak East North\",UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"5514\"]]"
+    },
+    "values": {
+     "shape_equal": true,
+     "n_pixels": 6660381,
+     "n_package_nan": 0,
+     "n_compared": 6660381,
+     "n_bitwise_equal": 6660381,
+     "diff": {
+      "n": 0
+     },
+     "package_nan_explained": {
+      "nodata": 0,
+      "below_range": 0,
+      "above_range": 0
+     },
+     "n_package_nan_unexplained": 0,
+     "unexplained_examples_row_col_download": [],
+     "n_download_invalid_but_package_valued": 0,
+     "download": {
+      "nodata_tag": null,
+      "n_nodata": 0,
+      "n_below_range": 0,
+      "n_above_range": 0,
+      "n_zero": 0,
+      "min": 283.5400085449219,
+      "max": 660.8599853515625
+     },
+     "package_n_zero": 0,
+     "ok": true
+    }
+   },
+   {
+    "sheet": "25-24-18",
+    "ok": true,
+    "grid": {
+     "w": 2824,
+     "h": 2363
+    },
+    "request": {
+     "url": "https://ags.cuzk.gov.cz/arcgis2/rest/services/dmr5g/ImageServer/exportImage",
+     "params": {
+      "bbox": "redacted: see data/cache/provenance/<sheet>.json",
+      "bboxSR": 5514,
+      "imageSR": 5514,
+      "size": "2824,2363",
+      "format": "tiff",
+      "pixelType": "F32",
+      "interpolation": "RSP_NearestNeighbor",
+      "f": "image"
+     }
+    },
+    "response": {
+     "retrieved_utc": "2026-11-26T19:49:38+00:00",
+     "status": 200,
+     "content_type": "image/tiff",
+     "etag": "\"6285757\"",
+     "bytes": 7279340,
+     "sha256": "8bccacd60f59a394cf111fdcc855da2c0ddfb1734892d1ccb0a494a46dee0236",
+     "reused_cache": null
+    },
+    "cached_file_sha256_matches_response": true,
+    "georef": {
+     "size": true,
+     "transform": true,
+     "tiepoint": true,
+     "pixel_scale": true,
+     "geokey_GTModelType": true,
+     "geokey_GTRasterType": true,
+     "geokey_ProjectedCSType": true,
+     "geokey_ProjLinearUnits": true,
+     "equal": true,
+     "download_transform_is_recipe": true
+    },
+    "georef_package": {
+     "geokeys": {
+      "GTModelType": 1,
+      "GTRasterType": 1,
+      "ProjectedCSType": 5514,
+      "ProjLinearUnits": 9001
+     },
+     "gdal_crs_epsg": 5514,
+     "nodata": "NaN",
+     "gdal_nodata_tag": "nan"
+    },
+    "georef_download": {
+     "geokeys": {
+      "GTModelType": 1,
+      "GTRasterType": 1,
+      "ProjectedCSType": 5514,
+      "ProjLinearUnits": 9001
+     },
+     "gdal_crs_epsg": null,
+     "nodata": null,
+     "gdal_nodata_tag": null,
+     "gdal_crs_wkt": "LOCAL_CS[\"S-JTSK / Krovak East North\",UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"5514\"]]"
+    },
+    "values": {
+     "shape_equal": true,
+     "n_pixels": 6673112,
+     "n_package_nan": 0,
+     "n_compared": 6673112,
+     "n_bitwise_equal": 6673112,
+     "diff": {
+      "n": 0
+     },
+     "package_nan_explained": {
+      "nodata": 0,
+      "below_range": 0,
+      "above_range": 0
+     },
+     "n_package_nan_unexplained": 0,
+     "unexplained_examples_row_col_download": [],
+     "n_download_invalid_but_package_valued": 0,
+     "download": {
+      "nodata_tag": null,
+      "n_nodata": 0,
+      "n_below_range": 0,
+      "n_above_range": 0,
+      "n_zero": 5083803,
+      "min": 0.0,
+      "max": 897.8900146484375
+     },
+     "package_n_zero": 5083803,
+     "ok": true
+    }
+   },
+   {
+    "sheet": "24-14-18",
+    "ok": true,
+    "grid": {
+     "w": 2865,
+     "h": 2396
+    },
+    "request": {
+     "url": "https://ags.cuzk.gov.cz/arcgis2/rest/services/dmr5g/ImageServer/exportImage",
+     "params": {
+      "bbox": "redacted: see data/cache/provenance/<sheet>.json",
+      "bboxSR": 5514,
+      "imageSR": 5514,
+      "size": "2865,2396",
+      "format": "tiff",
+      "pixelType": "F32",
+      "interpolation": "RSP_NearestNeighbor",
+      "f": "image"
+     }
+    },
+    "response": {
+     "retrieved_utc": "2026-11-26T19:49:40+00:00",
+     "status": 200,
+     "content_type": "image/tiff",
+     "etag": "\"aabf28e1\"",
+     "bytes": 28644076,
+     "sha256": "14c8a178fe65bd55bc55d9530deb45460f275ae3cfff3d88c72fb12299ec7075",
+     "reused_cache": null
+    },
+    "cached_file_sha256_matches_response": true,
+    "georef": {
+     "size": true,
+     "transform": true,
+     "tiepoint": true,
+     "pixel_scale": true,
+     "geokey_GTModelType": true,
+     "geokey_GTRasterType": true,
+     "geokey_ProjectedCSType": true,
+     "geokey_ProjLinearUnits": true,
+     "equal": true,
+     "download_transform_is_recipe": true
+    },
+    "georef_package": {
+     "geokeys": {
+      "GTModelType": 1,
+      "GTRasterType": 1,
+      "ProjectedCSType": 5514,
+      "ProjLinearUnits": 9001
+     },
+     "gdal_crs_epsg": 5514,
+     "nodata": "NaN",
+     "gdal_nodata_tag": "nan"
+    },
+    "georef_download": {
+     "geokeys": {
+      "GTModelType": 1,
+      "GTRasterType": 1,
+      "ProjectedCSType": 5514,
+      "ProjLinearUnits": 9001
+     },
+     "gdal_crs_epsg": null,
+     "nodata": null,
+     "gdal_nodata_tag": null,
+     "gdal_crs_wkt": "LOCAL_CS[\"S-JTSK / Krovak East North\",UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"5514\"]]"
+    },
+    "values": {
+     "shape_equal": true,
+     "n_pixels": 6864540,
+     "n_package_nan": 0,
+     "n_compared": 6864540,
+     "n_bitwise_equal": 6864540,
+     "diff": {
+      "n": 0
+     },
+     "package_nan_explained": {
+      "nodata": 0,
+      "below_range": 0,
+      "above_range": 0
+     },
+     "n_package_nan_unexplained": 0,
+     "unexplained_examples_row_col_download": [],
+     "n_download_invalid_but_package_valued": 0,
+     "download": {
+      "nodata_tag": null,
+      "n_nodata": 0,
+      "n_below_range": 0,
+      "n_above_range": 0,
+      "n_zero": 0,
+      "min": 351.760009765625,
+      "max": 633.9266967773438
+     },
+     "package_n_zero": 0,
+     "ok": true
+    }
+   },
+   {
+    "sheet": "04-33-10",
+    "ok": true,
+    "grid": {
+     "w": 2822,
+     "h": 2391
+    },
+    "request": {
+     "url": "https://ags.cuzk.gov.cz/arcgis2/rest/services/dmr5g/ImageServer/exportImage",
+     "params": {
+      "bbox": "redacted: see data/cache/provenance/<sheet>.json",
+      "bboxSR": 5514,
+      "imageSR": 5514,
+      "size": "2822,2391",
+      "format": "tiff",
+      "pixelType": "F32",
+      "interpolation": "RSP_NearestNeighbor",
+      "f": "image"
+     }
+    },
+    "response": {
+     "retrieved_utc": "2026-11-26T19:49:44+00:00",
+     "status": 200,
+     "content_type": "image/tiff",
+     "etag": "\"e7899132\"",
+     "bytes": 26481388,
+     "sha256": "75c4b53a5f52f5cdc16f7e4edd0c68730c1e3ab64f048884985c0992a3aa6ffa",
+     "reused_cache": null
+    },
+    "cached_file_sha256_matches_response": true,
+    "georef": {
+     "size": true,
+     "transform": true,
+     "tiepoint": true,
+     "pixel_scale": true,
+     "geokey_GTModelType": true,
+     "geokey_GTRasterType": true,
+     "geokey_ProjectedCSType": true,
+     "geokey_ProjLinearUnits": true,
+     "equal": true,
+     "download_transform_is_recipe": true
+    },
+    "georef_package": {
+     "geokeys": {
+      "GTModelType": 1,
+      "GTRasterType": 1,
+      "ProjectedCSType": 5514,
+      "ProjLinearUnits": 9001
+     },
+     "gdal_crs_epsg": 5514,
+     "nodata": "NaN",
+     "gdal_nodata_tag": "nan"
+    },
+    "georef_download": {
+     "geokeys": {
+      "GTModelType": 1,
+      "GTRasterType": 1,
+      "ProjectedCSType": 5514,
+      "ProjLinearUnits": 9001
+     },
+     "gdal_crs_epsg": null,
+     "nodata": null,
+     "gdal_nodata_tag": null,
+     "gdal_crs_wkt": "LOCAL_CS[\"S-JTSK / Krovak East North\",UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"5514\"]]"
+    },
+    "values": {
+     "shape_equal": true,
+     "n_pixels": 6747402,
+     "n_package_nan": 0,
+     "n_compared": 6747402,
+     "n_bitwise_equal": 6747402,
+     "diff": {
+      "n": 0
+     },
+     "package_nan_explained": {
+      "nodata": 0,
+      "below_range": 0,
+      "above_range": 0
+     },
+     "n_package_nan_unexplained": 0,
+     "unexplained_examples_row_col_download": [],
+     "n_download_invalid_but_package_valued": 0,
+     "download": {
+      "nodata_tag": null,
+      "n_nodata": 0,
+      "n_below_range": 0,
+      "n_above_range": 0,
+      "n_zero": 607827,
+      "min": 0.0,
+      "max": 780.7533569335938
+     },
+     "package_n_zero": 607827,
+     "ok": true
+    }
+   }
+  ],
+  "agree": true
+ },
+ "n_requests": 19,
+ "package_rasters": {
+  "n_sheets": 860,
+  "n_package_nan_total": 0,
+  "n_sheets_with_zero_cells": 96,
+  "n_negative_cells_total": 0,
+  "n_fetch_log_stats_disagree": 0,
+  "fetch_log_stats_disagree": [],
+  "agree": true
+ },
+ "manifest": {
+  "n_listed": 863,
+  "n_ok": 863,
+  "n_mismatch": 0,
+  "n_missing": 0,
+  "bytes_hashed": 11410687815,
+  "mismatches": [],
+  "missing": [],
+  "unlisted": [
+   {
+    "file": "dmr5g/fetch_log.jsonl",
+    "bytes": 135681,
+    "sha256": "a3869c7ec77a6c202b83ca972823c087d4369aa9ab06c9c618dc4e4a54e329cb"
+   },
+   {
+    "file": "MANIFEST.csv",
+    "bytes": 239033,
+    "sha256": "bc7e1deb1ce50c6c73dca2e25689cb3c350941ac47cf4cc9834c542b9e4901d4"
+   }
+  ],
+  "ok": true,
+  "seconds": 31.6
+ },
+ "gate_G1": {
+  "pass": true,
+  "failures": []
+ },
+ "finished_utc": "2026-11-26T19:52:32+00:00",
+ "redacted": "EPSG:5514 sheet-grid coordinates and the layer extents of rows 3 and 4 removed (licence not stated or verified); the full record is data/cache/provenance/provenance_full.json"
+}

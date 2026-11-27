@@ -1,0 +1,54 @@
+{
+  "written": "2026-11-26T19:21:58+00:00",
+  "git_commit": "bff0527c7e83965bdeee32963d97d5a77d7c1ce0",
+  "python": "3.13.15",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "packages": {
+    "torch": "2.14.1+cu130",
+    "torchvision": "0.29.1+cu130",
+    "numpy": "2.5.5",
+    "scipy": "1.18.1",
+    "pandas": "3.1.1",
+    "pyarrow": "26.0.1",
+    "geopandas": "1.2.0",
+    "shapely": "2.2.0",
+    "pyproj": "3.8.0",
+    "rasterio": "1.5.2",
+    "pyogrio": "0.13.0",
+    "scikit-learn": "1.9.1",
+    "matplotlib": "3.11.2",
+    "pillow": "13.0.0",
+    "requests": "2.34.2",
+    "tqdm": "4.70.1",
+    "pytest": "9.2.0"
+  },
+  "proj": "9.8.1",
+  "gdal": "3.12.2",
+  "gpu": {
+    "cuda": true,
+    "name": "NVIDIA GeForce RTX 3060",
+    "total_memory_gb": 12.0,
+    "capability": "8.6",
+    "bf16_supported": true,
+    "cuda_runtime": "13.0",
+    "cudnn": 92400,
+    "driver": "621.14"
+  },
+  "raw_data": {
+    "raw_dir": "data/raw_data",
+    "manifest_rows": 863,
+    "dtm_rasters": 860,
+    "fetch_log_lines": 860,
+    "vector_files_present": true,
+    "sample_raster": {
+      "file": "02_23_04.tif",
+      "epsg": 5514,
+      "res_m": [
+        2.0,
+        2.0
+      ],
+      "dtype": "float32",
+      "readable": true
+    }
+  }
+}

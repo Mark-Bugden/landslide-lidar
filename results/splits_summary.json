@@ -1,0 +1,736 @@
+{
+ "task": "P1-08",
+ "config_hash": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+ "code_commit": "815bb2c096dddfc1582542d54d37a41f42ad2e52",
+ "environment": {
+  "pyproj": "3.8.0",
+  "proj": "9.8.1",
+  "shapely": "2.2.0",
+  "geos": "3.14.1",
+  "geopandas": "1.2.0",
+  "pyogrio": "0.13.0",
+  "gdal": "3.12.2",
+  "numpy": "2.5.5",
+  "pandas": "3.1.1"
+ },
+ "polygons": {
+  "n_total": 21356,
+  "n_in_mapped": 18649,
+  "n_eligible": 15082,
+  "n_skupina": {
+   "1": 21181,
+   "10": 84,
+   "2": 21,
+   "3": 24,
+   "4": 46
+  },
+  "n_invalid_geometries": 68,
+  "eligible_by_kraj1": {
+   "Hlavní město Praha": 4,
+   "Jihomoravský": 1569,
+   "Karlovarský": 177,
+   "Královéhradecký": 1051,
+   "Liberecký": 529,
+   "Moravskoslezský": 1660,
+   "Olomoucký": 203,
+   "Pardubický": 413,
+   "Středočeský": 455,
+   "Vysočina": 89,
+   "Zlínský": 6988,
+   "Ústecký": 1944
+  },
+  "checks": {
+   "n_in_mapped_covered_by": 18649,
+   "n_in_mapped_repaired_geometry": 18649,
+   "n_eligible_repaired_geometry": 15082,
+   "n_eligible_source_area_field": 15083,
+   "objectids_eligible_differs_source_area_field": [
+    6894,
+    10088,
+    18220
+   ],
+   "source_area_field": "st_area(shape)",
+   "geometry_minus_source_area_m2": {
+    "median": -0.15219313227271414,
+    "max_abs": 721.3516875421628
+   }
+  }
+ },
+ "assignment": {
+  "n_eligible_assigned": 15082,
+  "n_eligible_unassigned": 0,
+  "n_share_below_0.5": 34,
+  "n_share_below_1": 1460,
+  "min_share": 0.29227040497639395,
+  "n_sheets_with_eligible": 771
+ },
+ "sheets": {
+  "n": 860,
+  "n_full": 843,
+  "n_partial": 17,
+  "n_with_kraj": 797,
+  "kraj": {
+   "Hlavní město Praha": 1,
+   "Jihomoravský": 171,
+   "Karlovarský": 10,
+   "Královéhradecký": 62,
+   "Liberecký": 37,
+   "Moravskoslezský": 101,
+   "Olomoucký": 29,
+   "Pardubický": 40,
+   "Plzeňský": 1,
+   "Středočeský": 31,
+   "Vysočina": 11,
+   "Zlínský": 195,
+   "Ústecký": 108
+  },
+  "kraj_rule": {
+   "lowest_objectid": 4,
+   "majority": 793,
+   "none": 63
+  },
+  "kraj_tie_rule": "lowest_objectid",
+  "kraj_other_tie_rule": {
+   "rule": "area",
+   "used": false,
+   "sheets_kraj_differs": [
+    "11-42-04",
+    "25-12-13",
+    "25-13-15"
+   ],
+   "stage1_sheets_stratum_differs": [
+    "25-12-13",
+    "25-13-15"
+   ],
+   "stage1_strata": {
+    "F_ZLMS": {
+     "n_sheets": 241,
+     "n_blocks": 33,
+     "n_eligible": 7998
+    },
+    "F_other": {
+     "n_sheets": 43,
+     "n_blocks": 18,
+     "n_eligible": 577
+    },
+    "N_ZLMS": {
+     "n_sheets": 38,
+     "n_blocks": 18,
+     "n_eligible": 370
+    },
+    "N_other": {
+     "n_sheets": 429,
+     "n_blocks": 96,
+     "n_eligible": 5672
+    }
+   }
+  },
+  "n_flysch": 300,
+  "n_with_eligible": 771
+ },
+ "dtm": {
+  "n_sheets": 860,
+  "n_has_zero_cells": 96,
+  "n_dtm_all_valid": 764,
+  "n_with_nonfinite": 0,
+  "n_with_le_min": 96,
+  "n_with_gt_max": 0,
+  "n_with_negative": 0,
+  "n_grid_matches_recipe": 860,
+  "invalid_rule": "z <= 0 (ImageServer returns 0.0 outside the national border) or z > 2000 -> NaN",
+  "invalid_bounds": [
+   0.0,
+   2000.0
+  ],
+  "zmax_all_sheets": 1426.1600341796875,
+  "n_zero_cells_total": 248483932
+ },
+ "flysch": {
+  "n_geology_polygons_file": 597,
+  "min_sheet_frac": 0.5,
+  "default": {
+   "reading": "closing = buffer(+d).buffer(-d) with d = closing_m",
+   "buffer_m": 2000.0,
+   "area_km2": 6585.579925560341,
+   "stages": {
+    "input": {
+     "area_km2": 6441.378433917753,
+     "n_parts": 8,
+     "n_holes": 14
+    },
+    "closed": {
+     "area_km2": 6585.579925560328,
+     "n_parts": 2,
+     "n_holes": 0
+    },
+    "filled": {
+     "area_km2": 6585.579925560341,
+     "n_parts": 2,
+     "n_holes": 0
+    },
+    "final": {
+     "area_km2": 6585.579925560341,
+     "n_parts": 2,
+     "n_holes": 0
+    },
+    "buffer_m": 2000.0,
+    "fill_holes": true,
+    "min_part_m2": 1000000.0,
+    "quad_segs": 8,
+    "n_geology_polygons": 597
+   },
+   "n_flysch_sheets": 300,
+   "n_sheets_frac_within_0.05_of_threshold": 7
+  },
+  "alt": {
+   "reading": "closing with a 2 km structuring element (diameter): d = closing_m / 2",
+   "buffer_m": 1000.0,
+   "area_km2": 6525.286342232248,
+   "stages": {
+    "input": {
+     "area_km2": 6441.378433917753,
+     "n_parts": 8,
+     "n_holes": 14
+    },
+    "closed": {
+     "area_km2": 6512.894394811617,
+     "n_parts": 2,
+     "n_holes": 2
+    },
+    "filled": {
+     "area_km2": 6525.286342232248,
+     "n_parts": 2,
+     "n_holes": 0
+    },
+    "final": {
+     "area_km2": 6525.286342232248,
+     "n_parts": 2,
+     "n_holes": 0
+    },
+    "buffer_m": 1000.0,
+    "fill_holes": true,
+    "min_part_m2": 1000000.0,
+    "quad_segs": 8,
+    "n_geology_polygons": 597
+   },
+   "n_flysch_sheets": 299,
+   "n_sheets_frac_within_0.05_of_threshold": 4
+  },
+  "n_sheets_flag_differs_between_readings": 1,
+  "used": "default"
+ },
+ "stage2": {
+  "lists": {
+   "n_flysch": 10,
+   "n_nonflysch": 10,
+   "sizes_match_config": true,
+   "distinct": true
+  },
+  "checks": [
+   {
+    "sheet": "24-43-19",
+    "list": "flysch",
+    "exists": true,
+    "full": true,
+    "n_eligible": 11,
+    "dtm_all_valid": true,
+    "flysch": true,
+    "checks": {
+     "full": true,
+     "min_eligible": true,
+     "dtm_all_valid": true,
+     "flysch_flag": true
+    },
+    "pass": true,
+    "failed": []
+   },
+   {
+    "sheet": "24-44-17",
+    "list": "flysch",
+    "exists": true,
+    "full": true,
+    "n_eligible": 7,
+    "dtm_all_valid": true,
+    "flysch": true,
+    "checks": {
+     "full": true,
+     "min_eligible": true,
+     "dtm_all_valid": true,
+     "flysch_flag": true
+    },
+    "pass": true,
+    "failed": []
+   },
+   {
+    "sheet": "25-14-17",
+    "list": "flysch",
+    "exists": true,
+    "full": true,
+    "n_eligible": 21,
+    "dtm_all_valid": true,
+    "flysch": true,
+    "checks": {
+     "full": true,
+     "min_eligible": true,
+     "dtm_all_valid": true,
+     "flysch_flag": true
+    },
+    "pass": true,
+    "failed": []
+   },
+   {
+    "sheet": "25-23-01",
+    "list": "flysch",
+    "exists": true,
+    "full": true,
+    "n_eligible": 10,
+    "dtm_all_valid": true,
+    "flysch": true,
+    "checks": {
+     "full": true,
+     "min_eligible": true,
+     "dtm_all_valid": true,
+     "flysch_flag": true
+    },
+    "pass": true,
+    "failed": []
+   },
+   {
+    "sheet": "25-23-04",
+    "list": "flysch",
+    "exists": true,
+    "full": true,
+    "n_eligible": 6,
+    "dtm_all_valid": true,
+    "flysch": true,
+    "checks": {
+     "full": true,
+     "min_eligible": true,
+     "dtm_all_valid": true,
+     "flysch_flag": true
+    },
+    "pass": true,
+    "failed": []
+   },
+   {
+    "sheet": "25-24-01",
+    "list": "flysch",
+    "exists": true,
+    "full": true,
+    "n_eligible": 17,
+    "dtm_all_valid": true,
+    "flysch": true,
+    "checks": {
+     "full": true,
+     "min_eligible": true,
+     "dtm_all_valid": true,
+     "flysch_flag": true
+    },
+    "pass": true,
+    "failed": []
+   },
+   {
+    "sheet": "25-32-22",
+    "list": "flysch",
+    "exists": true,
+    "full": true,
+    "n_eligible": 33,
+    "dtm_all_valid": true,
+    "flysch": true,
+    "checks": {
+     "full": true,
+     "min_eligible": true,
+     "dtm_all_valid": true,
+     "flysch_flag": true
+    },
+    "pass": true,
+    "failed": []
+   },
+   {
+    "sheet": "25-33-01",
+    "list": "flysch",
+    "exists": true,
+    "full": true,
+    "n_eligible": 21,
+    "dtm_all_valid": true,
+    "flysch": true,
+    "checks": {
+     "full": true,
+     "min_eligible": true,
+     "dtm_all_valid": true,
+     "flysch_flag": true
+    },
+    "pass": true,
+    "failed": []
+   },
+   {
+    "sheet": "25-41-05",
+    "list": "flysch",
+    "exists": true,
+    "full": true,
+    "n_eligible": 108,
+    "dtm_all_valid": true,
+    "flysch": true,
+    "checks": {
+     "full": true,
+     "min_eligible": true,
+     "dtm_all_valid": true,
+     "flysch_flag": true
+    },
+    "pass": true,
+    "failed": []
+   },
+   {
+    "sheet": "35-12-16",
+    "list": "flysch",
+    "exists": true,
+    "full": true,
+    "n_eligible": 44,
+    "dtm_all_valid": true,
+    "flysch": true,
+    "checks": {
+     "full": true,
+     "min_eligible": true,
+     "dtm_all_valid": true,
+     "flysch_flag": true
+    },
+    "pass": true,
+    "failed": []
+   },
+   {
+    "sheet": "02-41-01",
+    "list": "nonflysch",
+    "exists": true,
+    "full": true,
+    "n_eligible": 10,
+    "dtm_all_valid": true,
+    "flysch": false,
+    "checks": {
+     "full": true,
+     "min_eligible": true,
+     "dtm_all_valid": true,
+     "flysch_flag": true
+    },
+    "pass": true,
+    "failed": []
+   },
+   {
+    "sheet": "02-41-18",
+    "list": "nonflysch",
+    "exists": true,
+    "full": true,
+    "n_eligible": 14,
+    "dtm_all_valid": true,
+    "flysch": false,
+    "checks": {
+     "full": true,
+     "min_eligible": true,
+     "dtm_all_valid": true,
+     "flysch_flag": true
+    },
+    "pass": true,
+    "failed": []
+   },
+   {
+    "sheet": "03-34-01",
+    "list": "nonflysch",
+    "exists": true,
+    "full": true,
+    "n_eligible": 27,
+    "dtm_all_valid": true,
+    "flysch": false,
+    "checks": {
+     "full": true,
+     "min_eligible": true,
+     "dtm_all_valid": true,
+     "flysch_flag": true
+    },
+    "pass": true,
+    "failed": []
+   },
+   {
+    "sheet": "03-34-04",
+    "list": "nonflysch",
+    "exists": true,
+    "full": true,
+    "n_eligible": 26,
+    "dtm_all_valid": true,
+    "flysch": false,
+    "checks": {
+     "full": true,
+     "min_eligible": true,
+     "dtm_all_valid": true,
+     "flysch_flag": true
+    },
+    "pass": true,
+    "failed": []
+   },
+   {
+    "sheet": "14-13-14",
+    "list": "nonflysch",
+    "exists": true,
+    "full": true,
+    "n_eligible": 21,
+    "dtm_all_valid": true,
+    "flysch": false,
+    "checks": {
+     "full": true,
+     "min_eligible": true,
+     "dtm_all_valid": true,
+     "flysch_flag": true
+    },
+    "pass": true,
+    "failed": []
+   },
+   {
+    "sheet": "14-14-22",
+    "list": "nonflysch",
+    "exists": true,
+    "full": true,
+    "n_eligible": 21,
+    "dtm_all_valid": true,
+    "flysch": false,
+    "checks": {
+     "full": true,
+     "min_eligible": true,
+     "dtm_all_valid": true,
+     "flysch_flag": true
+    },
+    "pass": true,
+    "failed": []
+   },
+   {
+    "sheet": "24-12-21",
+    "list": "nonflysch",
+    "exists": true,
+    "full": true,
+    "n_eligible": 10,
+    "dtm_all_valid": true,
+    "flysch": false,
+    "checks": {
+     "full": true,
+     "min_eligible": true,
+     "dtm_all_valid": true,
+     "flysch_flag": true
+    },
+    "pass": true,
+    "failed": []
+   },
+   {
+    "sheet": "24-14-16",
+    "list": "nonflysch",
+    "exists": true,
+    "full": true,
+    "n_eligible": 17,
+    "dtm_all_valid": true,
+    "flysch": false,
+    "checks": {
+     "full": true,
+     "min_eligible": true,
+     "dtm_all_valid": true,
+     "flysch_flag": true
+    },
+    "pass": true,
+    "failed": []
+   },
+   {
+    "sheet": "24-42-23",
+    "list": "nonflysch",
+    "exists": true,
+    "full": true,
+    "n_eligible": 28,
+    "dtm_all_valid": true,
+    "flysch": false,
+    "checks": {
+     "full": true,
+     "min_eligible": true,
+     "dtm_all_valid": true,
+     "flysch_flag": true
+    },
+    "pass": true,
+    "failed": []
+   },
+   {
+    "sheet": "25-12-22",
+    "list": "nonflysch",
+    "exists": true,
+    "full": true,
+    "n_eligible": 13,
+    "dtm_all_valid": true,
+    "flysch": false,
+    "checks": {
+     "full": true,
+     "min_eligible": true,
+     "dtm_all_valid": true,
+     "flysch_flag": true
+    },
+    "pass": true,
+    "failed": []
+   }
+  ],
+  "all_pass": true,
+  "n_targets": 465,
+  "n_targets_flysch_list": 278,
+  "n_targets_nonflysch_list": 187,
+  "candidate_pool_info": {
+   "note": "full sheets with >= min_eligible_polygons and a fully valid DTM (not redrawn)",
+   "n_flysch": 240,
+   "n_nonflysch": 309
+  }
+ },
+ "stage1": {
+  "n_sheets": 751,
+  "n_eligible": 14617,
+  "n_blocks": 166,
+  "strata": {
+   "F_ZLMS": {
+    "n_sheets": 242,
+    "n_blocks": 34,
+    "n_eligible": 8000
+   },
+   "F_other": {
+    "n_sheets": 42,
+    "n_blocks": 18,
+    "n_eligible": 575
+   },
+   "N_ZLMS": {
+    "n_sheets": 39,
+    "n_blocks": 18,
+    "n_eligible": 372
+   },
+   "N_other": {
+    "n_sheets": 428,
+    "n_blocks": 96,
+    "n_eligible": 5670
+   }
+  },
+  "n_sheets_with_zero_cells": 77,
+  "block_km": 15,
+  "n_sheets_per_block": {
+   "min": 1,
+   "max": 13
+  }
+ },
+ "folds_a": {
+  "seed": 11,
+  "n_folds": 5,
+  "per_fold": {
+   "0": {
+    "n_blocks": 10,
+    "n_sheets": 47,
+    "n_eligible": 1715,
+    "n_blocks_F_ZLMS": 6,
+    "n_blocks_F_other": 4
+   },
+   "1": {
+    "n_blocks": 11,
+    "n_sheets": 59,
+    "n_eligible": 1716,
+    "n_blocks_F_ZLMS": 6,
+    "n_blocks_F_other": 5
+   },
+   "2": {
+    "n_blocks": 10,
+    "n_sheets": 64,
+    "n_eligible": 1715,
+    "n_blocks_F_ZLMS": 7,
+    "n_blocks_F_other": 3
+   },
+   "3": {
+    "n_blocks": 11,
+    "n_sheets": 63,
+    "n_eligible": 1715,
+    "n_blocks_F_ZLMS": 7,
+    "n_blocks_F_other": 4
+   },
+   "4": {
+    "n_blocks": 10,
+    "n_sheets": 51,
+    "n_eligible": 1714,
+    "n_blocks_F_ZLMS": 8,
+    "n_blocks_F_other": 2
+   }
+  }
+ },
+ "group_b": {
+  "train": {
+   "n_blocks": 52,
+   "n_sheets": 281,
+   "n_eligible": 8372
+  },
+  "test": {
+   "n_blocks": 114,
+   "n_sheets": 470,
+   "n_eligible": 6245
+  }
+ },
+ "inner_val": {
+  "frac": 0.15,
+  "rule": "random training blocks until >= frac of the run's training eligible polygons (D10)",
+  "runs": {
+   "a_f0": {
+    "seed": 1000,
+    "n_training_blocks": 42,
+    "n_training_eligible": 6860,
+    "n_inner_val_blocks": 9,
+    "n_inner_val_eligible": 1309,
+    "inner_val_frac_eligible": 0.19081632653061226,
+    "n_inner_val_sheets": 51
+   },
+   "a_f1": {
+    "seed": 1001,
+    "n_training_blocks": 41,
+    "n_training_eligible": 6859,
+    "n_inner_val_blocks": 9,
+    "n_inner_val_eligible": 1477,
+    "inner_val_frac_eligible": 0.21533751275696167,
+    "n_inner_val_sheets": 51
+   },
+   "a_f2": {
+    "seed": 1002,
+    "n_training_blocks": 42,
+    "n_training_eligible": 6860,
+    "n_inner_val_blocks": 3,
+    "n_inner_val_eligible": 1122,
+    "inner_val_frac_eligible": 0.16355685131195336,
+    "n_inner_val_sheets": 29
+   },
+   "a_f3": {
+    "seed": 1003,
+    "n_training_blocks": 41,
+    "n_training_eligible": 6860,
+    "n_inner_val_blocks": 5,
+    "n_inner_val_eligible": 1086,
+    "inner_val_frac_eligible": 0.15830903790087464,
+    "n_inner_val_sheets": 35
+   },
+   "a_f4": {
+    "seed": 1004,
+    "n_training_blocks": 42,
+    "n_training_eligible": 6861,
+    "n_inner_val_blocks": 8,
+    "n_inner_val_eligible": 1107,
+    "inner_val_frac_eligible": 0.16134674245736774,
+    "n_inner_val_sheets": 40
+   },
+   "b": {
+    "seed": 2000,
+    "n_training_blocks": 52,
+    "n_training_eligible": 8372,
+    "n_inner_val_blocks": 10,
+    "n_inner_val_eligible": 1533,
+    "inner_val_frac_eligible": 0.18311036789297658,
+    "n_inner_val_sheets": 42
+   },
+   "s2": {
+    "seed": 3000,
+    "n_training_blocks": 166,
+    "n_training_eligible": 14617,
+    "n_inner_val_blocks": 18,
+    "n_inner_val_eligible": 2251,
+    "inner_val_frac_eligible": 0.15399876855715947,
+    "n_inner_val_sheets": 119
+   }
+  }
+ }
+}
