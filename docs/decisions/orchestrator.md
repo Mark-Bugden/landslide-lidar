@@ -87,6 +87,11 @@ searched further.
   `stage2_baselines.py` were re-run: `sheets.parquet` and `splits.json` came out byte-identical, the tracked
   `results/sheet_splits.csv`, `splits_summary.json` (apart from its `code_commit`) and `stage2_baselines.csv` were
   unchanged, and the real-data tests pass. A full test run after the fix changed no file under `data/`.
+- **Missed at first, found by P1-16 (2026-11-27).** The same test run had also left 21 synthetic run directories in
+  `data/runs/` (P1-13's evaluation fixtures: `done.json`, `history.csv`, `preds_*.csv`, git commit `c0ffee`, a
+  made-up config hash, no `best.pt` or `norm.json`). The runner would have skipped them as finished units. All 21
+  were confirmed to be fixtures and `data/runs/` was deleted before the freeze. A sweep of every file under `data/`
+  (outside `raw_data/` and `cache/`) modified between 22:55 and 23:11 found nothing else.
 
 ## I2 · P1-09's real build was blocked by the permission system
 
