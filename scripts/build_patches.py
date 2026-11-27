@@ -45,6 +45,7 @@ from landslide.config import config_hash, load_config
 from landslide.logs import get_logger, setup_logging
 from landslide.paths import Paths
 from landslide.sampling import grid_of_sheet
+from landslide.sheets import grid_origin
 
 log = get_logger("build_patches")
 
@@ -86,7 +87,7 @@ def sheet_sources(cfg: dict[str, Any], paths: Paths, sheet_ids: set[str]) -> dic
     for s in sorted(sheet_ids):
         row = sh.loc[s]
         out[s] = P.SheetSource(sheet=s, dtm_path=paths.raw / str(row["dtm_path"]), susc_path=paths.susceptibility(s),
-                               grid=grid_of_sheet(row, cell))
+                               grid=grid_of_sheet(row, cell, grid_origin(cfg)))
     absent = [str(p) for src in out.values() for p in (src.dtm_path, src.susc_path) if not p.is_file()]
     if absent:
         raise FileNotFoundError(f"{len(absent)} rasters missing, e.g. {absent[:3]}")

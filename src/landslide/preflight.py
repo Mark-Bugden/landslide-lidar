@@ -53,8 +53,6 @@ from landslide.paths import Paths
 log = get_logger("preflight")
 
 GIB = 2 ** 30
-#: Appendix A §11 "≥ 7 GB free GPU memory". There is no config key for it (requested for P1-16's batch).
-MIN_FREE_GPU_GB = 7.0
 #: BRIEF.md Phase 1 item 6: on any problem the runner exits within 60 s.
 TIME_BUDGET_S = 60.0
 #: Time kept after the GPU probe for the remaining checks and the exit, and the shortest probe timeout.
@@ -547,7 +545,14 @@ def _check_disk(c: _Collector, cfg: Mapping[str, Any], paths: Paths, disk_usage:
         c.ok("disk", f"{free:.1f} GiB free (>= {need:g} GiB)")
 
 
-def _check_gpu(c: _Collector, gpu_probe: Callable[[], GpuInfo], timeout_s: float, info: dict[str, Any]) -> bool:
+def min_free_gpu_gib(cfg: Mapping[str, Any]) -> float:
+    """Appendix A §11 "≥ 7 GB free GPU memory" (`replication.runner.min_free_gpu_gb`), read as GiB (the stricter
+    reading)."""
+    return float(cfg["replication"]["runner"]["min_free_gpu_gb"])
+
+
+def _check_gpu(c: _Collector, gpu_probe: Callable[[], GpuInfo], timeout_s: float, info: dict[str, Any],
+               min_free_gb: float) -> bool:
     """Returns True if torch loaded (so later torch-based checks may run)."""
     try:
         g = call_with_timeout(gpu_probe, timeout_s, "CUDA probe")
@@ -565,11 +570,11 @@ def _check_gpu(c: _Collector, gpu_probe: Callable[[], GpuInfo], timeout_s: float
                       f"{g.cuda_version}): training needs the GPU")
         return True
     free = (g.free_bytes or 0) / GIB
-    if free < MIN_FREE_GPU_GB:
-        c.fail("gpu", f"only {free:.1f} GiB of GPU memory free on {g.name}; the run needs >= {MIN_FREE_GPU_GB:g} GiB "
+    if free < min_free_gb:
+        c.fail("gpu", f"only {free:.1f} GiB of GPU memory free on {g.name}; the run needs >= {min_free_gb:g} GiB "
                       f"(close other GPU programs)")
     else:
-        c.ok("gpu", f"{g.name}: {free:.1f} GiB free (>= {MIN_FREE_GPU_GB:g} GiB)")
+        c.ok("gpu", f"{g.name}: {free:.1f} GiB free (>= {min_free_gb:g} GiB)")
     return True
 
 
@@ -605,7 +610,7 @@ def run_preflight(cfg: Mapping[str, Any], paths: Paths, *, gpu_probe: Callable[[
     with c.guard("disk"):
         _check_disk(c, cfg, paths, disk_usage or shutil.disk_usage, info)
     timeout = max(_MIN_PROBE_TIMEOUT_S, TIME_BUDGET_S - _PROBE_MARGIN_S - (clock() - t0))
-    torch_ok = _check_gpu(c, gpu_probe or probe_gpu, timeout, info)
+    torch_ok = _check_gpu(c, gpu_probe or probe_gpu, timeout, info, min_free_gpu_gib(cfg))
     if torch_ok:
         with c.guard("weights"):
             _check_weights(c, cfg, paths, info)

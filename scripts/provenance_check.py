@@ -42,10 +42,9 @@ from landslide.logs import get_logger, progress, setup_logging
 from landslide.net import Client
 from landslide.paths import Paths, sheet_to_stem, stem_to_sheet
 
-#: BRIEF.md, "Provenance check": the feature counts on 2026-11-25.
-EXPECTED_COUNTS = {"register": 21356, "sheets": 860}
-#: BRIEF.md, "Provenance check": re-download at least 10 randomly chosen sheets.
-MIN_DTM_SHEETS = 10
+#: Rows whose live count the brief fixes (BRIEF.md, "Provenance check": 21,356 and 860 on 2026-11-25); the
+#: numbers are the config's `sources.<row>.expected_count`.
+EXPECTED_COUNT_ROWS = ("register", "sheets")
 
 log = get_logger("provenance")
 
@@ -64,9 +63,9 @@ def check_sources(cfg: dict, paths: Paths, client: Client) -> dict[str, Any]:
     dtm_url = S.dtm_service_url(cfg)
     out["dtm"] = {"url": dtm_url, "metadata": S.layer_metadata(client, dtm_url, keys=S.IMAGE_META_KEYS)}
     geology_where = S.sql_in("subregion", cfg["flysch"]["subregions"])
-    rows = (("register", S.REGISTER_URL, "1=1", paths.register_gpkg),
-            ("sheets", S.SHEETS_URL, "1=1", paths.surveyed_sheets),
-            ("geology", S.GEOLOGY_URL, geology_where, paths.geology_gpkg))
+    rows = (("register", S.source_url(cfg, "register"), "1=1", paths.register_gpkg),
+            ("sheets", S.source_url(cfg, "sheets"), "1=1", paths.surveyed_sheets),
+            ("geology", S.source_url(cfg, "geology"), geology_where, paths.geology_gpkg))
     for name, url, where, pkg in rows:
         meta = S.layer_metadata(client, url)
         live = S.count_features(client, url, where)
@@ -74,8 +73,8 @@ def check_sources(cfg: dict, paths: Paths, client: Client) -> dict[str, Any]:
         rec = {"url": url, "where": where, "metadata": meta, "count_live": live,
                "count_package": int(info["features"]), "package_crs": info["crs"],
                "package_fields": list(info["fields"])}
-        if name in EXPECTED_COUNTS:
-            rec["count_expected_brief"] = EXPECTED_COUNTS[name]
+        if name in EXPECTED_COUNT_ROWS:
+            rec["count_expected_brief"] = S.expected_count(cfg, name)
         rec["counts_agree"] = live == rec["count_package"] and live == rec.get("count_expected_brief", live)
         live_fields = [f for f, t in meta.get("fields", []) if t != "esriFieldTypeGeometry"]
         rec["package_fields_in_layer"] = all(f in live_fields for f in rec["package_fields"])
@@ -105,7 +104,7 @@ def check_grids(cfg: dict, paths: Paths, sheets_gdf, service_meta: dict) -> dict
                 header_problems.append({"sheet": s, "count": ds.count, "dtype": ds.dtypes[0],
                                         "epsg": ds.crs.to_epsg() if ds.crs else None})
     extra = sorted({stem_to_sheet(p.stem) for p in paths.dmr5g_dir.glob("*.tif")} - set(recipe))
-    res = S.compare_grids(recipe, flog, rasters, cell)
+    res = S.compare_grids(recipe, flog, rasters, cell, origin=S.grid_origin(cfg))
     worst = min(clearance, key=clearance.get)
     max_w, max_h = max(g.w for g in recipe.values()), max(g.h for g in recipe.values())
     res.update({
@@ -119,7 +118,8 @@ def check_grids(cfg: dict, paths: Paths, sheets_gdf, service_meta: dict) -> dict
     res["within_service_limits"] = (max_w <= (service_meta.get("maxImageWidth") or 0)
                                     and max_h <= (service_meta.get("maxImageHeight") or 0))
     res["agree"] = (res["n_mismatched_sheets"] == 0 and not header_problems and not extra
-                    and all(v == res["n_sheets"] for v in res["equal"].values()) and res["n_sheets"] == 860)
+                    and all(v == res["n_sheets"] for v in res["equal"].values())
+                    and res["n_sheets"] == S.expected_count(cfg, "sheets"))
     log.info("grids: %s equal of %d; %d mismatched sheets; min edge clearance %.3g m (%s)", res["equal"],
              res["n_sheets"], res["n_mismatched_sheets"], clearance[worst], worst)
     return res
@@ -170,7 +170,7 @@ def check_dtm(cfg: dict, paths: Paths, client: Client, sheets_gdf, refetch: bool
         with rasterio.open(paths.dtm(s)) as a, rasterio.open(tif) as b:
             pkg, dl = a.read(1), b.read(1)
             dl_nodata = b.nodata
-        values = S.compare_dtm(pkg, dl, dl_nodata)
+        values = S.compare_dtm(pkg, dl, dl_nodata, valid_range=S.package_valid_range(cfg))
         ok = bool(values["ok"] and georef["equal"] and georef["download_transform_is_recipe"]
                   and file_sha == fetch["sha256"])
         per_sheet.append({"sheet": s, "ok": ok, "grid": g.as_dict(),
@@ -288,9 +288,10 @@ def main(argv: list[str] | None = None) -> int:
                         "NaN fraction, zmin or zmax disagree with fetch_log.jsonl")
     if not result["grids"]["within_service_limits"]:
         failures.append("grids: a request exceeds the service's maxImageWidth/Height")
-    if result["dtm"]["summary"]["n_sheets"] < MIN_DTM_SHEETS:
+    min_sheets = int(cfg["sources"]["dtm"]["provenance_min_sheets"])
+    if result["dtm"]["summary"]["n_sheets"] < min_sheets:
         failures.append(f"dtm: only {result['dtm']['summary']['n_sheets']} sheets compared (brief: at least "
-                        f"{MIN_DTM_SHEETS})")
+                        f"{min_sheets})")
     for p in result["dtm"]["per_sheet"]:
         if not p["ok"]:
             failures.append(f"dtm {p['sheet']}: georef {p['georef']}, diff {p['values'].get('diff')}, "

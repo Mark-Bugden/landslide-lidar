@@ -160,7 +160,7 @@ def test_estimators_receive_only_fit_rows(meta, splits, monkeypatch):
         u = B.predict_unit(run, meta, splits, CFG)
         assert len(seen) == 3
         for name, x_fit, y_fit, x_test in seen:
-            feats = next(s.features for s in B.DEFAULT_SPECS if s.name == name)
+            feats = next(s.features for s in B.baseline_specs(CFG) if s.name == name)
             allx = meta[list(feats)].to_numpy(dtype=np.float64)
             index = {tuple(v): i for i, v in enumerate(allx)}
             assert len(index) == len(meta)  # feature vectors identify rows
@@ -322,7 +322,7 @@ def _tiny_meta() -> pd.DataFrame:
 
 def test_scorer_with_known_auc():
     meta = _tiny_meta()
-    specs = B.DEFAULT_SPECS[:2]
+    specs = B.baseline_specs(CFG)[:2]
     tp = B.PooledPredictions(test="b", rows=np.arange(5), run=np.array(["b"] * 5, dtype=object),
                              scores={"slope_only": meta["slope_mean"].to_numpy(),
                                      "susceptibility": meta["susc_mean"].to_numpy()}, units=[])
@@ -512,10 +512,16 @@ def test_flags_read_from_csv_forms():
 
 
 def test_scorer_specs_from_config():
-    assert B.baseline_specs(CFG) == B.DEFAULT_SPECS
-    assert [s.name for s in B.DEFAULT_SPECS] == NAMES
-    assert [s.kind for s in B.DEFAULT_SPECS] == ["baseline", "baseline", "classical_ml", "classical_ml",
-                                                 "classical_ml"]
+    # Appendix A §10, as the config's replication.baselines.scorers records it
+    assert B.baseline_specs(CFG) == (
+        B.BaselineSpec("slope_only", "column", ("slope_mean",)),
+        B.BaselineSpec("susceptibility", "column", ("susc_mean",)),
+        B.BaselineSpec("slope_susc_lr", "lr", B.SLOPE_SUSC_FEATURES),
+        B.BaselineSpec("terrain_stats_lr", "lr", B.TERRAIN_FEATURES),
+        B.BaselineSpec("terrain_stats_gbm", "gbm", B.TERRAIN_FEATURES))
+    assert [s.name for s in B.baseline_specs(CFG)] == NAMES
+    assert [s.kind for s in B.baseline_specs(CFG)] == ["baseline", "baseline", "classical_ml", "classical_ml",
+                                                       "classical_ml"]
     c = copy.deepcopy(CFG)
     c["replication"]["baselines"] = {"scorers": [{"name": "slope_only", "model": "column", "features": ["slope_mean"]},
                                                  {"name": "x_lr", "model": "lr", "features": ["tri", "svf_mean"]}]}

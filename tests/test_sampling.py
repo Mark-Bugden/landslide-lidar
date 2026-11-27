@@ -23,12 +23,13 @@ from landslide.config import load_config
 
 CFG = load_config()
 P = S.sampling_params(CFG)
+O = P.grid_origin  # the DMR 5G lattice origin, sources.dtm.grid_origin_m
 # a corner lattice on the DMR 5G lattice (x = 0.4 + 2i, y = -0.12 + 2j)
 X0, Y0 = 0.4 + 2 * -350_000, -0.12 + 2 * -550_000
 
 
 def grid(n_rows: int = 301, n_cols: int = 351) -> S.CornerGrid:
-    return S.CornerGrid.from_transform(Affine(2.0, 0.0, X0, 0.0, -2.0, Y0), n_rows - 1, n_cols - 1)
+    return S.CornerGrid.from_transform(Affine(2.0, 0.0, X0, 0.0, -2.0, Y0), n_rows - 1, n_cols - 1, origin=O)
 
 
 def all_corners(g: S.CornerGrid) -> tuple[np.ndarray, np.ndarray]:
@@ -62,6 +63,7 @@ def test_params_from_config():
     assert P.grid_step_px == 30 and P.neg_jitter_m == 15.0 and P.stage2_buffer_m == 150.0
     assert P.lookalike_types == ("quarry", "spoil", "rock", "cut")
     assert P.zabaged_layers == {"quarry": 118, "spoil": 119, "rock": 130, "landslide": 129, "road": 79, "railway": 75}
+    assert P.grid_origin == (0.4, -0.12)
     bad = copy.deepcopy(CFG)
     bad["patch"]["size_m"] = 302
     with pytest.raises(ValueError):
@@ -90,15 +92,15 @@ def test_corner_grid_lattice_and_snap():
     assert np.allclose(x, 0.4 + 2 * gi, atol=1e-6) and np.allclose(y, -0.12 + 2 * gj, atol=1e-6)
     r, c = G.snap(x + 0.9, y - 0.9)
     assert r.tolist() == [0, 10] and c.tolist() == [0, 5]
-    off = S.CornerGrid.from_transform(Affine(2.0, 0.0, X0 + 1.0, 0.0, -2.0, Y0), 10, 10)
+    off = S.CornerGrid.from_transform(Affine(2.0, 0.0, X0 + 1.0, 0.0, -2.0, Y0), 10, 10, origin=O)
     with pytest.raises(ValueError):
         off.lattice_offset()
     # a raster transform that differs from the stored (rounded) corner in the last bits is the same grid
-    a = S.CornerGrid.from_transform(Affine(2.0, 0.0, X0, 0.0, -2.0, Y0), 300, 350)
-    b = S.CornerGrid.from_transform(Affine(2.0, 0.0, X0 + 3e-10, 0.0, -2.0, Y0 - 2e-10), 300, 350)
-    c = S.CornerGrid.from_transform(Affine(2.0, 0.0, X0 + 2.0, 0.0, -2.0, Y0), 300, 350)
+    a = S.CornerGrid.from_transform(Affine(2.0, 0.0, X0, 0.0, -2.0, Y0), 300, 350, origin=O)
+    b = S.CornerGrid.from_transform(Affine(2.0, 0.0, X0 + 3e-10, 0.0, -2.0, Y0 - 2e-10), 300, 350, origin=O)
+    c = S.CornerGrid.from_transform(Affine(2.0, 0.0, X0 + 2.0, 0.0, -2.0, Y0), 300, 350, origin=O)
     assert a != b and a.same_lattice(b) and not a.same_lattice(c)
-    assert not a.same_lattice(S.CornerGrid.from_transform(Affine(2.0, 0.0, X0, 0.0, -2.0, Y0), 300, 351))
+    assert not a.same_lattice(S.CornerGrid.from_transform(Affine(2.0, 0.0, X0, 0.0, -2.0, Y0), 300, 351, origin=O))
 
 
 # ======================================================================================================================

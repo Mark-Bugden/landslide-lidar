@@ -99,11 +99,12 @@ def summarise(paths: Paths, cfg: dict, all_sheets: list[str]) -> dict[str, Any]:
     runs = read_jsonl(d / "runs.jsonl")
     meta_p = d / "service_metadata.json"
     meta = json.loads(meta_p.read_text(encoding="utf-8")) if meta_p.exists() else None
+    src = SU.source(cfg)
     done = [s for s in all_sheets if s in recs and paths.susceptibility(s).exists()]
     missing = sorted(set(all_sheets) - set(done))
     tot = {"n_px": 0, "n_mid_render": 0, "n_high_render": 0, "n_overlap": 0, "0": 0, "1": 0, "2": 0}
     pairs: dict[str, int] = {}
-    alpha = {k: {} for k in SU.CLASSES}
+    alpha = {k: {} for k in src.classes}
     other_colour = 0
     frac_mid, frac_high, frac_any = [], [], []
     n_no_class = n_overlap_sheets = 0
@@ -117,7 +118,7 @@ def summarise(paths: Paths, cfg: dict, all_sheets: list[str]) -> dict[str, Any]:
             tot[c] += r["n_code"][c]
         for p, n in r["overlap_alpha_pairs"].items():
             pairs[p] = pairs.get(p, 0) + n
-        for cls in SU.CLASSES:
+        for cls in src.classes:
             q = r["requests"][cls]
             png_bytes += q["bytes"]
             retrieved.append(q["retrieved_utc"])
@@ -140,13 +141,14 @@ def summarise(paths: Paths, cfg: dict, all_sheets: list[str]) -> dict[str, Any]:
     return {
         "row": 5,
         "source": "ČGS landslide susceptibility map (no stated licence: rasters stay in data/, aggregates only here)",
-        "service": SU.SERVICE_URL,
-        "request": {"url": SU.EXPORT_URL, "per_sheet": "one request per class (mid, high) on the sheet's DTM grid",
-                    "params": {k: v for k, v in SU.export_params(S.Grid(0, 0, 1, 1), S.epsg_code(cfg), "mid").items()
+        "service": src.service,
+        "request": {"url": src.export_url, "per_sheet": "one request per class (mid, high) on the sheet's DTM grid",
+                    "params": {k: v for k, v in SU.export_params(src, S.Grid(0, 0, 1, 1, x0=0.0, y0=0.0),
+                                                                 S.epsg_code(cfg), "mid").items()
                                if k not in ("bbox", "size", "layerDefs")},
                     "bbox_size": "bbox and size of the sheet's package DTM raster (transform and size read from it)",
-                    "layerDefs": {k: SU.layer_def(p) for k, (_, p) in SU.CLASSES.items()},
-                    "class_rule": f"alpha >= {SU.ALPHA_MIN}", "codes": SU.CLASS_LABELS,
+                    "layerDefs": {k: SU.layer_def(src, p) for k, (_, p) in src.classes.items()},
+                    "class_rule": f"alpha >= {src.alpha_min}", "codes": SU.CLASS_LABELS,
                     "overlap_rule": "a pixel in both the mid and the high render gets code 2 (high)"},
         "metadata": meta_c,
         "metadata_retrieved_utc": meta.get("retrieved_utc") if meta else None,
@@ -184,31 +186,32 @@ def summarise(paths: Paths, cfg: dict, all_sheets: list[str]) -> dict[str, Any]:
     }
 
 
-def inspect_sheet(client: Client, sheet: str, paths: Paths, epsg: int, cell: float, n_points: int) -> dict[str, Any]:
+def inspect_sheet(src: SU.Source, client: Client, sheet: str, paths: Paths, epsg: int, cell: float,
+                  origin: tuple[float, float], n_points: int) -> dict[str, Any]:
     """`f=json` description of both renders, then point queries of the vector layer at chosen pixels."""
     from PIL import Image
 
-    dtm = SU.read_dtm_grid(paths.dtm(sheet), cell)
+    dtm = SU.read_dtm_grid(paths.dtm(sheet), cell, origin)
     g = dtm.grid
     out: dict[str, Any] = {"sheet": sheet, "grid": g.as_dict(), "export_json": {}}
-    for cls in SU.CLASSES:
-        body = client.get_json(SU.EXPORT_URL, params=SU.export_params(g, epsg, cls, f="json"))
+    for cls in src.classes:
+        body = client.get_json(src.export_url, params=SU.export_params(src, g, epsg, cls, f="json"))
         out["export_json"][cls] = SU.check_export_json(body, g, epsg)
     alphas = {}
-    for cls in SU.CLASSES:
+    for cls in src.classes:
         with Image.open(paths.susceptibility_dir / "png" / f"{sheet_to_stem(sheet)}_{cls}.png") as im:
             alphas[cls] = np.asarray(im)[..., 3].copy()
     import rasterio
 
     with rasterio.open(paths.susceptibility(sheet)) as ds:
         codes = ds.read(1)
-    pts = SU.inspection_points(alphas, n_points)
+    pts = SU.inspection_points(src, alphas, n_points)
     rows = []
     for cat, cells in pts.items():
         for r, c in cells:
             x, y = SU.pixel_centre(g, r, c)
-            vals = SU.point_query(client, x, y, epsg)
-            sc = SU.code_from_values(vals)
+            vals = SU.point_query(src, client, x, y, epsg)
+            sc = SU.code_from_values(src, vals)
             rows.append({"category": cat, "row": r, "col": c, "x": x, "y": y, "raster_code": int(codes[r, c]),
                          "service_values": [v.split(" –")[0] for v in vals], "service_code": sc,
                          "agree": sc == int(codes[r, c])})
@@ -250,6 +253,8 @@ def main(argv: list[str] | None = None) -> int:
     log = get_logger("fetch_susceptibility")
     epsg = S.epsg_code(cfg)
     cell = float(cfg["dtm"]["cell_m"])
+    origin = S.grid_origin(cfg)
+    src = SU.source(cfg)
     d = paths.susceptibility_dir
     sources_json = paths.results / "sources.json"
 
@@ -269,7 +274,8 @@ def main(argv: list[str] | None = None) -> int:
     if missing_dtm:
         log.error("no DTM raster for %s", missing_dtm)
         return 1
-    grids = {s: SU.read_dtm_grid(paths.dtm(s), cell).grid for s in progress(all_sheets, desc="grids", unit="sheet")}
+    grids = {s: SU.read_dtm_grid(paths.dtm(s), cell, origin).grid
+             for s in progress(all_sheets, desc="grids", unit="sheet")}
     max_w, max_h = max(g.w for g in grids.values()), max(g.h for g in grids.values())
 
     run = {"started_utc": now_utc(), "argv": sys.argv[1:] if argv is None else argv,
@@ -281,23 +287,23 @@ def main(argv: list[str] | None = None) -> int:
     status, n_rendered = "ok", 0
     with Client() as client:
         try:
-            meta = SU.service_metadata(client)
+            meta = SU.service_metadata(src, client)
             meta["retrieved_utc"] = now_utc()
             d.mkdir(parents=True, exist_ok=True)
             (d / "service_metadata.json").write_text(json.dumps(meta, indent=1, ensure_ascii=False), encoding="utf-8")
-            problems = SU.check_service(meta, max_w, max_h, epsg)
+            problems = SU.check_service(src, meta, max_w, max_h, epsg)
             if problems:
                 for p in problems:
                     log.error("service check: %s", p)
                 raise SU.UnexpectedResponse("; ".join(problems))
             colours = {k: tuple(v) for k, v in meta["class_colours"].items()}
-            log.info("service %s v%s, layer %r; colours %s; max grid %dx%d (limit %sx%s)", SU.SERVICE_URL,
+            log.info("service %s v%s, layer %r; colours %s; max grid %dx%d (limit %sx%s)", src.service,
                      meta["service"].get("currentVersion"), meta["layer"].get("name"), colours, max_w, max_h,
                      meta["service"].get("maxImageWidth"), meta["service"].get("maxImageHeight"))
             for s in progress(todo, desc="susceptibility", unit="sheet"):
                 t0 = time.monotonic()
-                rec = SU.render_sheet(client, s, paths.dtm(s), paths.susceptibility(s), d / "png", epsg, cell,
-                                      colours)
+                rec = SU.render_sheet(src, client, s, paths.dtm(s), paths.susceptibility(s), d / "png", epsg, cell,
+                                      origin, colours)
                 rec["seconds"] = round(time.monotonic() - t0, 2)
                 append_jsonl(log_path, rec)
                 n_rendered += 1
@@ -306,7 +312,8 @@ def main(argv: list[str] | None = None) -> int:
                          rec["grid"]["h"], rec["n_code"]["1"] / n, rec["n_code"]["2"] / n, rec["n_overlap"],
                          rec["seconds"])
             if args.inspect:
-                out = [inspect_sheet(client, s, paths, epsg, cell, args.inspect_points) for s in chosen]
+                out = [inspect_sheet(src, client, s, paths, epsg, cell, origin, args.inspect_points)
+                       for s in chosen]
                 summ = summarise_inspection(out)
                 prev = json.loads((d / "inspection.json").read_text(encoding="utf-8")) \
                     if (d / "inspection.json").exists() else {"sheets": []}

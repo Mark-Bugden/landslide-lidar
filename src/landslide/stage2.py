@@ -74,6 +74,7 @@ from landslide.logs import get_logger, progress
 from landslide.metrics import PRSweep, pr_sweep
 from landslide.paths import REPO_ROOT, Paths
 from landslide.sampling import CornerGrid, grid_of_sheet, sheet_rng
+from landslide.sheets import grid_origin
 from landslide.splits import stage2_sheets
 
 if TYPE_CHECKING:
@@ -336,15 +337,17 @@ def read_sheet(inputs: Inputs, sheet: str, cfg: Mapping[str, Any], with_susc: bo
 
     row = inputs.sheets.loc[inputs.sheets["sheet"] == sheet].iloc[0]
     cell = float(cfg["dtm"]["cell_m"])
-    grid = grid_of_sheet(row, cell)
+    origin = grid_origin(cfg)
+    grid = grid_of_sheet(row, cell, origin)
     dtm = read_dtm(inputs.dtm_path(sheet), cfg)
     H, W = dtm.shape
-    if not CornerGrid.from_transform(dtm.transform, H, W).same_lattice(grid):
+    if not CornerGrid.from_transform(dtm.transform, H, W, origin=origin).same_lattice(grid):
         raise ValueError(f"{sheet}: the DTM raster grid differs from sheets.parquet")
     susc = None
     if with_susc:
         with rasterio.open(inputs.susc_path(sheet), mode="r") as src:
-            same = (src.height, src.width) == (H, W) and                 CornerGrid.from_transform(src.transform, H, W).same_lattice(grid)
+            same = ((src.height, src.width) == (H, W)
+                    and CornerGrid.from_transform(src.transform, H, W, origin=origin).same_lattice(grid))
             if not same:
                 raise ValueError(f"{sheet}: the susceptibility raster is not on the DTM grid")
             susc = src.read(1)

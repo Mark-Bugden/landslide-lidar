@@ -16,8 +16,9 @@ The class raster is a uint8 deflate GeoTIFF with the DTM raster's transform, siz
 Licence: row 5 has no stated licence. Its rasters, the PNGs and anything per sheet stay under `data/`; only
 aggregate numbers may be committed.
 
-The service URL, the class patterns, the alpha threshold and the render parameters are not keys of
-`configs/landslide.json`; they are the brief's note 5, kept as module constants below.
+The service URL, the layer, the class patterns, the alpha threshold and the render parameters are the brief's note 5,
+held in the config's `sources.susceptibility` block (added at the freeze, P1-16). `source(cfg)` reads them into a
+`Source`, which every function that needs them takes as its first argument.
 """
 
 from __future__ import annotations
@@ -36,24 +37,52 @@ import numpy as np
 
 from landslide import sheets as S
 
-# ---- the brief's note 5 ----
-
-SERVICE_URL = "https://mapy.geology.cz/arcgis/rest/services/Geohazardy/sesuvna_nachylnost/MapServer"
-EXPORT_URL = SERVICE_URL + "/export"
-LAYER_ID = 0
-LAYER_URL = f"{SERVICE_URL}/{LAYER_ID}"
-CLASS_FIELD = "struktura"
-#: Rendered classes in drawing order: name -> (code, LIKE pattern). Everything else is code 0.
-CLASSES: dict[str, tuple[int, str]] = {"mid": (1, "Třída střední%"), "high": (2, "Třída vysoké%")}
-#: The class that is not rendered (code 0 together with "no data"); used only to label point-query answers.
-LOW_PATTERN = "Třída nízké%"
-CODE_LOW = 0
-#: A pixel belongs to the rendered class if its alpha is at least this.
-ALPHA_MIN = 128
-DPI = 96
-IMAGE_FORMAT = "png32"
+#: Labels of the class codes (BRIEF.md note 5), written into each class raster's tags.
 CLASS_LABELS = {0: "low or no data", 1: "mid", 2: "high"}
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+
+
+@dataclass(frozen=True, eq=False)
+class Source:
+    """The brief's note 5, from the config's `sources.susceptibility` block.
+
+    `classes` are the rendered classes in drawing order, name -> (code, LIKE pattern); everything else gets
+    `low_code` (low together with "no data"). `low_pattern` only labels point-query answers. A pixel belongs to a
+    rendered class if its alpha is at least `alpha_min`.
+    """
+
+    service: str
+    layer_id: int
+    class_field: str
+    classes: dict[str, tuple[int, str]]
+    low_code: int
+    low_pattern: str
+    alpha_min: int
+    dpi: int
+    image_format: str
+
+    @property
+    def export_url(self) -> str:
+        return self.service + "/export"
+
+    @property
+    def layer_url(self) -> str:
+        return f"{self.service}/{self.layer_id}"
+
+
+def source(cfg: Mapping[str, Any]) -> Source:
+    """Read `sources.susceptibility`. The rendered classes must be "mid" and "high" with codes above the low code."""
+    c = cfg["sources"]["susceptibility"]
+    classes = {str(k): (int(v["code"]), str(v["like"])) for k, v in c["classes"].items()}
+    classes = dict(sorted(classes.items(), key=lambda kv: kv[1][0]))  # drawing order: higher codes last (they win)
+    low = int(c["low"]["code"])
+    codes = [code for code, _ in classes.values()]
+    if set(classes) != {"mid", "high"} or len(set(codes)) != len(codes) or min(codes) <= low:
+        raise ValueError(f"sources.susceptibility: expected classes mid and high with distinct codes above {low}, "
+                         f"got {classes}")
+    return Source(service=str(c["service"]).rstrip("/"), layer_id=int(c["layer_id"]),
+                  class_field=str(c["class_field"]), classes=classes, low_code=low, low_pattern=str(c["low"]["like"]),
+                  alpha_min=int(c["alpha_min"]), dpi=int(c["dpi"]), image_format=str(c["format"]))
 
 
 class UnexpectedResponse(RuntimeError):
@@ -65,9 +94,9 @@ class UnexpectedResponse(RuntimeError):
 # ======================================================================================================================
 
 
-def layer_def(pattern: str) -> str:
+def layer_def(src: Source, pattern: str) -> str:
     """`{"0": "struktura LIKE '<pattern>'"}` as JSON (UTF-8, not escaped; requests percent-encodes it)."""
-    return json.dumps({str(LAYER_ID): f"{CLASS_FIELD} LIKE '{pattern}'"}, ensure_ascii=False)
+    return json.dumps({str(src.layer_id): f"{src.class_field} LIKE '{pattern}'"}, ensure_ascii=False)
 
 
 def bbox_str(grid: S.Grid) -> str:
@@ -75,19 +104,19 @@ def bbox_str(grid: S.Grid) -> str:
     return ",".join(repr(float(round(v, 6))) for v in grid.bbox)
 
 
-def export_params(grid: S.Grid, epsg: int, cls: str, f: str = "image") -> dict[str, Any]:
+def export_params(src: Source, grid: S.Grid, epsg: int, cls: str, f: str = "image") -> dict[str, Any]:
     """BRIEF.md note 5 for class `cls` on `grid`. `f=image` returns the PNG; `f=json` describes the render. No outSR."""
-    _, pattern = CLASSES[cls]
+    _, pattern = src.classes[cls]
     return {
         "bbox": bbox_str(grid),
         "bboxSR": epsg,
         "imageSR": epsg,
         "size": f"{grid.w},{grid.h}",
-        "format": IMAGE_FORMAT,
+        "format": src.image_format,
         "transparent": "true",
-        "layers": f"show:{LAYER_ID}",
-        "dpi": DPI,
-        "layerDefs": layer_def(pattern),
+        "layers": f"show:{src.layer_id}",
+        "dpi": src.dpi,
+        "layerDefs": layer_def(src, pattern),
         "f": f,
     }
 
@@ -131,7 +160,7 @@ def decode_png(body: bytes, size: tuple[int, int]) -> np.ndarray:
         return np.asarray(im, dtype=np.uint8).copy()
 
 
-def class_mask(alpha: np.ndarray, alpha_min: int = ALPHA_MIN) -> np.ndarray:
+def class_mask(alpha: np.ndarray, alpha_min: int) -> np.ndarray:
     """Note 5: a pixel belongs to the rendered class if its alpha is >= `alpha_min`."""
     return np.asarray(alpha) >= alpha_min
 
@@ -142,8 +171,7 @@ def alpha_histogram(alpha: np.ndarray) -> dict[str, int]:
     return {str(v): int(h[v]) for v in np.flatnonzero(h)}
 
 
-def colour_check(rgba: np.ndarray, colour: tuple[int, int, int] | None,
-                 alpha_min: int = ALPHA_MIN) -> dict[str, Any]:
+def colour_check(rgba: np.ndarray, colour: tuple[int, int, int] | None, alpha_min: int) -> dict[str, Any]:
     """The RGB values of the class pixels (alpha >= alpha_min) must all be the class's symbol colour.
 
     A different colour would mean the `layerDefs` filter was not applied (e.g. a cached map drawn with every class)
@@ -160,22 +188,22 @@ def colour_check(rgba: np.ndarray, colour: tuple[int, int, int] | None,
     return {"n_class": int(rgb.shape[0]), "n_other_colour": n_other, "colours": dict(list(seen.items())[:10])}
 
 
-def combine(alphas: Mapping[str, np.ndarray], alpha_min: int = ALPHA_MIN) -> tuple[np.ndarray, dict[str, Any]]:
+def combine(src: Source, alphas: Mapping[str, np.ndarray]) -> tuple[np.ndarray, dict[str, Any]]:
     """Combine the per-class alpha planes into the uint8 code raster (0 low/no data, 1 mid, 2 high).
 
     Overlap rule (docs/decisions/P1-07.md): a pixel in both the mid and the high render gets the higher code, 2.
     The overlap is counted, with a histogram of the (mid alpha, high alpha) pairs of the overlapping pixels, which
     tells boundary ties (128, 128) apart from polygons that really overlap (255, 255).
     """
-    names = sorted(CLASSES, key=lambda k: CLASSES[k][0])  # mid, high: higher codes are written last and win
+    names = sorted(src.classes, key=lambda k: src.classes[k][0])  # mid, high: higher codes are written last, win
     shapes = {np.asarray(alphas[k]).shape for k in names}
     if len(shapes) != 1:
         raise ValueError(f"alpha planes differ in shape: {shapes}")
     shape = shapes.pop()
-    masks = {k: class_mask(alphas[k], alpha_min) for k in names}
-    codes = np.full(shape, CODE_LOW, dtype=np.uint8)
+    masks = {k: class_mask(alphas[k], src.alpha_min) for k in names}
+    codes = np.full(shape, src.low_code, dtype=np.uint8)
     for k in names:
-        codes[masks[k]] = CLASSES[k][0]
+        codes[masks[k]] = src.classes[k][0]
     overlap = masks["mid"] & masks["high"]
     n_overlap = int(overlap.sum())
     pairs: Counter[str] = Counter()
@@ -209,12 +237,13 @@ class DtmGrid:
     height: int
 
 
-def read_dtm_grid(path: Path | str, cell: float) -> DtmGrid:
-    """The grid of a package DTM raster (header only). Raises `sheets.OffGrid` unless it is on the native lattice."""
+def read_dtm_grid(path: Path | str, cell: float, origin: tuple[float, float]) -> DtmGrid:
+    """The grid of a package DTM raster (header only). Raises `sheets.OffGrid` unless it is on the native lattice
+    (`origin` = `sheets.grid_origin(cfg)`)."""
     import rasterio
 
     with rasterio.open(path) as ds:
-        g = S.grid_from_transform(list(ds.transform)[:6], ds.width, ds.height, cell=cell)
+        g = S.grid_from_transform(list(ds.transform)[:6], ds.width, ds.height, cell=cell, origin=origin)
         return DtmGrid(grid=g, transform=ds.transform, crs=ds.crs, width=ds.width, height=ds.height)
 
 
@@ -245,11 +274,11 @@ SERVICE_META_KEYS = ("currentVersion", "cimVersion", "serviceDescription", "mapN
                      "maxScale", "documentInfo", "serviceItemId")
 
 
-def class_colours(layer_meta: Mapping[str, Any]) -> dict[str, tuple[int, int, int] | None]:
+def class_colours(src: Source, layer_meta: Mapping[str, Any]) -> dict[str, tuple[int, int, int] | None]:
     """The RGB symbol colour of each rendered class, from the layer's unique-value renderer (None if not found)."""
     infos = (((layer_meta.get("drawingInfo") or {}).get("renderer") or {}).get("uniqueValueInfos")) or []
     out: dict[str, tuple[int, int, int] | None] = {}
-    for name, (_, pattern) in CLASSES.items():
+    for name, (_, pattern) in src.classes.items():
         prefix = pattern.rstrip("%")
         hits = [i for i in infos if str(i.get("value", "")).startswith(prefix)]
         out[name] = tuple(int(v) for v in hits[0]["symbol"]["color"][:3]) if len(hits) == 1 else None
@@ -262,25 +291,26 @@ def renderer_summary(layer_meta: Mapping[str, Any]) -> list[dict[str, Any]]:
              "color": (i.get("symbol") or {}).get("color")} for i in infos]
 
 
-def match_patterns(values: list[str]) -> dict[str, list[str]]:
+def match_patterns(src: Source, values: list[str]) -> dict[str, list[str]]:
     """Which distinct `struktura` values each LIKE pattern selects (the prefix before `%`)."""
-    pats = {**{k: p for k, (_, p) in CLASSES.items()}, "low": LOW_PATTERN}
+    pats = {**{k: p for k, (_, p) in src.classes.items()}, "low": src.low_pattern}
     return {k: [v for v in values if v.startswith(p.rstrip("%"))] for k, p in pats.items()}
 
 
-def class_statistics(client: Any) -> list[dict[str, Any]]:
+def class_statistics(src: Source, client: Any) -> list[dict[str, Any]]:
     """Feature count per distinct `struktura` value (one statistics query, no geometry)."""
+    field = src.class_field
     stats = [{"statisticType": "count", "onStatisticField": "objectid", "outStatisticFieldName": "n"}]
-    body = client.get_json(LAYER_URL + "/query", params={"where": "1=1", "groupByFieldsForStatistics": CLASS_FIELD,
-                                                         "outStatistics": json.dumps(stats), "f": "json"})
-    return sorted(({CLASS_FIELD: f["attributes"][CLASS_FIELD], "n_features": int(f["attributes"]["n"])}
-                   for f in body.get("features", [])), key=lambda r: r[CLASS_FIELD])
+    body = client.get_json(src.layer_url + "/query", params={"where": "1=1", "groupByFieldsForStatistics": field,
+                                                             "outStatistics": json.dumps(stats), "f": "json"})
+    return sorted(({field: f["attributes"][field], "n_features": int(f["attributes"]["n"])}
+                   for f in body.get("features", [])), key=lambda r: r[field])
 
 
-def service_metadata(client: Any) -> dict[str, Any]:
+def service_metadata(src: Source, client: Any) -> dict[str, Any]:
     """Service and layer description, the renderer and the class statistics. Extents are left out (row 5 licence)."""
-    svc = client.get_json(SERVICE_URL, params={"f": "json"})
-    lyr = client.get_json(LAYER_URL, params={"f": "json"})
+    svc = client.get_json(src.service, params={"f": "json"})
+    lyr = client.get_json(src.layer_url, params={"f": "json"})
     meta = {
         "service": {k: svc[k] for k in SERVICE_META_KEYS if k in svc},
         "layer": {k: lyr[k] for k in ("id", "name", "type", "geometryType", "sourceSpatialReference",
@@ -290,18 +320,18 @@ def service_metadata(client: Any) -> dict[str, Any]:
         "renderer": renderer_summary(lyr),
         "antialiasing": (svc.get("documentInfo") or {}).get("AntialiasingMode"),
     }
-    stats = class_statistics(client)
+    stats = class_statistics(src, client)
     meta["class_statistics"] = stats
-    meta["pattern_matches"] = match_patterns([r[CLASS_FIELD] for r in stats])
-    meta["class_colours"] = {k: list(v) if v else None for k, v in class_colours(lyr).items()}
+    meta["pattern_matches"] = match_patterns(src, [r[src.class_field] for r in stats])
+    meta["class_colours"] = {k: list(v) if v else None for k, v in class_colours(src, lyr).items()}
     return meta
 
 
-def check_service(meta: Mapping[str, Any], max_w: int, max_h: int, epsg: int) -> list[str]:
+def check_service(src: Source, meta: Mapping[str, Any], max_w: int, max_h: int, epsg: int) -> list[str]:
     """Problems that must stop the run: a pattern that does not select exactly one class, a missing colour, an image
     limit smaller than the largest grid, or a service in another SR."""
     problems = []
-    for k in CLASSES:
+    for k in src.classes:
         if len(meta["pattern_matches"][k]) != 1:
             problems.append(f"pattern for {k} selects {meta['pattern_matches'][k]}")
         if meta["class_colours"].get(k) is None:
@@ -312,8 +342,8 @@ def check_service(meta: Mapping[str, Any], max_w: int, max_h: int, epsg: int) ->
                         f"{svc.get('maxImageWidth')}x{svc.get('maxImageHeight')}")
     if S.native_wkid({"spatialReference": svc.get("spatialReference")}) != epsg:
         problems.append(f"service SR {svc.get('spatialReference')} is not EPSG:{epsg}")
-    if IMAGE_FORMAT.upper() not in str(svc.get("supportedImageFormatTypes", "")).upper().split(","):
-        problems.append(f"{IMAGE_FORMAT} not supported: {svc.get('supportedImageFormatTypes')}")
+    if src.image_format.upper() not in str(svc.get("supportedImageFormatTypes", "")).upper().split(","):
+        problems.append(f"{src.image_format} not supported: {svc.get('supportedImageFormatTypes')}")
     return problems
 
 
@@ -322,11 +352,11 @@ def check_service(meta: Mapping[str, Any], max_w: int, max_h: int, epsg: int) ->
 # ======================================================================================================================
 
 
-def fetch_png(client: Any, grid: S.Grid, epsg: int, cls: str) -> tuple[bytes, dict[str, Any]]:
+def fetch_png(src: Source, client: Any, grid: S.Grid, epsg: int, cls: str) -> tuple[bytes, dict[str, Any]]:
     """One `export` request. Returns the PNG body and a request record. Raises `UnexpectedResponse` on a non-PNG."""
-    params = export_params(grid, epsg, cls)
+    params = export_params(src, grid, epsg, cls)
     t0 = datetime.now(timezone.utc)
-    resp = client.get(EXPORT_URL, params=params)
+    resp = client.get(src.export_url, params=params)
     ctype = resp.headers.get("Content-Type", "")
     body = resp.content
     if not ctype.startswith("image/png") or body[:8] != PNG_SIGNATURE:
@@ -336,7 +366,8 @@ def fetch_png(client: Any, grid: S.Grid, epsg: int, cls: str) -> tuple[bytes, di
     return body, rec
 
 
-def render_sheet(client: Any, sheet: str, dtm_path: Path, out_tif: Path, png_dir: Path, epsg: int, cell: float,
+def render_sheet(src: Source, client: Any, sheet: str, dtm_path: Path, out_tif: Path, png_dir: Path, epsg: int,
+                 cell: float, origin: tuple[float, float],
                  colours: Mapping[str, tuple[int, int, int] | None]) -> dict[str, Any]:
     """Render mid and high for one sheet on its DTM grid, decode them, write the class raster and both PNGs.
 
@@ -345,15 +376,15 @@ def render_sheet(client: Any, sheet: str, dtm_path: Path, out_tif: Path, png_dir
     """
     from landslide.paths import sheet_to_stem
 
-    dtm = read_dtm_grid(dtm_path, cell)
+    dtm = read_dtm_grid(dtm_path, cell, origin)
     g = dtm.grid
     alphas: dict[str, np.ndarray] = {}
     reqs: dict[str, Any] = {}
     png_dir.mkdir(parents=True, exist_ok=True)
-    for cls in CLASSES:
-        body, rec = fetch_png(client, g, epsg, cls)
+    for cls in src.classes:
+        body, rec = fetch_png(src, client, g, epsg, cls)
         rgba = decode_png(body, (g.w, g.h))
-        cc = colour_check(rgba, colours.get(cls))
+        cc = colour_check(rgba, colours.get(cls), src.alpha_min)
         if cc["n_other_colour"]:
             raise UnexpectedResponse(f"{sheet} {cls}: {cc['n_other_colour']} class pixels have an unexpected colour "
                                      f"{cc['colours']} (expected {colours.get(cls)})")
@@ -363,10 +394,10 @@ def render_sheet(client: Any, sheet: str, dtm_path: Path, out_tif: Path, png_dir
         tmp.replace(png)
         alphas[cls] = rgba[..., 3]
         reqs[cls] = {**rec, "png": png.name, "alpha_histogram": alpha_histogram(rgba[..., 3]), "colour_check": cc}
-    codes, stats = combine(alphas)
+    codes, stats = combine(src, alphas)
     write_class_raster(out_tif, codes, dtm, tags={
-        "SOURCE": f"{EXPORT_URL} (ČGS, row 5 of BRIEF.md; no stated licence)",
-        "RECIPE": f"BRIEF.md note 5; class if alpha >= {ALPHA_MIN}; overlap of mid and high -> 2",
+        "SOURCE": f"{src.export_url} (ČGS, row 5 of BRIEF.md; no stated licence)",
+        "RECIPE": f"BRIEF.md note 5; class if alpha >= {src.alpha_min}; overlap of mid and high -> 2",
         "RETRIEVED_UTC": reqs["mid"]["retrieved_utc"], "SHEET": sheet})
     return {"sheet": sheet, "grid": g.as_dict(), "dtm": dtm_path.name, "tif": out_tif.name,
             "tif_bytes": out_tif.stat().st_size, "requests": reqs, **stats}
@@ -381,7 +412,8 @@ def pixel_centre(grid: S.Grid, row: int, col: int) -> tuple[float, float]:
     return (grid.xmin + (col + 0.5) * grid.cell, grid.ymax - (row + 0.5) * grid.cell)
 
 
-def inspection_points(alphas: Mapping[str, np.ndarray], n_per_category: int) -> dict[str, list[tuple[int, int]]]:
+def inspection_points(src: Source, alphas: Mapping[str, np.ndarray],
+                      n_per_category: int) -> dict[str, list[tuple[int, int]]]:
     """Pixels to check with point queries, `n` per category, spread deterministically over the raster (no RNG).
 
     - `<cls>_interior`: alpha 255 in the class render, and every pixel of the 5 x 5 window too; 0 in the other;
@@ -398,7 +430,7 @@ def inspection_points(alphas: Mapping[str, np.ndarray], n_per_category: int) -> 
     both_zero = zero["mid"] & zero["high"]
     cross = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]], bool)
     cats: dict[str, np.ndarray] = {}
-    for k in CLASSES:
+    for k in src.classes:
         other = "high" if k == "mid" else "mid"
         cats[f"{k}_interior"] = binary_erosion(full[k], np.ones((5, 5), bool), border_value=0) & zero[other]
         cats[f"{k}_edge"] = full[k] & ~binary_erosion(full[k], cross, border_value=1) & zero[other]
@@ -417,18 +449,19 @@ def inspection_points(alphas: Mapping[str, np.ndarray], n_per_category: int) -> 
     return out
 
 
-def code_from_values(values: list[str]) -> int:
+def code_from_values(src: Source, values: list[str]) -> int:
     """The code a point gets from the vector layer: the highest rendered class among the polygons containing it."""
-    code = CODE_LOW
-    for _, (c, pattern) in CLASSES.items():
+    code = src.low_code
+    for _, (c, pattern) in src.classes.items():
         if any(v.startswith(pattern.rstrip("%")) for v in values):
             code = max(code, c)
     return code
 
 
-def point_query(client: Any, x: float, y: float, epsg: int) -> list[str]:
+def point_query(src: Source, client: Any, x: float, y: float, epsg: int) -> list[str]:
     """The `struktura` values of the polygons that contain the point (EPSG:5514 in, no geometry back)."""
-    body = client.get_json(LAYER_URL + "/query", params={
+    body = client.get_json(src.layer_url + "/query", params={
         "geometry": f"{x!r},{y!r}", "geometryType": "esriGeometryPoint", "inSR": epsg,
-        "spatialRel": "esriSpatialRelIntersects", "outFields": CLASS_FIELD, "returnGeometry": "false", "f": "json"})
-    return [f["attributes"][CLASS_FIELD] for f in body.get("features", [])]
+        "spatialRel": "esriSpatialRelIntersects", "outFields": src.class_field, "returnGeometry": "false",
+        "f": "json"})
+    return [f["attributes"][src.class_field] for f in body.get("features", [])]

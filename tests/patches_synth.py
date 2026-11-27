@@ -23,6 +23,7 @@ from scipy import ndimage as ndi
 
 from landslide import sampling as S
 from landslide.patches import SheetSource
+from landslide.sheets import grid_origin
 from landslide.paths import sheet_to_stem
 from sampling_synth import make_world
 
@@ -42,7 +43,7 @@ class World:
         susc_dir = self.data / "cache" / "susceptibility"
         return {row.sheet: SheetSource(sheet=row.sheet, dtm_path=self.data / "raw_data" / row.dtm_path,
                                        susc_path=susc_dir / f"{sheet_to_stem(row.sheet)}.tif",
-                                       grid=S.grid_of_sheet(row, cell))
+                                       grid=S.grid_of_sheet(row, cell, grid_origin(self.cfg)))
                 for row in self.sheets.itertuples(index=False)}
 
 

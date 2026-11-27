@@ -40,6 +40,7 @@ from landslide.config import config_hash, load_config
 from landslide.logs import get_logger, setup_logging
 from landslide.paths import Paths
 from landslide.sampling import grid_of_sheet
+from landslide.sheets import grid_origin
 
 log = get_logger("verify_dataset")
 
@@ -66,8 +67,9 @@ def main(argv: list[str] | None = None) -> int:
     t0 = time.perf_counter()
     sheets = gpd.read_parquet(paths.sheets_parquet)
     cell = float(cfg["dtm"]["cell_m"])
+    origin = grid_origin(cfg)
     sources = {s: P.SheetSource(sheet=s, dtm_path=paths.raw / str(row.dtm_path), susc_path=paths.susceptibility(s),
-                                grid=grid_of_sheet(row, cell))
+                                grid=grid_of_sheet(row, cell, origin))
                for s, row in zip(sheets["sheet"], sheets.itertuples(index=False))}
     samples_path = dataset / "samples.parquet"
     samples = pd.read_parquet(samples_path) if samples_path.is_file() else None

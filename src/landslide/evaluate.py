@@ -86,8 +86,33 @@ SCORER_KINDS = {
     "random": "chance level",
 }
 
-S2_NOT_REACHED_RULE = ("a bootstrap replicate whose pooled detections never reach the recall level counts as "
-                       "precision 0 (a fail at that replicate); it is kept, not dropped")
+#: What a post hoc stage-2 bootstrap replicate whose pooled detections never reach the recall level counts as, by the
+#: config's `replication.eval.stage2_bootstrap_not_reached`: the value it gets and the text written to metrics.json.
+#: Only "precision_0" is defined (P1-13).
+S2_NOT_REACHED_RULES: dict[str, tuple[float, str]] = {
+    "precision_0": (0.0, "a bootstrap replicate whose pooled detections never reach the recall level counts as "
+                         "precision 0 (a fail at that replicate); it is kept, not dropped"),
+}
+
+
+def secondary_unit(cfg: Mapping[str, Any]) -> str:
+    """The secondary bootstrap unit, `replication.eval.secondary_bootstrap_unit` ("block"; Appendix A §8 "Block-level
+    bootstrap CI"). It must be a `meta.csv` column other than the primary unit. The metrics.json schema keeps its
+    field names (`block_ci`, `borderline_block`)."""
+    unit = str(cfg["replication"]["eval"]["secondary_bootstrap_unit"])
+    if unit == str(cfg["eval"]["bootstrap"]["unit"]) or unit not in META_COLUMNS:
+        raise ValueError(f"replication.eval.secondary_bootstrap_unit {unit!r} must be a meta.csv column other than "
+                         f"the primary unit")
+    return unit
+
+
+def stage2_not_reached_rule(cfg: Mapping[str, Any]) -> str:
+    """`replication.eval.stage2_bootstrap_not_reached` ("precision_0"), checked against `S2_NOT_REACHED_RULES`."""
+    rule = str(cfg["replication"]["eval"]["stage2_bootstrap_not_reached"])
+    if rule not in S2_NOT_REACHED_RULES:
+        raise ValueError(f"replication.eval.stage2_bootstrap_not_reached {rule!r} is not one of "
+                         f"{sorted(S2_NOT_REACHED_RULES)}")
+    return rule
 
 #: The spike's claims, copied from BRIEF.md "The spike's claims (to verify)". `brief_text` must appear verbatim in
 #: docs/BRIEF.md (tested); `ours` is the dotted path of our number in metrics.json.
@@ -628,6 +653,7 @@ def evaluate_auc_test(test: str, cfg: Mapping[str, Any], spec: M.BootstrapSpec, 
     log.info("test (%s): %d patches on %d sheets; CNN %s", test, n["patches"], n["sheets"],
              "complete" if cnn.complete else "INCOMPLETE")
 
+    unit2 = secondary_unit(cfg)
     base_scores, base_file = load_baselines(paths.baselines_dir / f"preds_{test}.csv", items, test, paths.smoke)
     scorers: dict[str, np.ndarray] = ({CNN: cnn_score} if cnn.complete else {}) | base_scores
     have_both = n["positives"] > 0 and n["negatives"] > 0
@@ -636,7 +662,7 @@ def evaluate_auc_test(test: str, cfg: Mapping[str, Any], spec: M.BootstrapSpec, 
     sheet_draws = block_draws = None
     if have_both:
         sheet_draws = _draws(items["sheet"].to_numpy(), spec)
-        block_draws = _draws(items["block"].to_numpy(), spec)
+        block_draws = _draws(items[unit2].to_numpy(), spec)
         if scorers:
             res_sheet = M.bootstrap_aucs(y, scorers, sheet_draws, ci=spec.ci)
             res_block = M.bootstrap_aucs(y, scorers, block_draws, ci=spec.ci)
@@ -653,7 +679,7 @@ def evaluate_auc_test(test: str, cfg: Mapping[str, Any], spec: M.BootstrapSpec, 
     secondary: dict[str, Any] = {"slope_only_check": None, "pair_accuracy": None}
     if cnn.complete and CNN in res_sheet:
         rs, rb = res_sheet[CNN], res_block[CNN]
-        rec.update(estimate=rs.estimate, sheet_ci=_ci_dict(rs, "sheet"), block_ci=_ci_dict(rb, "block"))
+        rec.update(estimate=rs.estimate, sheet_ci=_ci_dict(rs, "sheet"), block_ci=_ci_dict(rb, unit2))
         rec["status"] = V.classify_test(complete=True, estimate=rs.estimate, threshold=thr)
         rec["pass"] = rec["status"] == V.PASS
         rec["borderline"] = V.is_borderline(rs.ci_low, rs.ci_high, thr)
@@ -679,15 +705,15 @@ def evaluate_auc_test(test: str, cfg: Mapping[str, Any], spec: M.BootstrapSpec, 
                              "block_ci": None}
         if name in res_sheet:
             b.update(auc=res_sheet[name].estimate, sheet_ci=_ci_dict(res_sheet[name], "sheet"),
-                     block_ci=_ci_dict(res_block[name], "block"))
+                     block_ci=_ci_dict(res_block[name], unit2))
         if test == "a":
             b["per_fold"] = {str(k): _safe_auc(y[fold == k], base_scores[name][fold == k])
                              for k in sorted(set(fold.tolist()))}
         baselines["scorers"][name] = b
 
-    paired: dict[str, Any] = {"sheet": {}, "block": {}}
+    paired: dict[str, Any] = {"sheet": {}, unit2: {}}
     if CNN in res_sheet and len(res_sheet) > 1:
-        for unit, res in (("sheet", res_sheet), ("block", res_block)):
+        for unit, res in (("sheet", res_sheet), (unit2, res_block)):
             for name, d in M.paired_differences(res, CNN).items():
                 paired[unit][name] = {"estimate": d.estimate, "ci": _ci_dict(d, unit)}
     return {"test": rec, "baselines": baselines, "paired": paired, "secondary": secondary}
@@ -824,29 +850,32 @@ def _sweep_record(sw: M.PRSweep | None, n_sheets: int) -> dict[str, Any]:
 
 
 def _s2_bootstrap(scores: np.ndarray, outcomes: np.ndarray, idx: np.ndarray, frame: S2Frame, level: float,
-                  draws: M.ClusterDraws, ci: float) -> M.BootstrapResult:
-    """Sheet bootstrap of P@R (post hoc). A replicate that never reaches the level counts as precision 0."""
+                  draws: M.ClusterDraws, ci: float, not_reached: str) -> M.BootstrapResult:
+    """Sheet bootstrap of P@R (post hoc). A replicate that never reaches the level gets the value of the rule
+    `not_reached` (`S2_NOT_REACHED_RULES`: precision 0)."""
     nt = frame.n_targets
+    not_reached_value = S2_NOT_REACHED_RULES[not_reached][0]
 
     def stat(_w: np.ndarray, c: np.ndarray) -> float:
         n_t = int(c @ nt)
         if n_t <= 0:
             return math.nan  # no target drawn: degenerate (D21 sense), dropped and counted
         sw = M.pr_sweep(scores, outcomes, n_t, level, weights=c[idx])
-        return float(sw.precision_at_recall) if sw.reached else 0.0
+        return float(sw.precision_at_recall) if sw.reached else not_reached_value
 
     return M.bootstrap_statistic(stat, draws, ci=ci)
 
 
 def _s2_scorer(scores: np.ndarray, outcomes: np.ndarray, idx: np.ndarray, frame: S2Frame, level: float,
-               draws: M.ClusterDraws, spec: M.BootstrapSpec) -> tuple[dict[str, Any], M.BootstrapResult]:
+               draws: M.ClusterDraws, spec: M.BootstrapSpec,
+               not_reached: str) -> tuple[dict[str, Any], M.BootstrapResult]:
     sw = _sweep(scores, outcomes, idx, frame, level)
     rec = _sweep_record(sw, len(frame.sheets))
-    boot = _s2_bootstrap(scores, outcomes, idx, frame, level, draws, spec.ci)
+    boot = _s2_bootstrap(scores, outcomes, idx, frame, level, draws, spec.ci, not_reached)
     ci = _ci_dict(boot, "sheet")
     # With n_targets > 0, reaching recall >= level needs TP > 0, so precision 0 means "not reached".
-    ci.update(post_hoc=True, not_reached_rule=S2_NOT_REACHED_RULE,
-              n_not_reached=int(np.sum(boot.replicates == 0.0)))
+    value, text = S2_NOT_REACHED_RULES[not_reached]
+    ci.update(post_hoc=True, not_reached_rule=text, n_not_reached=int(np.sum(boot.replicates == value)))
     rec["sheet_ci"] = ci
     rec["by_stratum"] = {st: _sweep_record(_sweep(scores, outcomes, idx, frame, level, frame.stratum == st),
                                            int((frame.stratum == st).sum()))
@@ -861,6 +890,7 @@ def evaluate_stage2(cfg: Mapping[str, Any], spec: M.BootstrapSpec, paths: Paths,
                     ) -> dict[str, Any]:
     thr = float(cfg["eval"]["thresholds"]["stage2_precision_min"])
     level = float(cfg["eval"]["thresholds"]["stage2_recall"])
+    not_reached = stage2_not_reached_rule(cfg)
     names = [f"{r}_s{s}" for r in runs for s in seeds]
     missing = {n: units[n].status for n in names if not units[n].ok}
     strata = stage2_sheet_strata(cfg)
@@ -924,7 +954,7 @@ def evaluate_stage2(cfg: Mapping[str, Any], spec: M.BootstrapSpec, paths: Paths,
     else:
         try:
             arrays = _scorer_arrays(dets[dets["scorer"] == CNN], frame)
-            srec, cnn_boot = _s2_scorer(*arrays, frame, level, draws, spec)
+            srec, cnn_boot = _s2_scorer(*arrays, frame, level, draws, spec, not_reached)
         except ValueError as e:
             rec["status"] = V.INCOMPLETE
             problems.append(f"CNN detections unusable: {e}")
@@ -949,7 +979,7 @@ def evaluate_stage2(cfg: Mapping[str, Any], spec: M.BootstrapSpec, paths: Paths,
         for name in sorted(set(dets["scorer"].tolist()) - {CNN}):
             try:
                 arrays = _scorer_arrays(dets[dets["scorer"] == name], frame)
-                srec, boot = _s2_scorer(*arrays, frame, level, draws, spec)
+                srec, boot = _s2_scorer(*arrays, frame, level, draws, spec, not_reached)
             except ValueError as e:
                 baselines["scorers"][name] = {"kind": SCORER_KINDS.get(name, "comparator"), "status": "error",
                                               "problem": str(e)}
@@ -1054,7 +1084,7 @@ def run_evaluation(cfg: Mapping[str, Any], paths: Paths, *, targets: pd.DataFram
             "stage2_ring_as_fp": ev_s2["secondary"]["stage2_ring_as_fp"],
         },
         "bootstrap": {"n": spec.n_replicates, "ci": spec.ci, "seed": spec.seed, "method": spec.method,
-                      "primary_unit": spec.unit, "secondary_unit": "block"},
+                      "primary_unit": spec.unit, "secondary_unit": secondary_unit(cfg)},
         "spike_claims": {k: {kk: vv for kk, vv in c.items() if kk != "brief_text"} for k, c in SPIKE_CLAIMS.items()},
     }
     m["discrepancies"] = compare_with_spike(m)

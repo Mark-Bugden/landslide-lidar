@@ -1,8 +1,8 @@
 """The frozen config must carry Appendix B's values (BRIEF.md "Independence rules").
 
 Appendix B is embedded verbatim below. Every key and value must match `configs/landslide.json`, except `name`,
-`status` and `paths`, which refer to the spike's repo. The config may add keys (the `replication` block) but may not
-drop or change any Appendix B value.
+`status` and `paths`, which refer to the spike's repo. The config may add keys only in its own top-level blocks
+(`replication`, `sources`), never inside an Appendix B block, and may not drop or change any Appendix B value.
 """
 
 import json
@@ -230,3 +230,64 @@ def test_replication_block():
     assert len(set(streams.values())) == len(streams), "stream ids must be unique"
     assert rep["verdict_words"] == ["REPLICATED", "NOT REPLICATED", "INCOMPLETE"]
     assert rep["provenance"]["n_sheets"] >= 10
+
+
+#: Top-level blocks that are ours, not Appendix B's.
+OWN_BLOCKS = {"replication", "sources"}
+
+
+def _keys(d, prefix=()):
+    for k, v in d.items():
+        yield prefix + (k,)
+        if isinstance(v, dict):
+            yield from _keys(v, prefix + (k,))
+
+
+def test_no_key_added_inside_an_appendix_b_block():
+    spec = json.loads(APPENDIX_B)
+    cfg = load_config()
+    assert set(cfg) - set(spec) == OWN_BLOCKS, "a new top-level block that is neither replication nor sources"
+    want = {k for k in _keys(spec) if k[0] not in EXEMPT}
+    got = {k for k in _keys(cfg) if k[0] not in EXEMPT | OWN_BLOCKS}
+    assert got == want, f"keys added inside Appendix B blocks: {sorted('.'.join(k) for k in got - want)}"
+
+
+def test_sources_block_is_the_briefs():
+    """BRIEF.md "Data sources" (rows 1-6, 8), notes 1-5 and "Provenance check"; P1-16 moved them from module
+    constants into the config without changing a value."""
+    cfg = load_config()
+    src = cfg["sources"]
+    assert src["dtm"]["service"] == cfg["dtm"]["service"].split()[0]  # the URL in Appendix B's dtm.service
+    assert src["dtm"]["grid_origin_m"] == [0.4, -0.12]
+    assert src["dtm"]["package_valid_range_m"] == [-100.0, 2000.0]
+    assert src["dtm"]["provenance_min_sheets"] == 10 <= cfg["replication"]["provenance"]["n_sheets"]
+    base = "https://mapy.geology.cz/arcgis/rest/services/"
+    assert src["register"] == {"url": base + "Geohazardy/svahove_nestability/MapServer/1", "expected_count": 21356}
+    assert src["sheets"] == {"url": base + "Prozkoumanost/prehled_mapovani_svahove_nestability/MapServer/0",
+                             "expected_count": 860}
+    assert src["geology"] == {"url": base + "Geologie/geologicka_mapa500_CR/MapServer/7",
+                              "fields": ["objectid", "region", "subregion", "hor_karto"]}
+    su = src["susceptibility"]
+    assert su["service"] == base + "Geohazardy/sesuvna_nachylnost/MapServer"
+    assert (su["layer_id"], su["class_field"], su["alpha_min"], su["dpi"], su["format"]) == (0, "struktura", 128, 96,
+                                                                                            "png32")
+    assert su["classes"] == {"mid": {"code": 1, "like": "Třída střední%"}, "high": {"code": 2, "like": "Třída vysoké%"}}
+    assert su["low"] == {"code": 0, "like": "Třída nízké%"}
+    z = src["zabaged"]
+    assert z["service"] == "https://ags.cuzk.gov.cz/arcgis/rest/services/ZABAGED_POLOHOPIS/MapServer"
+    assert z["layers"] == {"quarry": 118, "spoil": 119, "rock": 130, "landslide": 129, "road": 79, "railway": 75}
+    w = src["weights"]
+    assert w["file"] == "resnet18-f37072fd.pth" and len(w["sha256"]) == 64
+    assert w["sha256"].startswith(w["file"].split("-")[1].split(".")[0])  # torch.hub's hash prefix in the name
+
+
+def test_replication_keys_added_at_the_freeze():
+    """The keys tasks requested (P1-05, P1-09, P1-10, P1-11, P1-13, P1-14), with the values the code used before."""
+    cfg = load_config()
+    rep = cfg["replication"]
+    assert rep["streams"]["verify_sample"] == 11
+    assert rep["sampling"]["stage2_buffer_m"] == 150 == cfg["patch"]["size_m"] / 2  # Appendix A §4: 150 m
+    assert [s["name"] for s in rep["baselines"]["scorers"]] == ["slope_only", "susceptibility", "slope_susc_lr",
+                                                                "terrain_stats_lr", "terrain_stats_gbm"]
+    assert rep["eval"] == {"secondary_bootstrap_unit": "block", "stage2_bootstrap_not_reached": "precision_0"}
+    assert rep["runner"] == {"min_free_gpu_gb": 7, "eval_reserve_min": 15}  # Appendix A §11

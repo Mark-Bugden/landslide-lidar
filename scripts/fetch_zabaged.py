@@ -37,16 +37,27 @@ from landslide.net import Client
 from landslide.paths import Paths, sheet_to_stem
 
 SECTION = "zabaged"
-SERVICE_URL = "https://ags.cuzk.gov.cz/arcgis/rest/services/ZABAGED_POLOHOPIS/MapServer"
-#: BRIEF.md row 6 and Appendix A §2, in the brief's order. The GeoPackage is named by the layer id.
-LAYERS: dict[int, str] = {118: "quarry", 119: "spoil heap", 130: "rock formation", 129: "landslide/scree",
-                          79: "road", 75: "railway"}
+#: The brief's name of each role (BRIEF.md row 6), written as `name_brief` in `results/sources.json`. Labels only:
+#: the service and the layer ids come from the config's `sources.zabaged` block (`service`, `layers`: role -> id).
+BRIEF_NAMES: dict[str, str] = {"quarry": "quarry", "spoil": "spoil heap", "rock": "rock formation",
+                               "landslide": "landslide/scree", "road": "road", "railway": "railway"}
 SERVICE_META_KEYS = ("currentVersion", "mapName", "serviceDescription", "copyrightText", "spatialReference",
                      "maxRecordCount", "capabilities", "supportedQueryFormats")
 
 
 def now_utc() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def service_url(cfg: Mapping[str, Any]) -> str:
+    """The ZABAGED polohopis MapServer (`sources.zabaged.service`)."""
+    return str(cfg["sources"]["zabaged"]["service"]).rstrip("/")
+
+
+def layers(cfg: Mapping[str, Any]) -> dict[int, str]:
+    """Layer id -> the brief's name, in the brief's order (BRIEF.md row 6; `sources.zabaged.layers`). The GeoPackage
+    is named by the layer id."""
+    return {int(i): BRIEF_NAMES[role] for role, i in cfg["sources"]["zabaged"]["layers"].items()}
 
 
 def layer_key(layer: int) -> str:
@@ -92,12 +103,12 @@ class EnvelopeClient:
 
 
 def fetch_pair(client: Any, layer: int, meta: Mapping[str, Any], sheet: str, bbox: tuple[float, float, float, float],
-               epsg: int, page_dir: Path) -> dict[str, Any]:
+               epsg: int, page_dir: Path, *, service: str) -> dict[str, Any]:
     """All features of `layer` that intersect one sheet's envelope, saved as unmodified pages in `page_dir`."""
     t0 = now_utc()
     if page_dir.exists():
         shutil.rmtree(page_dir)  # a page left by an interrupted attempt
-    res = S.query_pages(EnvelopeClient(client, bbox, epsg), f"{SERVICE_URL}/{layer}", "1=1", "*", "json",
+    res = S.query_pages(EnvelopeClient(client, bbox, epsg), f"{service}/{layer}", "1=1", "*", "json",
                         int(meta["maxRecordCount"]), S.oid_field(meta), page_dir)
     if res["n_pages"] == 0 and page_dir.exists():
         page_dir.rmdir()
@@ -225,14 +236,14 @@ def update_sources(path: Path, key: str, section: dict[str, Any]) -> None:
     tmp.replace(path)
 
 
-def read_grids(paths: Paths, sheets: list[str], cell: float) -> dict[str, S.Grid]:
+def read_grids(paths: Paths, sheets: list[str], cell: float, origin: tuple[float, float]) -> dict[str, S.Grid]:
     """Each sheet's DTM grid, read from its package raster (transform and size), never recomputed."""
     import rasterio
 
     out = {}
     for s in progress(sheets, desc="grids", unit="sheet"):
         with rasterio.open(paths.dtm(s)) as ds:
-            out[s] = S.grid_from_transform(list(ds.transform)[:6], ds.width, ds.height, cell=cell)
+            out[s] = S.grid_from_transform(list(ds.transform)[:6], ds.width, ds.height, cell=cell, origin=origin)
     return out
 
 
@@ -251,14 +262,16 @@ def main(argv: list[str] | None = None) -> int:
         stream.reconfigure(encoding="utf-8", errors="backslashreplace")
     cfg = load_config()
     paths = Paths()
+    url_service = service_url(cfg)
+    all_layers = layers(cfg)
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sel = ap.add_mutually_exclusive_group(required=True)
     sel.add_argument("--sheets", nargs="+", metavar="SHEET", help="sheet ids (fetch only; no GeoPackages)")
     sel.add_argument("--all", action="store_true", help="all 860 surveyed sheets, then build the GeoPackages")
     sel.add_argument("--build-only", action="store_true", help="build the GeoPackages from the saved pages")
-    ap.add_argument("--layers", nargs="+", type=int, default=list(LAYERS), help="layer ids (default: all six)")
+    ap.add_argument("--layers", nargs="+", type=int, default=list(all_layers), help="layer ids (default: all six)")
     args = ap.parse_args(argv)
-    bad = sorted(set(args.layers) - set(LAYERS))
+    bad = sorted(set(args.layers) - set(all_layers))
     if bad:
         ap.error(f"not a P1-07 layer: {bad}")
 
@@ -280,15 +293,15 @@ def main(argv: list[str] | None = None) -> int:
         unknown = sorted(set(chosen) - set(all_sheets))
         if unknown:
             ap.error(f"not surveyed sheets: {unknown}")
-        grids = read_grids(paths, chosen, cell)
+        grids = read_grids(paths, chosen, cell, S.grid_origin(cfg))
         done = {(r["layer"], r["sheet"]) for r in read_jsonl(log_path)}
         with Client() as client:
             try:
-                svc = client.get_json(SERVICE_URL, params={"f": "json"})
-                meta: dict[str, Any] = {"retrieved_utc": now_utc(), "url": SERVICE_URL,
+                svc = client.get_json(url_service, params={"f": "json"})
+                meta: dict[str, Any] = {"retrieved_utc": now_utc(), "url": url_service,
                                         "service": {k: svc[k] for k in SERVICE_META_KEYS if k in svc}, "layers": {}}
                 for lyr in args.layers:
-                    url = f"{SERVICE_URL}/{lyr}"
+                    url = f"{url_service}/{lyr}"
                     m = S.layer_metadata(client, url, keys=(*S.LAYER_META_KEYS, "advancedQueryCapabilities"))
                     m["count_national"] = S.count_features(client, url)
                     meta["layers"][layer_key(lyr)] = m
@@ -308,7 +321,7 @@ def main(argv: list[str] | None = None) -> int:
                 for lyr, s in progress(todo, desc="zabaged", unit="query"):
                     t0 = time.monotonic()
                     rec = fetch_pair(client, lyr, meta["layers"][layer_key(lyr)], s, grids[s].bbox, epsg,
-                                     pages_root / layer_key(lyr) / sheet_to_stem(s))
+                                     pages_root / layer_key(lyr) / sheet_to_stem(s), service=url_service)
                     rec["seconds"] = round(time.monotonic() - t0, 2)
                     append_jsonl(log_path, rec)
                     n_pairs += 1
@@ -352,7 +365,7 @@ def main(argv: list[str] | None = None) -> int:
     section = {
         "row": 6,
         "source": "ČÚZK ZABAGED polohopis, CC BY 4.0 (© ČÚZK); data stay in data/, never committed",
-        "service": SERVICE_URL,
+        "service": url_service,
         "service_metadata": meta["service"],
         "metadata_retrieved_utc": meta["retrieved_utc"],
         "request": {"per_sheet_and_layer": "returnIdsOnly with the envelope, then pages of <= maxRecordCount ids "
@@ -365,7 +378,7 @@ def main(argv: list[str] | None = None) -> int:
                                         "git_commit")} for r in runs],
         "n_requests_total": sum(int(r.get("n_requests", 0)) for r in runs),
         "n_sheets": len(all_sheets),
-        "layers": {k: {"name_brief": LAYERS[int(k)], "metadata": meta["layers"][k], **v}
+        "layers": {k: {"name_brief": all_layers[int(k)], "metadata": meta["layers"][k], **v}
                    for k, v in layers_out.items()},
         "total_bytes": {"gpkg": sum(v["bytes"] for v in layers_out.values()),
                         "pages": sum(v["page_bytes"] for v in layers_out.values())},

@@ -11,9 +11,14 @@ from PIL import Image
 
 from landslide import sheets as S
 from landslide import susceptibility as SU
+from landslide.config import load_config
 from landslide.paths import Paths
 
-GRID = S.snap_out(-514749.6, -1146860.12, -514749.6 + 2 * 7, -1146860.12 + 2 * 5)  # 7 x 5 px
+CFG = load_config()
+SRC = SU.source(CFG)  # BRIEF.md note 5, from the config's sources.susceptibility block
+ORIGIN = S.grid_origin(CFG)
+ALPHA = SRC.alpha_min
+GRID = S.snap_out(-514749.6, -1146860.12, -514749.6 + 2 * 7, -1146860.12 + 2 * 5, origin=ORIGIN)  # 7 x 5 px
 
 
 def _png(rgba: np.ndarray, mode: str = "RGBA") -> bytes:
@@ -35,13 +40,22 @@ def _rgba(alpha: np.ndarray, colour=(255, 255, 0)) -> np.ndarray:
 
 # ---- request ----
 
+def test_source_is_note_5():
+    assert SRC.service == "https://mapy.geology.cz/arcgis/rest/services/Geohazardy/sesuvna_nachylnost/MapServer"
+    assert SRC.export_url == SRC.service + "/export" and SRC.layer_url == SRC.service + "/0"
+    assert SRC.classes == {"mid": (1, "Třída střední%"), "high": (2, "Třída vysoké%")}
+    assert (SRC.low_code, SRC.low_pattern, SRC.alpha_min, SRC.dpi, SRC.image_format) == (0, "Třída nízké%", 128, 96,
+                                                                                         "png32")
+
+
 def test_export_params_follow_note_5_without_outsr():
-    p = SU.export_params(GRID, 5514, "mid")
+    p = SU.export_params(SRC, GRID, 5514, "mid")
     assert p == {"bbox": "-514749.6,-1146860.12,-514735.6,-1146850.12", "bboxSR": 5514, "imageSR": 5514,
                  "size": "7,5", "format": "png32", "transparent": "true", "layers": "show:0", "dpi": 96,
                  "layerDefs": '{"0": "struktura LIKE \'Třída střední%\'"}', "f": "image"}
-    assert json.loads(SU.export_params(GRID, 5514, "high")["layerDefs"]) == {"0": "struktura LIKE 'Třída vysoké%'"}
-    assert SU.export_params(GRID, 5514, "high", f="json")["f"] == "json"
+    assert json.loads(SU.export_params(SRC, GRID, 5514, "high")["layerDefs"]) == \
+        {"0": "struktura LIKE 'Třída vysoké%'"}
+    assert SU.export_params(SRC, GRID, 5514, "high", f="json")["f"] == "json"
     assert not any(k.lower() == "outsr" for k in p)
 
 
@@ -64,7 +78,7 @@ def test_decode_png_roundtrip_and_threshold():
     rgba = SU.decode_png(_png(_rgba(alpha)), (7, 5))
     assert rgba.shape == (5, 7, 4) and rgba.dtype == np.uint8
     assert np.array_equal(rgba[..., 3], alpha)
-    assert SU.class_mask(rgba[..., 3])[0].tolist() == [False, False, False, True, True, True, True]
+    assert SU.class_mask(rgba[..., 3], ALPHA)[0].tolist() == [False, False, False, True, True, True, True]
 
 
 def test_decode_png_rejects_wrong_size_mode_and_non_png():
@@ -81,13 +95,13 @@ def test_alpha_histogram_and_colour_check():
     alpha = np.array([[0, 0, 128, 255], [64, 191, 255, 255]], np.uint8)
     assert SU.alpha_histogram(alpha) == {"0": 2, "64": 1, "128": 1, "191": 1, "255": 3}
     rgba = _rgba(alpha, colour=(255, 0, 0))
-    ok = SU.colour_check(rgba, (255, 0, 0))
+    ok = SU.colour_check(rgba, (255, 0, 0), ALPHA)
     assert ok["n_class"] == 5 and ok["n_other_colour"] == 0
     rgba[0, 2, :3] = (56, 168, 0)  # a "low" pixel drawn: the filter was not applied
-    bad = SU.colour_check(rgba, (255, 0, 0))
+    bad = SU.colour_check(rgba, (255, 0, 0), ALPHA)
     assert bad["n_other_colour"] == 1 and "56,168,0" in bad["colours"]
     rgba[1, 0, :3] = (1, 2, 3)  # alpha 64: not a class pixel, so its colour does not matter
-    assert SU.colour_check(rgba, (255, 0, 0))["n_other_colour"] == 1
+    assert SU.colour_check(rgba, (255, 0, 0), ALPHA)["n_other_colour"] == 1
 
 
 # ---- overlap rule ----
@@ -95,7 +109,7 @@ def test_alpha_histogram_and_colour_check():
 def test_combine_codes_and_overlap_rule():
     mid = np.array([[255, 255, 128, 0, 0, 191]], np.uint8)
     high = np.array([[0, 255, 128, 255, 127, 128]], np.uint8)
-    codes, st = SU.combine({"mid": mid, "high": high})
+    codes, st = SU.combine(SRC, {"mid": mid, "high": high})
     assert codes.dtype == np.uint8
     assert codes.tolist() == [[1, 2, 2, 2, 0, 2]]  # in both renders -> 2 (high wins)
     assert st["n_overlap"] == 3 and st["n_mid_render"] == 4 and st["n_high_render"] == 4
@@ -106,16 +120,16 @@ def test_combine_codes_and_overlap_rule():
 def test_combine_does_not_depend_on_dict_order_and_checks_shapes():
     mid = np.full((2, 2), 255, np.uint8)
     high = np.full((2, 2), 255, np.uint8)
-    a, _ = SU.combine({"mid": mid, "high": high})
-    b, _ = SU.combine({"high": high, "mid": mid})
+    a, _ = SU.combine(SRC, {"mid": mid, "high": high})
+    b, _ = SU.combine(SRC, {"high": high, "mid": mid})
     assert np.array_equal(a, b) and (a == 2).all()
     with pytest.raises(ValueError):
-        SU.combine({"mid": mid, "high": high[:1]})
+        SU.combine(SRC, {"mid": mid, "high": high[:1]})
 
 
 def test_combine_threshold_is_128():
     mid = np.array([[127, 128]], np.uint8)
-    codes, st = SU.combine({"mid": mid, "high": np.zeros_like(mid)})
+    codes, st = SU.combine(SRC, {"mid": mid, "high": np.zeros_like(mid)})
     assert codes.tolist() == [[0, 1]] and st["n_overlap"] == 0
 
 
@@ -135,7 +149,7 @@ def _dtm(tmp_path, grid):
 def test_read_dtm_grid_and_write_class_raster(tmp_path):
     import rasterio
 
-    dtm = SU.read_dtm_grid(_dtm(tmp_path, GRID), 2.0)
+    dtm = SU.read_dtm_grid(_dtm(tmp_path, GRID), 2.0, ORIGIN)
     assert dtm.grid.key() == GRID.key() and (dtm.width, dtm.height) == (7, 5)
     codes = np.arange(35, dtype=np.uint8).reshape(5, 7) % 3
     out = tmp_path / "s.tif"
@@ -162,7 +176,7 @@ def test_read_dtm_grid_rejects_off_lattice(tmp_path):
                        transform=Affine(2.0, 0, GRID.xmin + 0.3, 0, -2.0, GRID.ymax)) as ds:
         ds.write(np.zeros((3, 3), np.float32), 1)
     with pytest.raises(S.OffGrid):
-        SU.read_dtm_grid(p, 2.0)
+        SU.read_dtm_grid(p, 2.0, ORIGIN)
 
 
 # ---- one sheet with a fake client ----
@@ -198,10 +212,10 @@ def test_render_sheet_end_to_end(tmp_path):
     mid[0, 3] = high[0, 3] = 128  # a boundary tie
     client = _FakeExport({"mid": mid, "high": high})
     colours = {"mid": (255, 255, 0), "high": (255, 0, 0)}
-    rec = SU.render_sheet(client, "25-14-17", dtm_path, tmp_path / "out" / "25_14_17.tif", tmp_path / "png", 5514,
-                          2.0, colours)
+    rec = SU.render_sheet(SRC, client, "25-14-17", dtm_path, tmp_path / "out" / "25_14_17.tif", tmp_path / "png",
+                          5514, 2.0, ORIGIN, colours)
     assert [c[1]["size"] for c in client.calls] == ["7,5", "7,5"]
-    assert all(c[0] == SU.EXPORT_URL for c in client.calls)
+    assert all(c[0] == SRC.export_url for c in client.calls)
     assert rec["n_overlap"] == 1 and rec["overlap_alpha_pairs"] == {"128,128": 1}
     assert rec["n_code"] == {"0": 10, "1": 15, "2": 10}
     assert (tmp_path / "png" / "25_14_17_mid.png").read_bytes()[:8] == SU.PNG_SIGNATURE
@@ -215,15 +229,16 @@ def test_render_sheet_stops_on_size_mismatch_error_body_and_colour(tmp_path):
     colours = {"mid": (255, 255, 0), "high": (255, 0, 0)}
     small = {"mid": np.zeros((4, 7), np.uint8), "high": np.zeros((4, 7), np.uint8)}
     with pytest.raises(SU.UnexpectedResponse, match="size"):
-        SU.render_sheet(_FakeExport(small), "s", dtm_path, tmp_path / "a.tif", tmp_path / "png", 5514, 2.0, colours)
+        SU.render_sheet(SRC, _FakeExport(small), "s", dtm_path, tmp_path / "a.tif", tmp_path / "png", 5514, 2.0,
+                        ORIGIN, colours)
     ok = {"mid": np.zeros((5, 7), np.uint8), "high": np.zeros((5, 7), np.uint8)}
     with pytest.raises(SU.UnexpectedResponse, match="image/png"):
-        SU.render_sheet(_FakeExport(ok, ctype="text/html"), "s", dtm_path, tmp_path / "b.tif", tmp_path / "png",
-                        5514, 2.0, colours)
+        SU.render_sheet(SRC, _FakeExport(ok, ctype="text/html"), "s", dtm_path, tmp_path / "b.tif",
+                        tmp_path / "png", 5514, 2.0, ORIGIN, colours)
     drawn = {"mid": np.full((5, 7), 255, np.uint8), "high": np.zeros((5, 7), np.uint8)}
     with pytest.raises(SU.UnexpectedResponse, match="colour"):
-        SU.render_sheet(_FakeExport(drawn), "s", dtm_path, tmp_path / "c.tif", tmp_path / "png", 5514, 2.0,
-                        {"mid": (255, 0, 0), "high": (255, 0, 0)})
+        SU.render_sheet(SRC, _FakeExport(drawn), "s", dtm_path, tmp_path / "c.tif", tmp_path / "png", 5514, 2.0,
+                        ORIGIN, {"mid": (255, 0, 0), "high": (255, 0, 0)})
     assert not any((tmp_path / n).exists() for n in ("a.tif", "b.tif", "c.tif"))
 
 
@@ -236,9 +251,9 @@ LAYER_META = {"drawingInfo": {"renderer": {"uniqueValueInfos": [
 
 
 def test_class_colours_and_patterns():
-    assert SU.class_colours(LAYER_META) == {"mid": (255, 255, 0), "high": (255, 0, 0)}
+    assert SU.class_colours(SRC, LAYER_META) == {"mid": (255, 255, 0), "high": (255, 0, 0)}
     vals = [i["value"] for i in LAYER_META["drawingInfo"]["renderer"]["uniqueValueInfos"]]
-    m = SU.match_patterns(vals)
+    m = SU.match_patterns(SRC, vals)
     assert m == {"mid": [vals[1]], "high": [vals[2]], "low": [vals[0]]}
 
 
@@ -246,23 +261,23 @@ def test_check_service_flags_problems():
     meta = {"pattern_matches": {"mid": ["a"], "high": ["b"]}, "class_colours": {"mid": [1, 1, 1], "high": [2, 2, 2]},
             "service": {"maxImageWidth": 4096, "maxImageHeight": 4096, "supportedImageFormatTypes": "PNG32,PNG",
                         "spatialReference": {"wkid": 102067, "latestWkid": 5514}}}
-    assert SU.check_service(meta, 2902, 2496, 5514) == []
-    assert len(SU.check_service(meta, 5000, 2496, 5514)) == 1
+    assert SU.check_service(SRC, meta, 2902, 2496, 5514) == []
+    assert len(SU.check_service(SRC, meta, 5000, 2496, 5514)) == 1
     bad = json.loads(json.dumps(meta))
     bad["pattern_matches"]["mid"] = []
     bad["class_colours"]["high"] = None
     bad["service"]["supportedImageFormatTypes"] = "PNG,JPG"
-    assert len(SU.check_service(bad, 100, 100, 5514)) == 3
+    assert len(SU.check_service(SRC, bad, 100, 100, 5514)) == 3
 
 
 # ---- inspection helpers ----
 
 def test_code_from_values():
-    assert SU.code_from_values([]) == 0
-    assert SU.code_from_values(["Třída nízké náchylnosti – x"]) == 0
-    assert SU.code_from_values(["Třída střední náchylnosti – x"]) == 1
-    assert SU.code_from_values(["Třída vysoké náchylnosti – x", "Třída nízké náchylnosti – y"]) == 2
-    assert SU.code_from_values(["Třída střední náchylnosti", "Třída vysoké náchylnosti"]) == 2
+    assert SU.code_from_values(SRC, []) == 0
+    assert SU.code_from_values(SRC, ["Třída nízké náchylnosti – x"]) == 0
+    assert SU.code_from_values(SRC, ["Třída střední náchylnosti – x"]) == 1
+    assert SU.code_from_values(SRC, ["Třída vysoké náchylnosti – x", "Třída nízké náchylnosti – y"]) == 2
+    assert SU.code_from_values(SRC, ["Třída střední náchylnosti", "Třída vysoké náchylnosti"]) == 2
 
 
 def test_pixel_centre():
@@ -277,7 +292,7 @@ def test_inspection_points_categories():
     mid[1, 2:14] = 128  # partial edge row
     high[16:28, 16:28] = 255
     mid[20:24, 20:24] = 255  # overlapping polygons
-    pts = SU.inspection_points({"mid": mid, "high": high}, 5)
+    pts = SU.inspection_points(SRC, {"mid": mid, "high": high}, 5)
     assert set(pts) == {"mid_interior", "mid_edge", "high_interior", "high_edge", "none_interior", "none_edge",
                         "both_full"}
     for r, c in pts["both_full"]:
@@ -291,7 +306,7 @@ def test_inspection_points_categories():
     for r, c in pts["none_edge"]:
         assert mid[r, c] == 0 and high[r, c] == 0
     assert all(0 < len(v) <= 5 for v in pts.values())
-    assert pts == SU.inspection_points({"mid": mid, "high": high}, 5)  # deterministic
+    assert pts == SU.inspection_points(SRC, {"mid": mid, "high": high}, 5)  # deterministic
 
 
 # ---- the script's log handling ----

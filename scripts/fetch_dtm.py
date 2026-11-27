@@ -90,7 +90,8 @@ def main(argv: list[str] | None = None) -> int:
                 rec = S.fetch_dtm(client, cfg, s, grids[s], args.out)
                 log.info("%s: %d bytes, sha256 %s", s, rec["bytes"], rec["sha256"])
             if args.package_out is not None:
-                S.write_package_raster(tif, args.package_out / tif.name, S.epsg_code(cfg))
+                S.write_package_raster(tif, args.package_out / tif.name, S.epsg_code(cfg),
+                                       S.package_valid_range(cfg))
     log.info("done: %d sheets in %s (%d requests)", len(chosen), args.out, client.n_requests)
     return 0
 

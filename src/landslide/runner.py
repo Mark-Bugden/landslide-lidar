@@ -63,8 +63,6 @@ SCHEMA_VERSION = 1
 #: `landslide.train.CUBLAS_WORKSPACE_CONFIG` (tested equal); repeated here because importing train loads torch.
 CUBLAS_WORKSPACE_CONFIG = ":4096:8"
 _DETERMINISTIC_CUBLAS = (":4096:8", ":16:8")
-#: Appendix A §11 "15 min reserved for evaluation". No config key exists (requested for P1-16's batch).
-EVAL_RESERVE_MIN = 15.0
 SUMMARY_NAME = "run_summary.json"
 MARKERS = ("done.json", "failed.json", "interrupted.json")
 
@@ -831,7 +829,9 @@ def main(argv: Sequence[str] | None = None, *, backend: Backend | None = None,
             return EXIT_OK
 
         cap_h = float(args.max_hours) if args.max_hours is not None else float(cfg["runner"]["wall_clock_h"])
-        deadline = Deadline(start=t_start, cap_s=cap_h * 3600.0, reserve_s=EVAL_RESERVE_MIN * 60.0, clock=clock)
+        # Appendix A §11 "15 min reserved for evaluation" (`replication.runner.eval_reserve_min`).
+        reserve_min = float(cfg["replication"]["runner"]["eval_reserve_min"])
+        deadline = Deadline(start=t_start, cap_s=cap_h * 3600.0, reserve_s=reserve_min * 60.0, clock=clock)
         opts = RunOptions(smoke=args.smoke, max_hours=args.max_hours, show_progress=not args.no_progress)
         runner = Runner(cfg, paths, opts, backend or Backend(), deadline=deadline, preflight=report,
                         log_file=log_file, clock=clock)
