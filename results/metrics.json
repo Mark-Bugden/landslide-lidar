@@ -1,0 +1,2757 @@
+{
+  "baselines": {
+    "a": {
+      "file": "preds_a.csv",
+      "n_extra_ids": 0,
+      "n_fold_mismatch": 0,
+      "n_missing_ids": 0,
+      "n_rows": 4410,
+      "scorers": {
+        "slope_only": {
+          "auc": 0.507358,
+          "block_ci": {
+            "high": 0.510738,
+            "level": 0.95,
+            "low": 0.504739,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "block"
+          },
+          "kind": "non-ML baseline",
+          "per_fold": {
+            "0": 0.511311,
+            "1": 0.51253,
+            "2": 0.503492,
+            "3": 0.503691,
+            "4": 0.510528
+          },
+          "sheet_ci": {
+            "high": 0.510694,
+            "level": 0.95,
+            "low": 0.504287,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          }
+        },
+        "slope_susc_lr": {
+          "auc": 0.576878,
+          "block_ci": {
+            "high": 0.596383,
+            "level": 0.95,
+            "low": 0.558588,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "block"
+          },
+          "kind": "classical-ML comparator",
+          "per_fold": {
+            "0": 0.591553,
+            "1": 0.543863,
+            "2": 0.57138,
+            "3": 0.593584,
+            "4": 0.605716
+          },
+          "sheet_ci": {
+            "high": 0.594935,
+            "level": 0.95,
+            "low": 0.558892,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          }
+        },
+        "susceptibility": {
+          "auc": 0.540475,
+          "block_ci": {
+            "high": 0.5557,
+            "level": 0.95,
+            "low": 0.525496,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "block"
+          },
+          "kind": "non-ML baseline",
+          "per_fold": {
+            "0": 0.571331,
+            "1": 0.526628,
+            "2": 0.524178,
+            "3": 0.527977,
+            "4": 0.565995
+          },
+          "sheet_ci": {
+            "high": 0.555117,
+            "level": 0.95,
+            "low": 0.524838,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          }
+        },
+        "terrain_stats_gbm": {
+          "auc": 0.669344,
+          "block_ci": {
+            "high": 0.687531,
+            "level": 0.95,
+            "low": 0.652168,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "block"
+          },
+          "kind": "classical-ML comparator (secondary)",
+          "per_fold": {
+            "0": 0.702186,
+            "1": 0.63815,
+            "2": 0.67208,
+            "3": 0.666793,
+            "4": 0.680913
+          },
+          "sheet_ci": {
+            "high": 0.687325,
+            "level": 0.95,
+            "low": 0.651635,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          }
+        },
+        "terrain_stats_lr": {
+          "auc": 0.685223,
+          "block_ci": {
+            "high": 0.705601,
+            "level": 0.95,
+            "low": 0.664356,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "block"
+          },
+          "kind": "classical-ML comparator",
+          "per_fold": {
+            "0": 0.705525,
+            "1": 0.681986,
+            "2": 0.676748,
+            "3": 0.695272,
+            "4": 0.679873
+          },
+          "sheet_ci": {
+            "high": 0.703954,
+            "level": 0.95,
+            "low": 0.666149,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          }
+        }
+      },
+      "status": "ok"
+    },
+    "b": {
+      "file": "preds_b.csv",
+      "n_extra_ids": 0,
+      "n_missing_ids": 0,
+      "n_rows": 3090,
+      "scorers": {
+        "slope_only": {
+          "auc": 0.510324,
+          "block_ci": {
+            "high": 0.514949,
+            "level": 0.95,
+            "low": 0.50656,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "block"
+          },
+          "kind": "non-ML baseline",
+          "sheet_ci": {
+            "high": 0.516885,
+            "level": 0.95,
+            "low": 0.503974,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          }
+        },
+        "slope_susc_lr": {
+          "auc": 0.516329,
+          "block_ci": {
+            "high": 0.544864,
+            "level": 0.95,
+            "low": 0.488699,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "block"
+          },
+          "kind": "classical-ML comparator",
+          "sheet_ci": {
+            "high": 0.536475,
+            "level": 0.95,
+            "low": 0.495773,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          }
+        },
+        "susceptibility": {
+          "auc": 0.525113,
+          "block_ci": {
+            "high": 0.543722,
+            "level": 0.95,
+            "low": 0.506416,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "block"
+          },
+          "kind": "non-ML baseline",
+          "sheet_ci": {
+            "high": 0.540555,
+            "level": 0.95,
+            "low": 0.510538,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          }
+        },
+        "terrain_stats_gbm": {
+          "auc": 0.618072,
+          "block_ci": {
+            "high": 0.644754,
+            "level": 0.95,
+            "low": 0.5901,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "block"
+          },
+          "kind": "classical-ML comparator (secondary)",
+          "sheet_ci": {
+            "high": 0.63865,
+            "level": 0.95,
+            "low": 0.597325,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          }
+        },
+        "terrain_stats_lr": {
+          "auc": 0.623619,
+          "block_ci": {
+            "high": 0.64486,
+            "level": 0.95,
+            "low": 0.603574,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "block"
+          },
+          "kind": "classical-ML comparator",
+          "sheet_ci": {
+            "high": 0.642256,
+            "level": 0.95,
+            "low": 0.603991,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          }
+        }
+      },
+      "status": "ok"
+    },
+    "stage2": {
+      "file": "detections.parquet",
+      "scorers": {
+        "random": {
+          "by_stratum": {
+            "flysch": {
+              "estimate": 0.12193,
+              "interpolated_precision": 0.12193,
+              "max_recall": 0.877698,
+              "n": {
+                "detections": 5095,
+                "duplicate": 641,
+                "fp": 3345,
+                "ignored": 865,
+                "sheets": 10,
+                "targets": 278,
+                "tp": 244
+              },
+              "reached": true,
+              "recall_level": 0.5,
+              "score_threshold": 0.971089
+            },
+            "nonflysch": {
+              "estimate": 0.072197,
+              "interpolated_precision": 0.072197,
+              "max_recall": 0.898396,
+              "n": {
+                "detections": 4972,
+                "duplicate": 302,
+                "fp": 3933,
+                "ignored": 569,
+                "sheets": 10,
+                "targets": 187,
+                "tp": 168
+              },
+              "reached": true,
+              "recall_level": 0.5,
+              "score_threshold": 0.972348
+            }
+          },
+          "estimate": 0.094256,
+          "interpolated_precision": 0.094256,
+          "kind": "chance level",
+          "max_recall": 0.886022,
+          "n": {
+            "detections": 10067,
+            "duplicate": 943,
+            "fp": 7278,
+            "ignored": 1434,
+            "sheets": 20,
+            "targets": 465,
+            "tp": 412
+          },
+          "reached": true,
+          "recall_level": 0.5,
+          "ring_as_fp": {
+            "estimate": 0.080345,
+            "interpolated_precision": 0.080345,
+            "max_recall": 0.886022,
+            "n": {
+              "detections": 10067,
+              "duplicate": 943,
+              "fp": 8712,
+              "ignored": 0,
+              "sheets": 20,
+              "targets": 465,
+              "tp": 412
+            },
+            "reached": true,
+            "recall_level": 0.5,
+            "score_threshold": 0.971089
+          },
+          "score_threshold": 0.971089,
+          "sheet_ci": {
+            "high": 0.136424,
+            "level": 0.95,
+            "low": 0.068446,
+            "n_degenerate": 0,
+            "n_not_reached": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "not_reached_rule": "a bootstrap replicate whose pooled detections never reach the recall level counts as precision 0 (a fail at that replicate); it is kept, not dropped",
+            "post_hoc": true,
+            "unit": "sheet"
+          },
+          "status": "ok"
+        },
+        "slope_only": {
+          "by_stratum": {
+            "flysch": {
+              "estimate": 0.220285,
+              "interpolated_precision": 0.220285,
+              "max_recall": 0.910072,
+              "n": {
+                "detections": 5906,
+                "duplicate": 805,
+                "fp": 3814,
+                "ignored": 1034,
+                "sheets": 10,
+                "targets": 278,
+                "tp": 253
+              },
+              "reached": true,
+              "recall_level": 0.5,
+              "score_threshold": 16.509365
+            },
+            "nonflysch": {
+              "estimate": 0.067577,
+              "interpolated_precision": 0.0717,
+              "max_recall": 0.935829,
+              "n": {
+                "detections": 5898,
+                "duplicate": 403,
+                "fp": 4619,
+                "ignored": 701,
+                "sheets": 10,
+                "targets": 187,
+                "tp": 175
+              },
+              "reached": true,
+              "recall_level": 0.5,
+              "score_threshold": 11.072932
+            }
+          },
+          "estimate": 0.120227,
+          "interpolated_precision": 0.120227,
+          "kind": "non-ML baseline",
+          "max_recall": 0.92043,
+          "n": {
+            "detections": 11804,
+            "duplicate": 1208,
+            "fp": 8433,
+            "ignored": 1735,
+            "sheets": 20,
+            "targets": 465,
+            "tp": 428
+          },
+          "reached": true,
+          "recall_level": 0.5,
+          "ring_as_fp": {
+            "estimate": 0.090803,
+            "interpolated_precision": 0.090803,
+            "max_recall": 0.92043,
+            "n": {
+              "detections": 11804,
+              "duplicate": 1208,
+              "fp": 10168,
+              "ignored": 0,
+              "sheets": 20,
+              "targets": 465,
+              "tp": 428
+            },
+            "reached": true,
+            "recall_level": 0.5,
+            "score_threshold": 13.884339
+          },
+          "score_threshold": 13.884339,
+          "sheet_ci": {
+            "high": 0.301777,
+            "level": 0.95,
+            "low": 0.06483,
+            "n_degenerate": 0,
+            "n_not_reached": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "not_reached_rule": "a bootstrap replicate whose pooled detections never reach the recall level counts as precision 0 (a fail at that replicate); it is kept, not dropped",
+            "post_hoc": true,
+            "unit": "sheet"
+          },
+          "status": "ok"
+        },
+        "slope_susc_lr": {
+          "by_stratum": {
+            "flysch": {
+              "estimate": 0.214506,
+              "interpolated_precision": 0.214506,
+              "max_recall": 0.910072,
+              "n": {
+                "detections": 5865,
+                "duplicate": 789,
+                "fp": 3766,
+                "ignored": 1057,
+                "sheets": 10,
+                "targets": 278,
+                "tp": 253
+              },
+              "reached": true,
+              "recall_level": 0.5,
+              "score_threshold": 0.809011
+            },
+            "nonflysch": {
+              "estimate": 0.083333,
+              "interpolated_precision": 0.083333,
+              "max_recall": 0.930481,
+              "n": {
+                "detections": 5856,
+                "duplicate": 407,
+                "fp": 4578,
+                "ignored": 697,
+                "sheets": 10,
+                "targets": 187,
+                "tp": 174
+              },
+              "reached": true,
+              "recall_level": 0.5,
+              "score_threshold": 0.586629
+            }
+          },
+          "estimate": 0.141469,
+          "interpolated_precision": 0.141469,
+          "kind": "classical-ML comparator",
+          "max_recall": 0.91828,
+          "n": {
+            "detections": 11721,
+            "duplicate": 1196,
+            "fp": 8344,
+            "ignored": 1754,
+            "sheets": 20,
+            "targets": 465,
+            "tp": 427
+          },
+          "reached": true,
+          "recall_level": 0.5,
+          "ring_as_fp": {
+            "estimate": 0.103097,
+            "interpolated_precision": 0.103097,
+            "max_recall": 0.91828,
+            "n": {
+              "detections": 11721,
+              "duplicate": 1196,
+              "fp": 10098,
+              "ignored": 0,
+              "sheets": 20,
+              "targets": 465,
+              "tp": 427
+            },
+            "reached": true,
+            "recall_level": 0.5,
+            "score_threshold": 0.729599
+          },
+          "score_threshold": 0.729599,
+          "sheet_ci": {
+            "high": 0.344925,
+            "level": 0.95,
+            "low": 0.063729,
+            "n_degenerate": 0,
+            "n_not_reached": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "not_reached_rule": "a bootstrap replicate whose pooled detections never reach the recall level counts as precision 0 (a fail at that replicate); it is kept, not dropped",
+            "post_hoc": true,
+            "unit": "sheet"
+          },
+          "status": "ok"
+        },
+        "susceptibility": {
+          "by_stratum": {
+            "flysch": {
+              "estimate": 0.12108,
+              "interpolated_precision": 0.121739,
+              "max_recall": 0.877698,
+              "n": {
+                "detections": 5753,
+                "duplicate": 769,
+                "fp": 3723,
+                "ignored": 1017,
+                "sheets": 10,
+                "targets": 278,
+                "tp": 244
+              },
+              "reached": true,
+              "recall_level": 0.5,
+              "score_threshold": 1.127556
+            },
+            "nonflysch": {
+              "estimate": 0.055588,
+              "interpolated_precision": 0.056549,
+              "max_recall": 0.914439,
+              "n": {
+                "detections": 5489,
+                "duplicate": 364,
+                "fp": 4311,
+                "ignored": 643,
+                "sheets": 10,
+                "targets": 187,
+                "tp": 171
+              },
+              "reached": true,
+              "recall_level": 0.5,
+              "score_threshold": 0.248356
+            }
+          },
+          "estimate": 0.101216,
+          "interpolated_precision": 0.101216,
+          "kind": "non-ML baseline",
+          "max_recall": 0.892473,
+          "n": {
+            "detections": 11242,
+            "duplicate": 1133,
+            "fp": 8034,
+            "ignored": 1660,
+            "sheets": 20,
+            "targets": 465,
+            "tp": 415
+          },
+          "reached": true,
+          "recall_level": 0.5,
+          "ring_as_fp": {
+            "estimate": 0.07824,
+            "interpolated_precision": 0.07824,
+            "max_recall": 0.892473,
+            "n": {
+              "detections": 11242,
+              "duplicate": 1133,
+              "fp": 9694,
+              "ignored": 0,
+              "sheets": 20,
+              "targets": 465,
+              "tp": 415
+            },
+            "reached": true,
+            "recall_level": 0.5,
+            "score_threshold": 0.875644
+          },
+          "score_threshold": 0.875644,
+          "sheet_ci": {
+            "high": 0.228743,
+            "level": 0.95,
+            "low": 0.041051,
+            "n_degenerate": 0,
+            "n_not_reached": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "not_reached_rule": "a bootstrap replicate whose pooled detections never reach the recall level counts as precision 0 (a fail at that replicate); it is kept, not dropped",
+            "post_hoc": true,
+            "unit": "sheet"
+          },
+          "status": "ok"
+        }
+      },
+      "status": "ok"
+    }
+  },
+  "bootstrap": {
+    "ci": 0.95,
+    "method": "percentile",
+    "n": 2000,
+    "primary_unit": "sheet",
+    "secondary_unit": "block",
+    "seed": 123
+  },
+  "config_hash": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+  "discrepancies": {
+    "comparisons": [
+      {
+        "claim": "(a) held-out flysch sheets, ROC AUC (5 folds, pooled): CNN",
+        "id": "a_cnn",
+        "note": null,
+        "ours": 0.80045,
+        "ours_path": "tests.a.estimate",
+        "outside_spike_ci": false,
+        "spike": 0.811,
+        "spike_ci": [
+          0.796,
+          0.826
+        ]
+      },
+      {
+        "claim": "(b) train Zlínský + Moravskoslezský, test other kraje, ROC AUC: CNN",
+        "id": "b_cnn",
+        "note": null,
+        "ours": 0.758341,
+        "ours_path": "tests.b.estimate",
+        "outside_spike_ci": false,
+        "spike": 0.749,
+        "spike_ci": [
+          0.727,
+          0.77
+        ]
+      },
+      {
+        "claim": "Stage 2, 20 reserved sheets, precision at 50 % object recall: CNN",
+        "id": "stage2_cnn",
+        "note": null,
+        "ours": 0.581047,
+        "ours_path": "tests.stage2.estimate",
+        "outside_spike_ci": false,
+        "spike": 0.559,
+        "spike_ci": [
+          0.407,
+          0.812
+        ]
+      },
+      {
+        "claim": "(a) best non-CNN: terrain-stats LR",
+        "id": "a_best_noncnn",
+        "note": null,
+        "ours": 0.685223,
+        "ours_path": "baselines.a.scorers.terrain_stats_lr.auc",
+        "outside_spike_ci": false,
+        "spike": 0.695,
+        "spike_ci": [
+          0.678,
+          0.713
+        ]
+      },
+      {
+        "claim": "(b) best non-CNN: terrain-stats GBM",
+        "id": "b_best_noncnn",
+        "note": null,
+        "ours": 0.618072,
+        "ours_path": "baselines.b.scorers.terrain_stats_gbm.auc",
+        "outside_spike_ci": false,
+        "spike": 0.624,
+        "spike_ci": [
+          0.603,
+          0.647
+        ]
+      },
+      {
+        "claim": "Stage 2 best non-CNN: slope + susceptibility LR",
+        "id": "stage2_best_noncnn",
+        "note": "the spike gives no CI",
+        "ours": 0.141469,
+        "ours_path": "baselines.stage2.scorers.slope_susc_lr.estimate",
+        "outside_spike_ci": null,
+        "spike": 0.136,
+        "spike_ci": null
+      },
+      {
+        "claim": "Stage 2 random scores",
+        "id": "stage2_random",
+        "note": "the spike gives no CI",
+        "ours": 0.094256,
+        "ours_path": "baselines.stage2.scorers.random.estimate",
+        "outside_spike_ci": null,
+        "spike": 0.085,
+        "spike_ci": null
+      },
+      {
+        "claim": "(a) same-sheet pair accuracy (post hoc)",
+        "id": "a_pair_accuracy",
+        "note": "the spike gives no CI",
+        "ours": 0.813536,
+        "ours_path": "secondary.pair_accuracy.a.same_sheet.accuracy",
+        "outside_spike_ci": null,
+        "spike": 0.824,
+        "spike_ci": null
+      },
+      {
+        "claim": "(b) same-sheet pair accuracy (post hoc)",
+        "id": "b_pair_accuracy",
+        "note": "the spike gives no CI",
+        "ours": 0.757902,
+        "ours_path": "secondary.pair_accuracy.b.same_sheet.accuracy",
+        "outside_spike_ci": null,
+        "spike": 0.762,
+        "spike_ci": null
+      },
+      {
+        "claim": "Stage 2 P@R50 with the 150 m ring counted as false positives (post hoc)",
+        "id": "stage2_ring_as_fp",
+        "note": "the spike gives no CI",
+        "ours": 0.41533,
+        "ours_path": "secondary.stage2_ring_as_fp.estimate",
+        "outside_spike_ci": null,
+        "spike": 0.418,
+        "spike_ci": null
+      },
+      {
+        "claim": "(b) non-flysch Jihomoravský ROC AUC (post hoc)",
+        "id": "b_jihomoravsky_nonflysch",
+        "note": "the spike gives no CI",
+        "ours": 0.708323,
+        "ours_path": "secondary.jihomoravsky_nonflysch.auc",
+        "outside_spike_ci": null,
+        "spike": 0.622,
+        "spike_ci": null
+      }
+    ],
+    "flagged": [],
+    "rule": "a discrepancy is our point estimate outside the spike's 95 % CI (bounds count as inside); claims without a CI cannot be flagged; discrepancies never change the verdict"
+  },
+  "figures": {
+    "learning_curves": {
+      "file": "learning_curves.png",
+      "runs": [
+        "a_f0",
+        "a_f1",
+        "a_f2",
+        "a_f3",
+        "a_f4",
+        "b",
+        "s2"
+      ]
+    }
+  },
+  "git_commit": "dba23cf5c7ea39499f7caeb28126910c6ca26494",
+  "integrity": {
+    "config_hash_current": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+    "config_hash_expected": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+    "config_hash_source": "frozen",
+    "failed": [],
+    "git_commits": [
+      "dba23cf5c7ea39499f7caeb28126910c6ca26494"
+    ],
+    "git_dirty_units": [],
+    "hash_mismatch": [],
+    "interrupted": [],
+    "invalid": [],
+    "missing": [],
+    "n_done": 21,
+    "n_expected": 21,
+    "ok": true,
+    "units": {
+      "a_f0_s0": {
+        "best_epoch": 6,
+        "best_val_auc": 0.80985,
+        "config_hash": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+        "epochs_run": 14,
+        "git_commit": "dba23cf5c7ea39499f7caeb28126910c6ca26494",
+        "git_dirty": false,
+        "n_test": 672,
+        "n_train": 2968,
+        "n_val": 770,
+        "peak_gpu_mem_gb": 2.492,
+        "problems": [],
+        "seconds": 59.08,
+        "status": "done",
+        "stop_reason": "early_stopping"
+      },
+      "a_f0_s1": {
+        "best_epoch": 7,
+        "best_val_auc": 0.819632,
+        "config_hash": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+        "epochs_run": 15,
+        "git_commit": "dba23cf5c7ea39499f7caeb28126910c6ca26494",
+        "git_dirty": false,
+        "n_test": 672,
+        "n_train": 2968,
+        "n_val": 770,
+        "peak_gpu_mem_gb": 2.492,
+        "problems": [],
+        "seconds": 57.73,
+        "status": "done",
+        "stop_reason": "early_stopping"
+      },
+      "a_f0_s2": {
+        "best_epoch": 3,
+        "best_val_auc": 0.803198,
+        "config_hash": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+        "epochs_run": 11,
+        "git_commit": "dba23cf5c7ea39499f7caeb28126910c6ca26494",
+        "git_dirty": false,
+        "n_test": 672,
+        "n_train": 2968,
+        "n_val": 770,
+        "peak_gpu_mem_gb": 2.492,
+        "problems": [],
+        "seconds": 43.34,
+        "status": "done",
+        "stop_reason": "early_stopping"
+      },
+      "a_f1_s0": {
+        "best_epoch": 5,
+        "best_val_auc": 0.821375,
+        "config_hash": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+        "epochs_run": 13,
+        "git_commit": "dba23cf5c7ea39499f7caeb28126910c6ca26494",
+        "git_dirty": false,
+        "n_test": 956,
+        "n_train": 2664,
+        "n_val": 790,
+        "peak_gpu_mem_gb": 2.409,
+        "problems": [],
+        "seconds": 48.4,
+        "status": "done",
+        "stop_reason": "early_stopping"
+      },
+      "a_f1_s1": {
+        "best_epoch": 6,
+        "best_val_auc": 0.825355,
+        "config_hash": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+        "epochs_run": 14,
+        "git_commit": "dba23cf5c7ea39499f7caeb28126910c6ca26494",
+        "git_dirty": false,
+        "n_test": 956,
+        "n_train": 2664,
+        "n_val": 790,
+        "peak_gpu_mem_gb": 2.409,
+        "problems": [],
+        "seconds": 51.83,
+        "status": "done",
+        "stop_reason": "early_stopping"
+      },
+      "a_f1_s2": {
+        "best_epoch": 8,
+        "best_val_auc": 0.825265,
+        "config_hash": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+        "epochs_run": 16,
+        "git_commit": "dba23cf5c7ea39499f7caeb28126910c6ca26494",
+        "git_dirty": false,
+        "n_test": 956,
+        "n_train": 2664,
+        "n_val": 790,
+        "peak_gpu_mem_gb": 2.409,
+        "problems": [],
+        "seconds": 58.71,
+        "status": "done",
+        "stop_reason": "early_stopping"
+      },
+      "a_f2_s0": {
+        "best_epoch": 5,
+        "best_val_auc": 0.855365,
+        "config_hash": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+        "epochs_run": 13,
+        "git_commit": "dba23cf5c7ea39499f7caeb28126910c6ca26494",
+        "git_dirty": false,
+        "n_test": 1000,
+        "n_train": 2936,
+        "n_val": 474,
+        "peak_gpu_mem_gb": 2.395,
+        "problems": [],
+        "seconds": 43.18,
+        "status": "done",
+        "stop_reason": "early_stopping"
+      },
+      "a_f2_s1": {
+        "best_epoch": 8,
+        "best_val_auc": 0.845484,
+        "config_hash": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+        "epochs_run": 16,
+        "git_commit": "dba23cf5c7ea39499f7caeb28126910c6ca26494",
+        "git_dirty": false,
+        "n_test": 1000,
+        "n_train": 2936,
+        "n_val": 474,
+        "peak_gpu_mem_gb": 2.395,
+        "problems": [],
+        "seconds": 52.19,
+        "status": "done",
+        "stop_reason": "early_stopping"
+      },
+      "a_f2_s2": {
+        "best_epoch": 11,
+        "best_val_auc": 0.84714,
+        "config_hash": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+        "epochs_run": 19,
+        "git_commit": "dba23cf5c7ea39499f7caeb28126910c6ca26494",
+        "git_dirty": false,
+        "n_test": 1000,
+        "n_train": 2936,
+        "n_val": 474,
+        "peak_gpu_mem_gb": 2.395,
+        "problems": [],
+        "seconds": 61.36,
+        "status": "done",
+        "stop_reason": "early_stopping"
+      },
+      "a_f3_s0": {
+        "best_epoch": 5,
+        "best_val_auc": 0.798096,
+        "config_hash": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+        "epochs_run": 13,
+        "git_commit": "dba23cf5c7ea39499f7caeb28126910c6ca26494",
+        "git_dirty": false,
+        "n_test": 990,
+        "n_train": 2882,
+        "n_val": 538,
+        "peak_gpu_mem_gb": 2.398,
+        "problems": [],
+        "seconds": 44.83,
+        "status": "done",
+        "stop_reason": "early_stopping"
+      },
+      "a_f3_s1": {
+        "best_epoch": 6,
+        "best_val_auc": 0.79529,
+        "config_hash": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+        "epochs_run": 14,
+        "git_commit": "dba23cf5c7ea39499f7caeb28126910c6ca26494",
+        "git_dirty": false,
+        "n_test": 990,
+        "n_train": 2882,
+        "n_val": 538,
+        "peak_gpu_mem_gb": 2.398,
+        "problems": [],
+        "seconds": 48.02,
+        "status": "done",
+        "stop_reason": "early_stopping"
+      },
+      "a_f3_s2": {
+        "best_epoch": 8,
+        "best_val_auc": 0.794696,
+        "config_hash": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+        "epochs_run": 16,
+        "git_commit": "dba23cf5c7ea39499f7caeb28126910c6ca26494",
+        "git_dirty": false,
+        "n_test": 990,
+        "n_train": 2882,
+        "n_val": 538,
+        "peak_gpu_mem_gb": 2.398,
+        "problems": [],
+        "seconds": 54.32,
+        "status": "done",
+        "stop_reason": "early_stopping"
+      },
+      "a_f4_s0": {
+        "best_epoch": 26,
+        "best_val_auc": 0.792704,
+        "config_hash": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+        "epochs_run": 34,
+        "git_commit": "dba23cf5c7ea39499f7caeb28126910c6ca26494",
+        "git_dirty": false,
+        "n_test": 792,
+        "n_train": 2994,
+        "n_val": 624,
+        "peak_gpu_mem_gb": 2.457,
+        "problems": [],
+        "seconds": 117.2,
+        "status": "done",
+        "stop_reason": "early_stopping"
+      },
+      "a_f4_s1": {
+        "best_epoch": 9,
+        "best_val_auc": 0.795848,
+        "config_hash": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+        "epochs_run": 17,
+        "git_commit": "dba23cf5c7ea39499f7caeb28126910c6ca26494",
+        "git_dirty": false,
+        "n_test": 792,
+        "n_train": 2994,
+        "n_val": 624,
+        "peak_gpu_mem_gb": 2.457,
+        "problems": [],
+        "seconds": 60.51,
+        "status": "done",
+        "stop_reason": "early_stopping"
+      },
+      "a_f4_s2": {
+        "best_epoch": 5,
+        "best_val_auc": 0.780243,
+        "config_hash": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+        "epochs_run": 13,
+        "git_commit": "dba23cf5c7ea39499f7caeb28126910c6ca26494",
+        "git_dirty": false,
+        "n_test": 792,
+        "n_train": 2994,
+        "n_val": 624,
+        "peak_gpu_mem_gb": 2.457,
+        "problems": [],
+        "seconds": 47.2,
+        "status": "done",
+        "stop_reason": "early_stopping"
+      },
+      "b_s0": {
+        "best_epoch": 11,
+        "best_val_auc": 0.81521,
+        "config_hash": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+        "epochs_run": 19,
+        "git_commit": "dba23cf5c7ea39499f7caeb28126910c6ca26494",
+        "git_dirty": false,
+        "n_test": 3090,
+        "n_train": 3396,
+        "n_val": 646,
+        "peak_gpu_mem_gb": 2.581,
+        "problems": [],
+        "seconds": 80.79,
+        "status": "done",
+        "stop_reason": "early_stopping"
+      },
+      "b_s1": {
+        "best_epoch": 17,
+        "best_val_auc": 0.834274,
+        "config_hash": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+        "epochs_run": 25,
+        "git_commit": "dba23cf5c7ea39499f7caeb28126910c6ca26494",
+        "git_dirty": false,
+        "n_test": 3090,
+        "n_train": 3396,
+        "n_val": 646,
+        "peak_gpu_mem_gb": 2.581,
+        "problems": [],
+        "seconds": 101.44,
+        "status": "done",
+        "stop_reason": "early_stopping"
+      },
+      "b_s2": {
+        "best_epoch": 7,
+        "best_val_auc": 0.835012,
+        "config_hash": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+        "epochs_run": 15,
+        "git_commit": "dba23cf5c7ea39499f7caeb28126910c6ca26494",
+        "git_dirty": false,
+        "n_test": 3090,
+        "n_train": 3396,
+        "n_val": 646,
+        "peak_gpu_mem_gb": 2.581,
+        "problems": [],
+        "seconds": 64.4,
+        "status": "done",
+        "stop_reason": "early_stopping"
+      },
+      "s2_s0": {
+        "best_epoch": 8,
+        "best_val_auc": 0.843029,
+        "config_hash": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+        "epochs_run": 16,
+        "git_commit": "dba23cf5c7ea39499f7caeb28126910c6ca26494",
+        "git_dirty": false,
+        "n_test": 0,
+        "n_train": 9241,
+        "n_val": 1891,
+        "peak_gpu_mem_gb": 4.66,
+        "problems": [],
+        "seconds": 173.95,
+        "status": "done",
+        "stop_reason": "early_stopping"
+      },
+      "s2_s1": {
+        "best_epoch": 13,
+        "best_val_auc": 0.848493,
+        "config_hash": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+        "epochs_run": 21,
+        "git_commit": "dba23cf5c7ea39499f7caeb28126910c6ca26494",
+        "git_dirty": false,
+        "n_test": 0,
+        "n_train": 9241,
+        "n_val": 1891,
+        "peak_gpu_mem_gb": 4.66,
+        "problems": [],
+        "seconds": 222.86,
+        "status": "done",
+        "stop_reason": "early_stopping"
+      },
+      "s2_s2": {
+        "best_epoch": 8,
+        "best_val_auc": 0.846829,
+        "config_hash": "1ae1a9b787d8cb2567c265ae8812d28dc913c80c888edfc8103740f55d895adb",
+        "epochs_run": 16,
+        "git_commit": "dba23cf5c7ea39499f7caeb28126910c6ca26494",
+        "git_dirty": false,
+        "n_test": 0,
+        "n_train": 9241,
+        "n_val": 1891,
+        "peak_gpu_mem_gb": 4.66,
+        "problems": [],
+        "seconds": 171.54,
+        "status": "done",
+        "stop_reason": "early_stopping"
+      }
+    }
+  },
+  "paired_diffs": {
+    "a": {
+      "block": {
+        "slope_only": {
+          "ci": {
+            "high": 0.307662,
+            "level": 0.95,
+            "low": 0.279689,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "block"
+          },
+          "estimate": 0.293092
+        },
+        "slope_susc_lr": {
+          "ci": {
+            "high": 0.24441,
+            "level": 0.95,
+            "low": 0.201643,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "block"
+          },
+          "estimate": 0.223571
+        },
+        "susceptibility": {
+          "ci": {
+            "high": 0.278552,
+            "level": 0.95,
+            "low": 0.242856,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "block"
+          },
+          "estimate": 0.259975
+        },
+        "terrain_stats_gbm": {
+          "ci": {
+            "high": 0.148791,
+            "level": 0.95,
+            "low": 0.113367,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "block"
+          },
+          "estimate": 0.131106
+        },
+        "terrain_stats_lr": {
+          "ci": {
+            "high": 0.135844,
+            "level": 0.95,
+            "low": 0.096618,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "block"
+          },
+          "estimate": 0.115227
+        }
+      },
+      "sheet": {
+        "slope_only": {
+          "ci": {
+            "high": 0.309062,
+            "level": 0.95,
+            "low": 0.277651,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          },
+          "estimate": 0.293092
+        },
+        "slope_susc_lr": {
+          "ci": {
+            "high": 0.245652,
+            "level": 0.95,
+            "low": 0.202576,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          },
+          "estimate": 0.223571
+        },
+        "susceptibility": {
+          "ci": {
+            "high": 0.281352,
+            "level": 0.95,
+            "low": 0.239448,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          },
+          "estimate": 0.259975
+        },
+        "terrain_stats_gbm": {
+          "ci": {
+            "high": 0.149518,
+            "level": 0.95,
+            "low": 0.11227,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          },
+          "estimate": 0.131106
+        },
+        "terrain_stats_lr": {
+          "ci": {
+            "high": 0.132278,
+            "level": 0.95,
+            "low": 0.099101,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          },
+          "estimate": 0.115227
+        }
+      }
+    },
+    "b": {
+      "block": {
+        "slope_only": {
+          "ci": {
+            "high": 0.272982,
+            "level": 0.95,
+            "low": 0.221609,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "block"
+          },
+          "estimate": 0.248016
+        },
+        "slope_susc_lr": {
+          "ci": {
+            "high": 0.284262,
+            "level": 0.95,
+            "low": 0.19524,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "block"
+          },
+          "estimate": 0.242012
+        },
+        "susceptibility": {
+          "ci": {
+            "high": 0.262968,
+            "level": 0.95,
+            "low": 0.20282,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "block"
+          },
+          "estimate": 0.233228
+        },
+        "terrain_stats_gbm": {
+          "ci": {
+            "high": 0.165768,
+            "level": 0.95,
+            "low": 0.115216,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "block"
+          },
+          "estimate": 0.140268
+        },
+        "terrain_stats_lr": {
+          "ci": {
+            "high": 0.16456,
+            "level": 0.95,
+            "low": 0.104617,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "block"
+          },
+          "estimate": 0.134722
+        }
+      },
+      "sheet": {
+        "slope_only": {
+          "ci": {
+            "high": 0.267141,
+            "level": 0.95,
+            "low": 0.22733,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          },
+          "estimate": 0.248016
+        },
+        "slope_susc_lr": {
+          "ci": {
+            "high": 0.270127,
+            "level": 0.95,
+            "low": 0.212698,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          },
+          "estimate": 0.242012
+        },
+        "susceptibility": {
+          "ci": {
+            "high": 0.254756,
+            "level": 0.95,
+            "low": 0.210306,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          },
+          "estimate": 0.233228
+        },
+        "terrain_stats_gbm": {
+          "ci": {
+            "high": 0.162771,
+            "level": 0.95,
+            "low": 0.116654,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          },
+          "estimate": 0.140268
+        },
+        "terrain_stats_lr": {
+          "ci": {
+            "high": 0.159325,
+            "level": 0.95,
+            "low": 0.11004,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          },
+          "estimate": 0.134722
+        }
+      }
+    },
+    "definition": "CNN minus scorer, replicate by replicate on the same cluster resamples",
+    "stage2": {
+      "sheet": {
+        "random": {
+          "ci": {
+            "high": 0.713633,
+            "level": 0.95,
+            "low": 0.312197,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          },
+          "estimate": 0.486792,
+          "post_hoc": true
+        },
+        "slope_only": {
+          "ci": {
+            "high": 0.733921,
+            "level": 0.95,
+            "low": 0.171268,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          },
+          "estimate": 0.46082,
+          "post_hoc": true
+        },
+        "slope_susc_lr": {
+          "ci": {
+            "high": 0.745274,
+            "level": 0.95,
+            "low": 0.125996,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          },
+          "estimate": 0.439578,
+          "post_hoc": true
+        },
+        "susceptibility": {
+          "ci": {
+            "high": 0.765863,
+            "level": 0.95,
+            "low": 0.253394,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          },
+          "estimate": 0.479831,
+          "post_hoc": true
+        }
+      }
+    }
+  },
+  "schema_version": 1,
+  "secondary": {
+    "jihomoravsky_nonflysch": {
+      "auc": 0.708323,
+      "n": {
+        "blocks": 27,
+        "negatives": 327,
+        "patches": 652,
+        "positives": 325,
+        "sheets": 121
+      },
+      "sheet_ci": {
+        "high": 0.755542,
+        "level": 0.95,
+        "low": 0.657479,
+        "n_degenerate": 0,
+        "n_replicates": 2000,
+        "n_used": 2000,
+        "unit": "sheet"
+      }
+    },
+    "pair_accuracy": {
+      "a": {
+        "all_pairs": {
+          "accuracy": 0.814966,
+          "n_correct": 1797,
+          "n_cross_sheet": 0,
+          "n_incomplete": 0,
+          "n_pairs": 2205,
+          "n_ties": 0,
+          "n_wrong": 408
+        },
+        "level_1": {
+          "accuracy": 0.81345,
+          "n_correct": 1766,
+          "n_cross_sheet": 0,
+          "n_incomplete": 0,
+          "n_pairs": 2171,
+          "n_ties": 0,
+          "n_wrong": 405
+        },
+        "primary": "same_sheet",
+        "same_sheet": {
+          "accuracy": 0.813536,
+          "by_match_level": {
+            "1": 2171,
+            "3": 1
+          },
+          "n_correct": 1767,
+          "n_cross_sheet": 33,
+          "n_incomplete": 0,
+          "n_pairs": 2172,
+          "n_ties": 0,
+          "n_wrong": 405,
+          "sheet_ci": {
+            "high": 0.832872,
+            "level": 0.95,
+            "low": 0.794712,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          }
+        }
+      },
+      "b": {
+        "all_pairs": {
+          "accuracy": 0.756634,
+          "n_correct": 1169,
+          "n_cross_sheet": 0,
+          "n_incomplete": 0,
+          "n_pairs": 1545,
+          "n_ties": 0,
+          "n_wrong": 376
+        },
+        "level_1": {
+          "accuracy": 0.758086,
+          "n_correct": 1125,
+          "n_cross_sheet": 0,
+          "n_incomplete": 0,
+          "n_pairs": 1484,
+          "n_ties": 0,
+          "n_wrong": 359
+        },
+        "primary": "same_sheet",
+        "same_sheet": {
+          "accuracy": 0.757902,
+          "by_match_level": {
+            "1": 1484,
+            "3": 3
+          },
+          "n_correct": 1127,
+          "n_cross_sheet": 58,
+          "n_incomplete": 0,
+          "n_pairs": 1487,
+          "n_ties": 0,
+          "n_wrong": 360,
+          "sheet_ci": {
+            "high": 0.78232,
+            "level": 0.95,
+            "low": 0.733595,
+            "n_degenerate": 0,
+            "n_replicates": 2000,
+            "n_used": 2000,
+            "unit": "sheet"
+          }
+        }
+      }
+    },
+    "slope_only_check": {
+      "a": {
+        "auc": 0.507358,
+        "expected": "about 0.5",
+        "n": {
+          "blocks": 52,
+          "negatives": 2205,
+          "patches": 4410,
+          "positives": 2205,
+          "sheets": 284
+        },
+        "score": "meta.csv slope_mean (patch-mean slope)",
+        "sheet_ci": {
+          "high": 0.510694,
+          "level": 0.95,
+          "low": 0.504287,
+          "n_degenerate": 0,
+          "n_replicates": 2000,
+          "n_used": 2000,
+          "unit": "sheet"
+        }
+      },
+      "b": {
+        "auc": 0.510324,
+        "expected": "about 0.5",
+        "n": {
+          "blocks": 114,
+          "negatives": 1545,
+          "patches": 3090,
+          "positives": 1545,
+          "sheets": 465
+        },
+        "score": "meta.csv slope_mean (patch-mean slope)",
+        "sheet_ci": {
+          "high": 0.516885,
+          "level": 0.95,
+          "low": 0.503974,
+          "n_degenerate": 0,
+          "n_replicates": 2000,
+          "n_used": 2000,
+          "unit": "sheet"
+        }
+      }
+    },
+    "stage2_ring_as_fp": {
+      "estimate": 0.41533,
+      "interpolated_precision": 0.41533,
+      "max_recall": 0.92043,
+      "n": {
+        "detections": 11143,
+        "duplicate": 1169,
+        "fp": 9546,
+        "ignored": 0,
+        "sheets": 20,
+        "targets": 465,
+        "tp": 428
+      },
+      "reached": true,
+      "recall_level": 0.5,
+      "score_threshold": 0.782508
+    }
+  },
+  "smoke": false,
+  "spike_claims": {
+    "a_best_noncnn": {
+      "ci": [
+        0.678,
+        0.713
+      ],
+      "claim": "(a) best non-CNN: terrain-stats LR",
+      "ours": "baselines.a.scorers.terrain_stats_lr.auc",
+      "value": 0.695
+    },
+    "a_cnn": {
+      "ci": [
+        0.796,
+        0.826
+      ],
+      "claim": "(a) held-out flysch sheets, ROC AUC (5 folds, pooled): CNN",
+      "ours": "tests.a.estimate",
+      "value": 0.811
+    },
+    "a_pair_accuracy": {
+      "ci": null,
+      "claim": "(a) same-sheet pair accuracy (post hoc)",
+      "ours": "secondary.pair_accuracy.a.same_sheet.accuracy",
+      "value": 0.824
+    },
+    "b_best_noncnn": {
+      "ci": [
+        0.603,
+        0.647
+      ],
+      "claim": "(b) best non-CNN: terrain-stats GBM",
+      "ours": "baselines.b.scorers.terrain_stats_gbm.auc",
+      "value": 0.624
+    },
+    "b_cnn": {
+      "ci": [
+        0.727,
+        0.77
+      ],
+      "claim": "(b) train Zlínský + Moravskoslezský, test other kraje, ROC AUC: CNN",
+      "ours": "tests.b.estimate",
+      "value": 0.749
+    },
+    "b_jihomoravsky_nonflysch": {
+      "ci": null,
+      "claim": "(b) non-flysch Jihomoravský ROC AUC (post hoc)",
+      "ours": "secondary.jihomoravsky_nonflysch.auc",
+      "value": 0.622
+    },
+    "b_pair_accuracy": {
+      "ci": null,
+      "claim": "(b) same-sheet pair accuracy (post hoc)",
+      "ours": "secondary.pair_accuracy.b.same_sheet.accuracy",
+      "value": 0.762
+    },
+    "stage2_best_noncnn": {
+      "ci": null,
+      "claim": "Stage 2 best non-CNN: slope + susceptibility LR",
+      "ours": "baselines.stage2.scorers.slope_susc_lr.estimate",
+      "value": 0.136
+    },
+    "stage2_cnn": {
+      "ci": [
+        0.407,
+        0.812
+      ],
+      "ci_note": "post hoc sheet-level bootstrap, not pre-registered",
+      "claim": "Stage 2, 20 reserved sheets, precision at 50 % object recall: CNN",
+      "ours": "tests.stage2.estimate",
+      "value": 0.559
+    },
+    "stage2_random": {
+      "ci": null,
+      "claim": "Stage 2 random scores",
+      "ours": "baselines.stage2.scorers.random.estimate",
+      "value": 0.085
+    },
+    "stage2_ring_as_fp": {
+      "ci": null,
+      "claim": "Stage 2 P@R50 with the 150 m ring counted as false positives (post hoc)",
+      "ours": "secondary.stage2_ring_as_fp.estimate",
+      "value": 0.418
+    }
+  },
+  "tests": {
+    "a": {
+      "block_ci": {
+        "high": 0.814488,
+        "level": 0.95,
+        "low": 0.787596,
+        "n_degenerate": 0,
+        "n_replicates": 2000,
+        "n_used": 2000,
+        "unit": "block"
+      },
+      "borderline": false,
+      "borderline_block": false,
+      "breakdowns": {
+        "by_source": {
+          "cut": {
+            "auc": 0.80714,
+            "n": {
+              "blocks": 52,
+              "negatives": 117,
+              "patches": 2322,
+              "positives": 2205,
+              "sheets": 284
+            },
+            "sheet_ci": {
+              "high": 0.839368,
+              "level": 0.95,
+              "low": 0.772387,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "quarry": {
+            "auc": 0.569894,
+            "n": {
+              "blocks": 52,
+              "negatives": 13,
+              "patches": 2218,
+              "positives": 2205,
+              "sheets": 284
+            },
+            "sheet_ci": {
+              "high": 0.738388,
+              "level": 0.95,
+              "low": 0.451151,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "random": {
+            "auc": 0.80261,
+            "n": {
+              "blocks": 52,
+              "negatives": 2048,
+              "patches": 4253,
+              "positives": 2205,
+              "sheets": 284
+            },
+            "sheet_ci": {
+              "high": 0.817684,
+              "level": 0.95,
+              "low": 0.787689,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "rock": {
+            "auc": 0.694942,
+            "n": {
+              "blocks": 52,
+              "negatives": 23,
+              "patches": 2228,
+              "positives": 2205,
+              "sheets": 284
+            },
+            "sheet_ci": {
+              "high": 0.790469,
+              "level": 0.95,
+              "low": 0.596706,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "spoil": {
+            "auc": 0.854649,
+            "n": {
+              "blocks": 52,
+              "negatives": 4,
+              "patches": 2209,
+              "positives": 2205,
+              "sheets": 284
+            },
+            "sheet_ci": {
+              "high": 0.930963,
+              "level": 0.95,
+              "low": 0.763359,
+              "n_degenerate": 32,
+              "n_replicates": 2000,
+              "n_used": 1968,
+              "unit": "sheet"
+            }
+          }
+        }
+      },
+      "complete": true,
+      "definition": "pooled out-of-fold ROC AUC over all held-out flysch patches (5 folds)",
+      "estimate": 0.80045,
+      "metric": "roc_auc",
+      "missing_units": {},
+      "n": {
+        "blocks": 52,
+        "negatives": 2205,
+        "patches": 4410,
+        "positives": 2205,
+        "sheets": 284
+      },
+      "pass": true,
+      "per_fold": {
+        "0": {
+          "auc": 0.81754,
+          "complete": true,
+          "n_patches": 672,
+          "run": "a_f0"
+        },
+        "1": {
+          "auc": 0.784156,
+          "complete": true,
+          "n_patches": 956,
+          "run": "a_f1"
+        },
+        "2": {
+          "auc": 0.7849,
+          "complete": true,
+          "n_patches": 1000,
+          "run": "a_f2"
+        },
+        "3": {
+          "auc": 0.826785,
+          "complete": true,
+          "n_patches": 990,
+          "run": "a_f3"
+        },
+        "4": {
+          "auc": 0.813973,
+          "complete": true,
+          "n_patches": 792,
+          "run": "a_f4"
+        }
+      },
+      "per_seed": {
+        "0": {
+          "auc": 0.772729,
+          "complete": true,
+          "n_patches": 4410
+        },
+        "1": {
+          "auc": 0.790914,
+          "complete": true,
+          "n_patches": 4410
+        },
+        "2": {
+          "auc": 0.79516,
+          "complete": true,
+          "n_patches": 4410
+        }
+      },
+      "per_unit": {
+        "a_f0_s0": {
+          "auc": 0.81382,
+          "n_patches": 672
+        },
+        "a_f0_s1": {
+          "auc": 0.80397,
+          "n_patches": 672
+        },
+        "a_f0_s2": {
+          "auc": 0.799975,
+          "n_patches": 672
+        },
+        "a_f1_s0": {
+          "auc": 0.760381,
+          "n_patches": 956
+        },
+        "a_f1_s1": {
+          "auc": 0.784584,
+          "n_patches": 956
+        },
+        "a_f1_s2": {
+          "auc": 0.791084,
+          "n_patches": 956
+        },
+        "a_f2_s0": {
+          "auc": 0.760128,
+          "n_patches": 1000
+        },
+        "a_f2_s1": {
+          "auc": 0.779008,
+          "n_patches": 1000
+        },
+        "a_f2_s2": {
+          "auc": 0.786112,
+          "n_patches": 1000
+        },
+        "a_f3_s0": {
+          "auc": 0.812317,
+          "n_patches": 990
+        },
+        "a_f3_s1": {
+          "auc": 0.806746,
+          "n_patches": 990
+        },
+        "a_f3_s2": {
+          "auc": 0.82199,
+          "n_patches": 990
+        },
+        "a_f4_s0": {
+          "auc": 0.793828,
+          "n_patches": 792
+        },
+        "a_f4_s1": {
+          "auc": 0.815816,
+          "n_patches": 792
+        },
+        "a_f4_s2": {
+          "auc": 0.799676,
+          "n_patches": 792
+        }
+      },
+      "problems": [],
+      "sheet_ci": {
+        "high": 0.815827,
+        "level": 0.95,
+        "low": 0.785542,
+        "n_degenerate": 0,
+        "n_replicates": 2000,
+        "n_used": 2000,
+        "unit": "sheet"
+      },
+      "status": "PASS",
+      "test": "a",
+      "threshold": 0.75,
+      "units": [
+        "a_f0_s0",
+        "a_f0_s1",
+        "a_f0_s2",
+        "a_f1_s0",
+        "a_f1_s1",
+        "a_f1_s2",
+        "a_f2_s0",
+        "a_f2_s1",
+        "a_f2_s2",
+        "a_f3_s0",
+        "a_f3_s1",
+        "a_f3_s2",
+        "a_f4_s0",
+        "a_f4_s1",
+        "a_f4_s2"
+      ]
+    },
+    "b": {
+      "block_ci": {
+        "high": 0.783842,
+        "level": 0.95,
+        "low": 0.732431,
+        "n_degenerate": 0,
+        "n_replicates": 2000,
+        "n_used": 2000,
+        "unit": "block"
+      },
+      "borderline": false,
+      "borderline_block": false,
+      "breakdowns": {
+        "by_flysch": {
+          "flysch": {
+            "auc": 0.803907,
+            "n": {
+              "blocks": 18,
+              "negatives": 287,
+              "patches": 574,
+              "positives": 287,
+              "sheets": 42
+            },
+            "sheet_ci": {
+              "high": 0.849917,
+              "level": 0.95,
+              "low": 0.758291,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "non-flysch": {
+            "auc": 0.747451,
+            "n": {
+              "blocks": 96,
+              "negatives": 1258,
+              "patches": 2516,
+              "positives": 1258,
+              "sheets": 423
+            },
+            "sheet_ci": {
+              "high": 0.769199,
+              "level": 0.95,
+              "low": 0.725914,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          }
+        },
+        "by_kraj": {
+          "Hlavní město Praha": {
+            "auc": 0.777778,
+            "n": {
+              "blocks": 1,
+              "negatives": 3,
+              "patches": 6,
+              "positives": 3,
+              "sheets": 1
+            },
+            "sheet_ci": {
+              "high": 0.777778,
+              "level": 0.95,
+              "low": 0.777778,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "Jihomoravský": {
+            "auc": 0.755088,
+            "n": {
+              "blocks": 41,
+              "negatives": 572,
+              "patches": 1142,
+              "positives": 570,
+              "sheets": 157
+            },
+            "sheet_ci": {
+              "high": 0.790627,
+              "level": 0.95,
+              "low": 0.718574,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "Karlovarský": {
+            "auc": 0.849481,
+            "n": {
+              "blocks": 5,
+              "negatives": 34,
+              "patches": 68,
+              "positives": 34,
+              "sheets": 10
+            },
+            "sheet_ci": {
+              "high": 0.941245,
+              "level": 0.95,
+              "low": 0.747475,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "Královéhradecký": {
+            "auc": 0.726667,
+            "n": {
+              "blocks": 12,
+              "negatives": 180,
+              "patches": 360,
+              "positives": 180,
+              "sheets": 58
+            },
+            "sheet_ci": {
+              "high": 0.773774,
+              "level": 0.95,
+              "low": 0.67563,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "Liberecký": {
+            "auc": 0.758687,
+            "n": {
+              "blocks": 10,
+              "negatives": 111,
+              "patches": 223,
+              "positives": 112,
+              "sheets": 35
+            },
+            "sheet_ci": {
+              "high": 0.837333,
+              "level": 0.95,
+              "low": 0.670974,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "Olomoucký": {
+            "auc": 0.698193,
+            "n": {
+              "blocks": 14,
+              "negatives": 102,
+              "patches": 204,
+              "positives": 102,
+              "sheets": 26
+            },
+            "sheet_ci": {
+              "high": 0.786815,
+              "level": 0.95,
+              "low": 0.605151,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "Pardubický": {
+            "auc": 0.782393,
+            "n": {
+              "blocks": 11,
+              "negatives": 91,
+              "patches": 182,
+              "positives": 91,
+              "sheets": 34
+            },
+            "sheet_ci": {
+              "high": 0.836658,
+              "level": 0.95,
+              "low": 0.721435,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "Plzeňský": {
+            "auc": 0.444444,
+            "n": {
+              "blocks": 1,
+              "negatives": 3,
+              "patches": 6,
+              "positives": 3,
+              "sheets": 1
+            },
+            "sheet_ci": {
+              "high": 0.444444,
+              "level": 0.95,
+              "low": 0.444444,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "Středočeský": {
+            "auc": 0.74782,
+            "n": {
+              "blocks": 7,
+              "negatives": 85,
+              "patches": 170,
+              "positives": 85,
+              "sheets": 29
+            },
+            "sheet_ci": {
+              "high": 0.818237,
+              "level": 0.95,
+              "low": 0.671902,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "Vysočina": {
+            "auc": 0.57672,
+            "n": {
+              "blocks": 5,
+              "negatives": 27,
+              "patches": 55,
+              "positives": 28,
+              "sheets": 10
+            },
+            "sheet_ci": {
+              "high": 0.736615,
+              "level": 0.95,
+              "low": 0.402102,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "Ústecký": {
+            "auc": 0.814685,
+            "n": {
+              "blocks": 19,
+              "negatives": 337,
+              "patches": 674,
+              "positives": 337,
+              "sheets": 104
+            },
+            "sheet_ci": {
+              "high": 0.85099,
+              "level": 0.95,
+              "low": 0.776638,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          }
+        },
+        "by_kraj_flysch": {
+          "Hlavní město Praha | non-flysch": {
+            "auc": 0.777778,
+            "n": {
+              "blocks": 1,
+              "negatives": 3,
+              "patches": 6,
+              "positives": 3,
+              "sheets": 1
+            },
+            "sheet_ci": {
+              "high": 0.777778,
+              "level": 0.95,
+              "low": 0.777778,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "Jihomoravský | flysch": {
+            "auc": 0.813378,
+            "n": {
+              "blocks": 14,
+              "negatives": 245,
+              "patches": 490,
+              "positives": 245,
+              "sheets": 36
+            },
+            "sheet_ci": {
+              "high": 0.859853,
+              "level": 0.95,
+              "low": 0.762504,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "Jihomoravský | non-flysch": {
+            "auc": 0.708323,
+            "n": {
+              "blocks": 27,
+              "negatives": 327,
+              "patches": 652,
+              "positives": 325,
+              "sheets": 121
+            },
+            "sheet_ci": {
+              "high": 0.755542,
+              "level": 0.95,
+              "low": 0.657479,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "Karlovarský | non-flysch": {
+            "auc": 0.849481,
+            "n": {
+              "blocks": 5,
+              "negatives": 34,
+              "patches": 68,
+              "positives": 34,
+              "sheets": 10
+            },
+            "sheet_ci": {
+              "high": 0.941245,
+              "level": 0.95,
+              "low": 0.747475,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "Královéhradecký | non-flysch": {
+            "auc": 0.726667,
+            "n": {
+              "blocks": 12,
+              "negatives": 180,
+              "patches": 360,
+              "positives": 180,
+              "sheets": 58
+            },
+            "sheet_ci": {
+              "high": 0.773774,
+              "level": 0.95,
+              "low": 0.67563,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "Liberecký | non-flysch": {
+            "auc": 0.758687,
+            "n": {
+              "blocks": 10,
+              "negatives": 111,
+              "patches": 223,
+              "positives": 112,
+              "sheets": 35
+            },
+            "sheet_ci": {
+              "high": 0.837333,
+              "level": 0.95,
+              "low": 0.670974,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "Olomoucký | flysch": {
+            "auc": 0.736395,
+            "n": {
+              "blocks": 4,
+              "negatives": 42,
+              "patches": 84,
+              "positives": 42,
+              "sheets": 6
+            },
+            "sheet_ci": {
+              "high": 0.833005,
+              "level": 0.95,
+              "low": 0.643655,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "Olomoucký | non-flysch": {
+            "auc": 0.666944,
+            "n": {
+              "blocks": 10,
+              "negatives": 60,
+              "patches": 120,
+              "positives": 60,
+              "sheets": 20
+            },
+            "sheet_ci": {
+              "high": 0.787459,
+              "level": 0.95,
+              "low": 0.526014,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "Pardubický | non-flysch": {
+            "auc": 0.782393,
+            "n": {
+              "blocks": 11,
+              "negatives": 91,
+              "patches": 182,
+              "positives": 91,
+              "sheets": 34
+            },
+            "sheet_ci": {
+              "high": 0.836658,
+              "level": 0.95,
+              "low": 0.721435,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "Plzeňský | non-flysch": {
+            "auc": 0.444444,
+            "n": {
+              "blocks": 1,
+              "negatives": 3,
+              "patches": 6,
+              "positives": 3,
+              "sheets": 1
+            },
+            "sheet_ci": {
+              "high": 0.444444,
+              "level": 0.95,
+              "low": 0.444444,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "Středočeský | non-flysch": {
+            "auc": 0.74782,
+            "n": {
+              "blocks": 7,
+              "negatives": 85,
+              "patches": 170,
+              "positives": 85,
+              "sheets": 29
+            },
+            "sheet_ci": {
+              "high": 0.818237,
+              "level": 0.95,
+              "low": 0.671902,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "Vysočina | non-flysch": {
+            "auc": 0.57672,
+            "n": {
+              "blocks": 5,
+              "negatives": 27,
+              "patches": 55,
+              "positives": 28,
+              "sheets": 10
+            },
+            "sheet_ci": {
+              "high": 0.736615,
+              "level": 0.95,
+              "low": 0.402102,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "Ústecký | non-flysch": {
+            "auc": 0.814685,
+            "n": {
+              "blocks": 19,
+              "negatives": 337,
+              "patches": 674,
+              "positives": 337,
+              "sheets": 104
+            },
+            "sheet_ci": {
+              "high": 0.85099,
+              "level": 0.95,
+              "low": 0.776638,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          }
+        },
+        "by_source": {
+          "cut": {
+            "auc": 0.759862,
+            "n": {
+              "blocks": 114,
+              "negatives": 80,
+              "patches": 1625,
+              "positives": 1545,
+              "sheets": 463
+            },
+            "sheet_ci": {
+              "high": 0.807509,
+              "level": 0.95,
+              "low": 0.706999,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "quarry": {
+            "auc": 0.898471,
+            "n": {
+              "blocks": 114,
+              "negatives": 29,
+              "patches": 1574,
+              "positives": 1545,
+              "sheets": 463
+            },
+            "sheet_ci": {
+              "high": 0.946136,
+              "level": 0.95,
+              "low": 0.842072,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "random": {
+            "auc": 0.760974,
+            "n": {
+              "blocks": 114,
+              "negatives": 1265,
+              "patches": 2810,
+              "positives": 1545,
+              "sheets": 465
+            },
+            "sheet_ci": {
+              "high": 0.779861,
+              "level": 0.95,
+              "low": 0.741853,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "rock": {
+            "auc": 0.714908,
+            "n": {
+              "blocks": 114,
+              "negatives": 167,
+              "patches": 1712,
+              "positives": 1545,
+              "sheets": 463
+            },
+            "sheet_ci": {
+              "high": 0.757175,
+              "level": 0.95,
+              "low": 0.671463,
+              "n_degenerate": 0,
+              "n_replicates": 2000,
+              "n_used": 2000,
+              "unit": "sheet"
+            }
+          },
+          "spoil": {
+            "auc": 0.692395,
+            "n": {
+              "blocks": 114,
+              "negatives": 4,
+              "patches": 1549,
+              "positives": 1545,
+              "sheets": 463
+            },
+            "sheet_ci": {
+              "high": 0.989041,
+              "level": 0.95,
+              "low": 0.277361,
+              "n_degenerate": 42,
+              "n_replicates": 2000,
+              "n_used": 1958,
+              "unit": "sheet"
+            }
+          }
+        }
+      },
+      "complete": true,
+      "definition": "ROC AUC on all patches of non-Zlínský/non-Moravskoslezský sheets",
+      "estimate": 0.758341,
+      "metric": "roc_auc",
+      "missing_units": {},
+      "n": {
+        "blocks": 114,
+        "negatives": 1545,
+        "patches": 3090,
+        "positives": 1545,
+        "sheets": 465
+      },
+      "pass": true,
+      "per_fold": null,
+      "per_seed": {
+        "0": {
+          "auc": 0.744688,
+          "complete": true,
+          "n_patches": 3090
+        },
+        "1": {
+          "auc": 0.748895,
+          "complete": true,
+          "n_patches": 3090
+        },
+        "2": {
+          "auc": 0.726783,
+          "complete": true,
+          "n_patches": 3090
+        }
+      },
+      "per_unit": {
+        "b_s0": {
+          "auc": 0.744688,
+          "n_patches": 3090
+        },
+        "b_s1": {
+          "auc": 0.748895,
+          "n_patches": 3090
+        },
+        "b_s2": {
+          "auc": 0.726783,
+          "n_patches": 3090
+        }
+      },
+      "problems": [],
+      "sheet_ci": {
+        "high": 0.777012,
+        "level": 0.95,
+        "low": 0.738577,
+        "n_degenerate": 0,
+        "n_replicates": 2000,
+        "n_used": 2000,
+        "unit": "sheet"
+      },
+      "status": "PASS",
+      "test": "b",
+      "threshold": 0.65,
+      "units": [
+        "b_s0",
+        "b_s1",
+        "b_s2"
+      ]
+    },
+    "stage2": {
+      "block_ci": null,
+      "borderline": false,
+      "breakdowns": {
+        "by_stratum": {
+          "flysch": {
+            "estimate": 0.588983,
+            "interpolated_precision": 0.588983,
+            "max_recall": 0.895683,
+            "n": {
+              "detections": 5612,
+              "duplicate": 785,
+              "fp": 3603,
+              "ignored": 975,
+              "sheets": 10,
+              "targets": 278,
+              "tp": 249
+            },
+            "reached": true,
+            "recall_level": 0.5,
+            "score_threshold": 0.764243
+          },
+          "nonflysch": {
+            "estimate": 0.559524,
+            "interpolated_precision": 0.559524,
+            "max_recall": 0.957219,
+            "n": {
+              "detections": 5531,
+              "duplicate": 384,
+              "fp": 4344,
+              "ignored": 624,
+              "sheets": 10,
+              "targets": 187,
+              "tp": 179
+            },
+            "reached": true,
+            "recall_level": 0.5,
+            "score_threshold": 0.797535
+          }
+        }
+      },
+      "complete": true,
+      "definition": "precision at the highest threshold whose object recall >= 0.5 (primary); interpolated max precision at recall >= 0.5 (secondary)",
+      "estimate": 0.581047,
+      "interpolated_precision": 0.581047,
+      "max_recall": 0.92043,
+      "metric": "precision_at_recall",
+      "missing_units": {},
+      "n": {
+        "detections": 11143,
+        "duplicate": 1169,
+        "fp": 7947,
+        "ignored": 1599,
+        "sheets": 20,
+        "targets": 465,
+        "tp": 428
+      },
+      "pass": true,
+      "per_fold": null,
+      "per_seed": null,
+      "problems": [],
+      "reached": true,
+      "recall_level": 0.5,
+      "score_threshold": 0.782508,
+      "sheet_ci": {
+        "high": 0.838244,
+        "level": 0.95,
+        "low": 0.392826,
+        "n_degenerate": 0,
+        "n_not_reached": 0,
+        "n_replicates": 2000,
+        "n_used": 2000,
+        "not_reached_rule": "a bootstrap replicate whose pooled detections never reach the recall level counts as precision 0 (a fail at that replicate); it is kept, not dropped",
+        "post_hoc": true,
+        "unit": "sheet"
+      },
+      "sheets": [
+        "02-41-01",
+        "02-41-18",
+        "03-34-01",
+        "03-34-04",
+        "14-13-14",
+        "14-14-22",
+        "24-12-21",
+        "24-14-16",
+        "24-42-23",
+        "24-43-19",
+        "24-44-17",
+        "25-12-22",
+        "25-14-17",
+        "25-23-01",
+        "25-23-04",
+        "25-24-01",
+        "25-32-22",
+        "25-33-01",
+        "25-41-05",
+        "35-12-16"
+      ],
+      "status": "PASS",
+      "test": "stage2",
+      "threshold": 0.3,
+      "units": [
+        "s2_s0",
+        "s2_s1",
+        "s2_s2"
+      ]
+    }
+  },
+  "verdict": "REPLICATED",
+  "verdict_detail": {
+    "a": "PASS",
+    "b": "PASS",
+    "reasons": [
+      "(a), (b) and stage 2 all pass on their point estimates"
+    ],
+    "rule": "any completed test below its threshold -> NOT REPLICATED; else all three PASS -> REPLICATED; else INCOMPLETE (Appendix A §1, D25)",
+    "stage2": "PASS"
+  }
+}
