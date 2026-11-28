@@ -120,6 +120,22 @@ Differences worth noting, where the spike gives no CI or where the inputs differ
   stopping keeps the best epoch, so the scores above are sound, but the model's probabilities are overconfident:
   they rank well but shouldn't be read as calibrated probabilities. This also marks clear room to improve (more
   data, regularisation), which is the next phase (`docs/PLAN.md` §10a).
+- **Why the validation curves look flat** (checked after Mark's review). The figure logs once per epoch, and
+  validation AUC is already 0.72–0.82 after the first epoch in all 21 units; later epochs add only 0.05 on average.
+  A diagnostic re-run of fold 0, seed 0 with the same recipe (`scripts/diagnose_first_epoch.py`,
+  `results/diag_first_epoch.json`) scored the inner-validation set every 4 training steps [E]:
+  - It reproduces the logged epoch-1 value (0.748). Validation AUC is 0.46 before training (chance), 0.58 after
+    12 steps, 0.70 after 24, 0.76 after 40, and 0.77 at the end of epoch 2. The curve isn't flat; its rise happens
+    within the first epoch, before the plot's first point. From about step 35, the score on training patches pulls
+    away from validation: the network starts memorising.
+  - No leakage: no inner-validation or test patch overlaps a training patch (nearest centres 386 m apart, more than a
+    patch width), and no sheet or block is shared. Leakage would also make validation follow training upwards,
+    which it doesn't.
+  - On the same validation set, the terrain-statistics LR scores 0.676 and slope alone 0.510; the CNN passes the LR
+    about 30 steps in.
+
+  So the network learns most of what generalises from its first ~3,000 patches and then mostly memorises [I]: what
+  you'd expect from a pretrained ResNet on a small dataset, and another pointer to more data and regularisation.
 
 ## 8. Files
 
